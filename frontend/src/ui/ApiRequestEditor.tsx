@@ -1,14 +1,17 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { fetchTerminalVerification, simulateRequest } from '../api/client'
 import type {
+  ActiveTerminalChallenge,
   AdaptivePracticeDoor,
   MissionDetail,
+  MissionProgressState,
   SimulateResponse,
   SimulationMode,
   TerminalVerification,
   VerifyAnotherScenario,
 } from '../types/api'
+import { conceptLabel } from '../learning/prerequisites'
 import { recordDeviceUnlock, saveConceptStage, saveFirstAttempt } from '../storage/attemptStorage'
 import { ControlGuide } from './spy/ControlGuide'
 import { TerminalBootSequence } from './terminal/TerminalBootSequence'
@@ -19,10 +22,14 @@ interface ApiRequestEditorProps {
   mission: MissionDetail
   /** MISSION grades first attempts; PRACTICE/TRAINING do not. */
   mode?: SimulationMode
+  /** Server-restored active terminal scenario (refresh / reopen). */
+  resumeTerminal?: ActiveTerminalChallenge | null
   onClose: () => void
   onSuccess: (payload?: { optionalVerification?: boolean; exitReady?: boolean }) => void
   onAttemptSaved: () => void
   onAdaptivePracticeDoors?: (doors: AdaptivePracticeDoor[]) => void
+  /** Keeps Field pause-menu escalate hints in sync after wrong/right submits. */
+  onMissionProgress?: (progress: MissionProgressState) => void
 }
 
 const NEUTRAL_METHOD = ''
@@ -105,16 +112,34 @@ export function ApiRequestEditor({
   participantCode,
   mission,
   mode = 'MISSION',
+  resumeTerminal = null,
   onClose,
   onSuccess,
   onAttemptSaved,
   onAdaptivePracticeDoors,
+  onMissionProgress,
 }: ApiRequestEditorProps) {
   const primary = mission.challenge
-  const [active, setActive] = useState<ActiveChallenge>(() => toActiveChallenge(mission))
+  const [active, setActive] = useState<ActiveChallenge>(() =>
+    resumeTerminal
+      ? toActiveChallenge(mission, {
+          challengeId: resumeTerminal.challengeId,
+          variantId: resumeTerminal.variantId,
+          deviceId: resumeTerminal.deviceId,
+          documentation: resumeTerminal.documentation,
+          optionalVerification: resumeTerminal.optionalVerification,
+        })
+      : toActiveChallenge(mission),
+  )
+  const [mandatoryCheckpoint, setMandatoryCheckpoint] = useState<ActiveChallenge | null>(null)
+  const [offeredPractice, setOfferedPractice] = useState<AdaptivePracticeDoor[]>([])
   const effectiveMode: SimulationMode = active.practiceMode ? 'PRACTICE' : mode
   const graded = effectiveMode === 'MISSION' && !active.practiceMode
   const allowAnswerPrefill = !graded
+  const showTvpShell =
+    mode === 'MISSION' &&
+    !active.practiceMode &&
+    !gradedMissionIsUngraded(mission.mission.missionId)
 
   const [method, setMethod] = useState(NEUTRAL_METHOD)
   const [path, setPath] = useState(NEUTRAL_PATH)
@@ -123,10 +148,21 @@ export function ApiRequestEditor({
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useState<SimulateResponse | null>(null)
-  const [tvp, setTvp] = useState<TerminalVerification | null>(null)
+  /** Immediate 0% shell; replaced by server-authoritative snapshot/simulate results. */
+  const [tvp, setTvp] = useState<TerminalVerification | null>(() =>
+    showTvpShell ? emptyTvpSnapshot(primary.deviceId) : null,
+  )
   const [bootComplete, setBootComplete] = useState(false)
-  const bootKey = `${active.challengeId}:${active.deviceId}:${active.optionalVerification ? 'verify' : 'primary'}`
+  const [progressionNotice, setProgressionNotice] = useState<string | null>(null)
+  const [sequenceComplete, setSequenceComplete] = useState(false)
+  const advanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const submitGenerationRef = useRef(0)
+  const bootKey = `${active.challengeId}:${active.deviceId}:${
+    active.optionalVerification ? 'verify' : active.practiceMode ? 'practice' : 'primary'
+  }`
   const gradedMissionId = mission.mission.missionId
+  const practiceOfferList =
+    offeredPractice.length > 0 ? offeredPractice : (result?.adaptivePracticeDoors ?? []).slice(0, 2)
 
   const finishBoot = useCallback(() => setBootComplete(true), [])
 
@@ -134,28 +170,45 @@ export function ApiRequestEditor({
     setBootComplete(false)
   }, [bootKey])
 
-  // Graded terminals load server-authoritative TVP on open (including 0%). Practice never shows it.
   useEffect(() => {
-    if (!graded || active.practiceMode) {
+    return () => {
+      if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current)
+    }
+  }, [])
+
+  // Graded terminals load server-authoritative TVP on open (including 0%). Practice never shows it.
+  // Refetch after boot so a transient API blip during open does not leave the bar missing.
+  useEffect(() => {
+    if (!showTvpShell) {
       setTvp(null)
       return
     }
-    if (gradedMissionId.startsWith('practice-') || gradedMissionId.startsWith('m0-')) {
-      setTvp(null)
-      return
-    }
+    setTvp((prev) => prev ?? emptyTvpSnapshot(primary.deviceId))
     let cancelled = false
-    void fetchTerminalVerification(gradedMissionId)
-      .then((snapshot) => {
-        if (!cancelled) setTvp(snapshot)
-      })
-      .catch(() => {
-        if (!cancelled) setTvp(null)
-      })
+    let retryTimer: ReturnType<typeof setTimeout> | undefined
+
+    const load = (allowRetry: boolean) => {
+      void fetchTerminalVerification(gradedMissionId)
+        .then((snapshot) => {
+          if (!cancelled) setTvp(snapshot)
+        })
+        .catch(() => {
+          if (cancelled) return
+          if (allowRetry) {
+            retryTimer = setTimeout(() => load(false), 600)
+            return
+          }
+          // Keep the 0% shell visible; never hide the bar after a fetch blip.
+          setTvp((prev) => prev ?? emptyTvpSnapshot(primary.deviceId))
+        })
+    }
+
+    load(true)
     return () => {
       cancelled = true
+      if (retryTimer) clearTimeout(retryTimer)
     }
-  }, [graded, active.practiceMode, gradedMissionId, bootKey])
+  }, [showTvpShell, gradedMissionId, bootKey, bootComplete, primary.deviceId])
 
   function applyEditorFields(next: ActiveChallenge, guided: boolean) {
     const canGuide = guided && Boolean(next.expectedMethod && next.pathTemplate)
@@ -180,15 +233,48 @@ export function ApiRequestEditor({
   }
 
   // Mission / challenge identity change must never leave a prior correct request prefilled.
+  // Refresh/reopen restores the server-authoritative active terminal scenario.
   useEffect(() => {
+    if (resumeTerminal) {
+      const next = toActiveChallenge(mission, {
+        challengeId: resumeTerminal.challengeId,
+        variantId: resumeTerminal.variantId,
+        deviceId: resumeTerminal.deviceId,
+        documentation: resumeTerminal.documentation,
+        optionalVerification: resumeTerminal.optionalVerification,
+      })
+      setActive(next)
+      applyEditorFields(next, mode !== 'MISSION')
+      setSequenceComplete(Boolean(resumeTerminal.sequenceComplete))
+      setProgressionNotice(
+        resumeTerminal.sequenceComplete
+          ? 'Verification sequence complete. You can close this terminal and continue the mission — the exit stays unlocked.'
+          : null,
+      )
+      return
+    }
     const next = toActiveChallenge(mission)
     setActive(next)
     applyEditorFields(next, mode !== 'MISSION')
+    setSequenceComplete(false)
+    setProgressionNotice(null)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mission.mission.missionId, mission.challenge.challengeId, mode])
+  }, [
+    mission.mission.missionId,
+    mission.challenge.challengeId,
+    mode,
+    resumeTerminal?.challengeId,
+    resumeTerminal?.sequenceComplete,
+    resumeTerminal?.optionalVerification,
+  ])
 
-  function startVerifyAnother(scenario: VerifyAnotherScenario) {
+  function startConceptVerification(scenario: VerifyAnotherScenario, fromCheckpoint = true) {
+    if (fromCheckpoint && !active.optionalVerification && !active.practiceMode) {
+      setMandatoryCheckpoint(active)
+    }
     const variant = mission.conceptVariants.find((item) => item.challengeId === scenario.challengeId)
+    setSequenceComplete(false)
+    setProgressionNotice(null)
     loadChallenge(
       {
         challengeId: scenario.challengeId,
@@ -203,7 +289,30 @@ export function ApiRequestEditor({
     )
   }
 
+  function scheduleAutoAdvance(scenario: VerifyAnotherScenario, generation: number) {
+    if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current)
+    setProgressionNotice('Scenario cleared. Loading the next verification scenario…')
+    advanceTimerRef.current = setTimeout(() => {
+      if (submitGenerationRef.current !== generation) return
+      startConceptVerification(scenario)
+    }, 1100)
+  }
+
+  function markSequenceComplete(generation: number) {
+    if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current)
+    if (submitGenerationRef.current !== generation) return
+    setSequenceComplete(true)
+    setProgressionNotice(
+      'Verification sequence complete. You can close this terminal and continue the mission — the exit stays unlocked.',
+    )
+    applyEditorFields(active, false)
+  }
+
   function startPracticeDoor(door: AdaptivePracticeDoor) {
+    // Keep the mandatory mission available: stash it, then open ungraded practice in-editor.
+    if (!active.practiceMode) {
+      setMandatoryCheckpoint(active)
+    }
     loadChallenge(
       {
         challengeId: door.challengeId,
@@ -222,9 +331,15 @@ export function ApiRequestEditor({
     )
   }
 
+  function returnToMandatoryChallenge() {
+    const checkpoint = mandatoryCheckpoint ?? toActiveChallenge(mission)
+    setMandatoryCheckpoint(null)
+    loadChallenge({ ...checkpoint, optionalVerification: false, practiceMode: false }, false)
+  }
+
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
-    if (!bootComplete || busy) return
+    if (!bootComplete || busy || sequenceComplete) return
     if (!method.trim()) {
       setError('Select an HTTP method before sending.')
       return
@@ -234,8 +349,10 @@ export function ApiRequestEditor({
       return
     }
 
+    const generation = ++submitGenerationRef.current
     setBusy(true)
     setError(null)
+    setProgressionNotice(null)
 
     try {
       let headers: Record<string, string> = {}
@@ -256,6 +373,8 @@ export function ApiRequestEditor({
         body,
         mode: effectiveMode,
       })
+
+      if (submitGenerationRef.current !== generation) return
 
       const record = response.firstAttemptRecord
       if (graded && !response.optionalVerification) {
@@ -306,12 +425,18 @@ export function ApiRequestEditor({
         })
       }
 
-      if (response.adaptivePracticeDoors && onAdaptivePracticeDoors) {
-        onAdaptivePracticeDoors(response.adaptivePracticeDoors)
+      if (response.adaptivePracticeDoors) {
+        setOfferedPractice(response.adaptivePracticeDoors.slice(0, 2))
+        if (onAdaptivePracticeDoors) {
+          onAdaptivePracticeDoors(response.adaptivePracticeDoors)
+        }
+      }
+      if (response.missionProgress && onMissionProgress) {
+        onMissionProgress(response.missionProgress)
       }
 
       setResult(response)
-      if (graded && response.terminalVerification) {
+      if (showTvpShell && response.terminalVerification) {
         setTvp(response.terminalVerification)
       }
       onAttemptSaved()
@@ -320,11 +445,22 @@ export function ApiRequestEditor({
           optionalVerification: Boolean(response.optionalVerification),
           exitReady: Boolean(response.missionProgress?.exitReady),
         })
+        const nextScenario = response.terminalVerification?.verifyAnotherScenario ?? null
+        const serverActive = response.missionProgress?.activeTerminalChallenge
+        if (nextScenario && nextScenario.challengeId !== active.challengeId) {
+          scheduleAutoAdvance(nextScenario, generation)
+        } else if (serverActive?.sequenceComplete || (!nextScenario && response.correct)) {
+          markSequenceComplete(generation)
+        }
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Request failed')
+      if (submitGenerationRef.current === generation) {
+        setError(err instanceof Error ? err.message : 'Request failed')
+      }
     } finally {
-      setBusy(false)
+      if (submitGenerationRef.current === generation) {
+        setBusy(false)
+      }
     }
   }
 
@@ -374,7 +510,8 @@ export function ApiRequestEditor({
         <div className="editor-header">
           <h2>
             Field brief · {modeLabel}
-            {active.optionalVerification ? ' · Verify Another Scenario' : ''}
+            {active.optionalVerification ? ' · Concept Verification' : ''}
+            {active.practiceMode ? ' · Ungraded Practice' : ''}
           </h2>
           <button type="button" className="ghost" onClick={onClose}>
             Close
@@ -388,33 +525,50 @@ export function ApiRequestEditor({
         ) : (
           <p className="hint">
             Educational {effectiveMode.toLowerCase()} mode: unlimited retries, guided fields allowed, no mission door
-            unlocks, no RCA first-attempt writes.
+            unlocks, no RCA first-attempt writes. This does not replace your mandatory mission challenge.
           </p>
         )}
         {active.optionalVerification ? (
           <p className="hint">
-            Optional verification scenario. Completing it does not block the exit or grant mission rewards.
+            Automatic concept verification: a distinct fictional resource. Eligible Terminal Verification evidence may
+            be added. This never re-locks your mandatory mission door or blocks an already unlocked exit.
+          </p>
+        ) : null}
+        {progressionNotice ? (
+          <ControlGuide message={progressionNotice} tone="success" />
+        ) : null}
+        {active.practiceMode && mandatoryCheckpoint ? (
+          <p className="hint">
+            <button type="button" className="ghost" onClick={returnToMandatoryChallenge}>
+              Return to mandatory mission challenge
+            </button>
           </p>
         ) : null}
 
-        <pre className="docs">{active.documentation}</pre>
-
-        {tvp ? (
+        {showTvpShell && tvp ? (
           <div className="tvp-bar" aria-label="Terminal Verification Progress">
             <div className="tvp-bar__label">
               <span>Terminal Verification</span>
               <span>
-                {tvp.percent}% · {tvp.earnedSlots}/{tvp.requiredSlots} evidence slots
+                {tvp.requiredSlots > 0
+                  ? `${tvp.percent}% · ${tvp.earnedSlots}/${tvp.requiredSlots} evidence slots`
+                  : '0% — loading evidence slots…'}
               </span>
             </div>
             <div className="tvp-bar__track">
-              <div className="tvp-bar__fill" style={{ width: `${tvp.percent}%` }} />
+              <div
+                className="tvp-bar__fill"
+                style={{ width: `${tvp.requiredSlots > 0 ? Math.max(0, Math.min(100, tvp.percent)) : 0}%` }}
+              />
             </div>
             <p className="tvp-bar__note">
-              Measures verified API decisions on this terminal — not mission completion.
+              Server-authoritative evidence of eligible correct concept decisions (TVP = floor(100 × earned /
+              required)). Not mission completion and not an academic score. Device unlock does not require 100%.
             </p>
           </div>
         ) : null}
+
+        <pre className="docs">{active.documentation}</pre>
 
         {controlMessage ? (
           <ControlGuide
@@ -478,8 +632,8 @@ export function ApiRequestEditor({
           />
         </label>
 
-        <button type="submit" disabled={busy || !bootComplete}>
-          {busy ? 'Sending…' : 'Send simulated request'}
+        <button type="submit" disabled={busy || !bootComplete || sequenceComplete || Boolean(progressionNotice)}>
+          {busy ? 'Sending…' : sequenceComplete ? 'Sequence complete' : 'Send simulated request'}
         </button>
 
         {error && <p className="error">{error}</p>}
@@ -521,36 +675,45 @@ export function ApiRequestEditor({
                   .join(', ')}
               </p>
             )}
-            {!result.correct && !active.optionalVerification && (
+            {!result.correct && !active.optionalVerification && !active.practiceMode && (
               <p className="hint">Door stays locked. Revise the request. API mistakes never remove hearts.</p>
             )}
             {result.correct &&
+              !active.practiceMode &&
               result.terminalVerification &&
-              !result.terminalVerification.complete &&
-              result.terminalVerification.verifyAnotherScenario &&
-              !active.optionalVerification && (
-                <button
-                  type="button"
-                  className="open-terminal"
-                  onClick={() =>
-                    startVerifyAnother(result.terminalVerification!.verifyAnotherScenario!)
-                  }
-                >
-                  Verify Another Scenario
-                </button>
-              )}
-            {result.adaptivePracticeDoors && result.adaptivePracticeDoors.length > 0 ? (
-              <div className="hint">
-                <p>Adaptive practice doors available in this room (max 2):</p>
-                <ul>
-                  {result.adaptivePracticeDoors.map((door) => (
-                    <li key={`${door.challengeId}-${door.conceptTag}`}>
-                      <button type="button" className="ghost" onClick={() => startPracticeDoor(door)}>
-                        Open {door.label}
-                      </button>
-                    </li>
+              result.terminalVerification.earnedSlots === 0 &&
+              !result.firstAttemptRecord.firstAttemptCorrect ? (
+              <p className="hint">
+                Door unlock is independent of Terminal Verification. Your preserved incorrect first attempt did not
+                earn evidence slots; corrected retries never rewrite that record. The next authored verification
+                scenario loads automatically when available.
+              </p>
+            ) : null}
+            {practiceOfferList.length > 0 && !active.practiceMode ? (
+              <div className="terminal-offer terminal-offer--practice" data-section="adaptive-practice">
+                <p className="terminal-offer__title">Recurring difficulty · ungraded practice</p>
+                <p className="hint">
+                  CONTROL detected repeated eligible first-attempt misses for{' '}
+                  {practiceOfferList.map((door) => conceptLabel(door.conceptTag)).join(', ')}. An authored practice
+                  drill is ready in this room (max 2). Practice is optional, ungraded, uses different fictional
+                  resources, and is not required to keep a correctly unlocked mandatory device.
+                </p>
+                <div className="terminal-offer__actions">
+                  {practiceOfferList.map((door) => (
+                    <button
+                      key={`${door.challengeId}-${door.conceptTag}`}
+                      type="button"
+                      className="ghost"
+                      onClick={() => startPracticeDoor(door)}
+                    >
+                      Practice {conceptLabel(door.conceptTag)} (optional)
+                    </button>
                   ))}
-                </ul>
+                </div>
+                <p className="hint">
+                  Prefer the field? Close this terminal and use the practice terminal that appeared in the room —
+                  your mandatory mission challenge stays available.
+                </p>
               </div>
             ) : null}
           </div>
@@ -561,8 +724,26 @@ export function ApiRequestEditor({
   )
 }
 
+function emptyTvpSnapshot(terminalId: string): TerminalVerification {
+  return {
+    percent: 0,
+    earnedSlots: 0,
+    requiredSlots: 0,
+    terminalId,
+    complete: false,
+    verifyAnotherScenario: null,
+  }
+}
+
+function gradedMissionIsUngraded(missionId: string): boolean {
+  return missionId.startsWith('practice-') || missionId.startsWith('m0-')
+}
+
 function doorMissionId(challengeId: string): string {
-  if (challengeId.includes('l2')) return 'practice-m1-recruit-l2'
+  if (challengeId.includes('l6')) return 'practice-m1-recruit-l6'
+  if (challengeId.includes('l5')) return 'practice-m1-recruit-l5'
+  if (challengeId.includes('l4')) return 'practice-m1-recruit-l4'
   if (challengeId.includes('l3')) return 'practice-m1-recruit-l3'
+  if (challengeId.includes('l2')) return 'practice-m1-recruit-l2'
   return 'practice-m1-recruit-l1'
 }

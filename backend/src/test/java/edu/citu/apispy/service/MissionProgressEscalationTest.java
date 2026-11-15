@@ -64,10 +64,11 @@ class MissionProgressEscalationTest {
 	}
 
 	@Test
-	void playerResetRequiresMatchingGenerationAndDoesNotEscalate() {
+	void playerResetRequiresMatchingGenerationAndDoesNotEscalateWithoutApiActivity() {
 		MissionProgressDto initial = progress.getOrCreate("player-reset", "m1-recruit-l1");
 		assertEquals(0, initial.apiResetCount());
 		assertEquals(1, initial.requiredDeviceIds().size());
+		assertFalse(initial.manualRestartWouldEscalate());
 
 		assertThrows(
 				IllegalArgumentException.class,
@@ -90,8 +91,43 @@ class MissionProgressEscalationTest {
 		assertEquals(1, after.requiredDeviceIds().size());
 		assertTrue(after.unlockedDeviceIds().isEmpty());
 		assertEquals(0, after.gradedAttemptCountSinceReset());
+		assertEquals(0, after.consecutiveUnresolvedApiResets());
 		assertEquals("PRIMARY", after.activeRunKind());
 		assertNotEquals(initial.roomGeneration(), after.roomGeneration());
+	}
+
+	@Test
+	void wrongSubmissionsAloneDoNotEscalateUntilApiDrivenRoomReset() {
+		progress.getOrCreate("wrong-only", "m1-recruit-l1");
+		for (int i = 0; i < 5; i++) {
+			simulate.simulate(
+					"wrong-only",
+					request("m1-recruit-l1", "door-alpha", "chal-m1-get-door-v1", "POST", "/api/doors/wrong"));
+		}
+		MissionProgressDto afterWrongs = progress.getOrCreate("wrong-only", "m1-recruit-l1");
+		assertEquals(0, afterWrongs.apiResetCount());
+		assertEquals(1, afterWrongs.requiredDeviceCount());
+		assertTrue(afterWrongs.gradedAttemptCountSinceReset() >= 5);
+		assertTrue(afterWrongs.manualRestartWouldEscalate());
+		assertEquals(3, afterWrongs.nextRequiredDeviceCount());
+	}
+
+	@Test
+	void manualRestartAfterUnresolvedApiActivityEscalatesOneToThree() {
+		MissionProgressDto initial = progress.getOrCreate("abandon", "m1-recruit-l1");
+		simulate.simulate(
+				"abandon",
+				request("m1-recruit-l1", "door-alpha", "chal-m1-get-door-v1", "POST", "/api/doors/wrong"));
+		MissionProgressDto after = progress.resetRoom(
+				"abandon",
+				"m1-recruit-l1",
+				RoomResetReason.PLAYER,
+				initial.roomGeneration());
+		assertEquals(1, after.apiResetCount());
+		assertEquals(3, after.requiredDeviceCount());
+		assertEquals(4, after.requiredDeviceIds().size());
+		assertTrue(after.requiredDeviceIds().contains("final-lock-l1"));
+		assertEquals(1, after.consecutiveUnresolvedApiResets());
 	}
 
 	@Test
@@ -184,6 +220,101 @@ class MissionProgressEscalationTest {
 		assertEquals(1, after.requiredDeviceIds().size());
 		assertFalse(after.combatRestartAuthorized());
 		assertNotEquals(created.roomGeneration(), after.roomGeneration());
+	}
+
+	@Test
+	void furtherApiResetsRemainCappedAtFiveDevices() {
+		progress.getOrCreate("cap", "m1-recruit-l1");
+		simulate.simulate("cap", request("m1-recruit-l1", "door-alpha", "chal-m1-get-door-v1", "POST", "/bad"));
+		MissionProgressDto first = progress.resetRoom("cap", "m1-recruit-l1", RoomResetReason.API_STALLED);
+		simulate.simulate("cap", request("m1-recruit-l1", "door-alpha", "chal-m1-get-door-v1", "POST", "/bad"));
+		MissionProgressDto second = progress.resetRoom("cap", "m1-recruit-l1", RoomResetReason.API_STALLED);
+		assertEquals(2, second.apiResetCount());
+		assertEquals(5, second.requiredDeviceCount());
+		assertEquals(6, second.requiredDeviceIds().size());
+		simulate.simulate("cap", request("m1-recruit-l1", "door-alpha", "chal-m1-get-door-v1", "POST", "/bad"));
+		MissionProgressDto third = progress.resetRoom(
+				"cap", "m1-recruit-l1", RoomResetReason.PLAYER, second.roomGeneration());
+		assertEquals(2, third.apiResetCount());
+		assertEquals(5, third.requiredDeviceCount());
+		assertEquals(6, third.requiredDeviceIds().size());
+		assertEquals(3, third.consecutiveUnresolvedApiResets());
+		assertEquals(first.requiredDeviceCount(), 3);
+	}
+
+	@Test
+	void fifteenUnresolvedApiRoomAttemptsRequireLessonAndBlockBypass() {
+		MissionProgressDto state = progress.getOrCreate("fifteen", "m1-recruit-l1");
+		for (int i = 0; i < MissionProgressService.CONSECUTIVE_UNRESOLVED_API_RESET_THRESHOLD; i++) {
+			simulate.simulate(
+					"fifteen",
+					request("m1-recruit-l1", "door-alpha", "chal-m1-get-door-v1", "POST", "/api/doors/wrong"));
+			state = progress.resetRoom(
+					"fifteen",
+					"m1-recruit-l1",
+					RoomResetReason.PLAYER,
+					state.roomGeneration());
+		}
+		assertTrue(state.lessonReviewRequired());
+		assertEquals("rest-fundamentals", state.requiredReviewLessonId());
+		assertEquals(
+				MissionProgressService.CONSECUTIVE_UNRESOLVED_API_RESET_THRESHOLD,
+				state.consecutiveUnresolvedApiResets());
+		// Tier preserved at cap; gate does not alter device count further.
+		assertEquals(2, state.apiResetCount());
+		assertEquals(5, state.requiredDeviceCount());
+
+		final String gatedGeneration = state.roomGeneration();
+		assertThrows(
+				IllegalStateException.class,
+				() -> progress.resetRoom(
+						"fifteen", "m1-recruit-l1", RoomResetReason.PLAYER, gatedGeneration));
+		assertThrows(
+				IllegalStateException.class,
+				() -> simulate.simulate(
+						"fifteen",
+						request("m1-recruit-l1", "door-alpha", "chal-m1-get-door-v1", "GET", "/api/doors/alpha")));
+
+		MissionProgressDto cleared = progress.acknowledgeLessonReview(
+				"fifteen", "m1-recruit-l1", "rest-fundamentals");
+		assertFalse(cleared.lessonReviewRequired());
+		assertEquals(0, cleared.consecutiveUnresolvedApiResets());
+		assertEquals(2, cleared.apiResetCount());
+		assertEquals(5, cleared.requiredDeviceCount());
+	}
+
+	@Test
+	void fifteenWrongSubmissionsAloneDoNotTriggerLessonGate() {
+		progress.getOrCreate("spam", "m1-recruit-l1");
+		for (int i = 0; i < 15; i++) {
+			simulate.simulate(
+					"spam",
+					request("m1-recruit-l1", "door-alpha", "chal-m1-get-door-v1", "POST", "/api/doors/wrong"));
+		}
+		MissionProgressDto state = progress.getOrCreate("spam", "m1-recruit-l1");
+		assertFalse(state.lessonReviewRequired());
+		assertEquals(0, state.consecutiveUnresolvedApiResets());
+		assertEquals(0, state.apiResetCount());
+	}
+
+	@Test
+	void combatDeathDoesNotIncrementConsecutiveApiResets() {
+		MissionProgressDto created = progress.getOrCreate("combat-streak", "m1-recruit-l1");
+		simulate.simulate(
+				"combat-streak",
+				request("m1-recruit-l1", "door-alpha", "chal-m1-get-door-v1", "POST", "/bad"));
+		MissionProgressDto afterApi = progress.resetRoom(
+				"combat-streak",
+				"m1-recruit-l1",
+				RoomResetReason.API_STALLED);
+		assertEquals(1, afterApi.consecutiveUnresolvedApiResets());
+		progress.reportCombatDeath("combat-streak", "m1-recruit-l1", afterApi.roomGeneration());
+		MissionProgressDto afterCombat = progress.resetRoom(
+				"combat-streak", "m1-recruit-l1", RoomResetReason.COMBAT);
+		assertEquals(1, afterCombat.apiResetCount());
+		assertEquals(3, afterCombat.requiredDeviceCount());
+		assertEquals(1, afterCombat.consecutiveUnresolvedApiResets());
+		assertEquals(1, created.requiredDeviceCount());
 	}
 
 	@Test

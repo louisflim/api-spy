@@ -190,6 +190,17 @@ export function GameWorkspace({
       }
       try {
         const detail = await fetchMissionDetail(mission.module, mission.rank, mission.level)
+        const progressGate = await fetchMissionProgress(detail.mission.missionId)
+        if (progressGate.lessonReviewRequired) {
+          const lessonId = progressGate.requiredReviewLessonId
+          const title = lessonId ? lessonTitle(lessonId, lessons) : 'the required lesson'
+          setOpeningFieldRoom(false)
+          setGateMessage(
+            `After 15 unresolved API-driven room attempts, revisit ${title} before returning to the field. This does not reveal the graded answer.`,
+          )
+          leaveForTraining()
+          return
+        }
         const conceptRows = await refreshConcepts()
         const missing = missingRequiredLessons(detail.mission, lessons, conceptRows)
         if (missing.length > 0) {
@@ -415,8 +426,14 @@ export function GameWorkspace({
                     <GameCanvas
                       key={roomProgress.roomGeneration}
                       missionId={missionDetail.mission.missionId}
-                      deviceId={missionDetail.challenge.deviceId}
-                      documentation={missionDetail.challenge.documentation}
+                      deviceId={
+                        roomProgress?.mandatoryDevices?.[0]?.deviceId ??
+                        missionDetail.challenge.deviceId
+                      }
+                      documentation={
+                        roomProgress?.mandatoryDevices?.[0]?.documentation ??
+                        missionDetail.challenge.documentation
+                      }
                       exitReady={exitReady}
                       practiceDoors={practiceDoors}
                       inputLocked={inputLocked}
@@ -493,6 +510,10 @@ export function GameWorkspace({
             combatRestartAvailable={Boolean(roomProgress?.combatRestartAuthorized)}
             onReturnToOps={returnToOps}
             resetBusy={resetLevelBusy}
+            currentDeviceCount={roomProgress?.requiredDeviceCount ?? 1}
+            nextDeviceCount={roomProgress?.nextRequiredDeviceCount ?? roomProgress?.requiredDeviceCount ?? 1}
+            wouldEscalate={Boolean(roomProgress?.manualRestartWouldEscalate)}
+            finalLockRequired={Boolean(roomProgress?.finalLockRequired)}
           />
         </>
       ) : (
@@ -521,8 +542,30 @@ export function GameWorkspace({
                     queryParameters: {},
                   },
                 }
-              : missionDetail
+              : roomProgress?.activeTerminalChallenge
+                ? {
+                    ...missionDetail,
+                    challenge: {
+                      ...missionDetail.challenge,
+                      challengeId: roomProgress.activeTerminalChallenge.challengeId,
+                      variantId: roomProgress.activeTerminalChallenge.variantId,
+                      deviceId: roomProgress.activeTerminalChallenge.deviceId,
+                      documentation: roomProgress.activeTerminalChallenge.documentation,
+                    },
+                  }
+                : roomProgress?.mandatoryDevices?.[0]
+                  ? {
+                      ...missionDetail,
+                      challenge: {
+                        ...missionDetail.challenge,
+                        challengeId: roomProgress.mandatoryDevices[0].challengeId,
+                        deviceId: roomProgress.mandatoryDevices[0].deviceId,
+                        documentation: roomProgress.mandatoryDevices[0].documentation,
+                      },
+                    }
+                  : missionDetail
           }
+          resumeTerminal={practiceEditorDoor ? null : roomProgress?.activeTerminalChallenge ?? null}
           mode={practiceEditorDoor ? 'PRACTICE' : 'MISSION'}
           onClose={() => {
             setEditorOpen(false)
@@ -536,6 +579,10 @@ export function GameWorkspace({
           }}
           onAttemptSaved={() => refreshSavedAttempt(playerId, missionDetail.mission.missionId)}
           onAdaptivePracticeDoors={setPracticeDoors}
+          onMissionProgress={(server) => {
+            setRoomProgress(server)
+            if (server.exitReady) setExitReady(true)
+          }}
         />
       ) : null}
 

@@ -27,6 +27,11 @@ export interface EnemyTypeConfig {
   spritesheetKey: string
   frameWidth: number
   frameHeight: number
+  /**
+   * On-screen scale. Patrol guards match the Rookie Detective display size
+   * (272px frame × 0.24 scale ≈ 65px).
+   */
+  displayScale: number
 }
 
 /** Security Patrol Guard — only fully authored enemy for Phase 1. */
@@ -47,6 +52,8 @@ export const PATROL_GUARD_CONFIG: EnemyTypeConfig = {
   spritesheetKey: 'spy-patrol-guard-sheet',
   frameWidth: 32,
   frameHeight: 40,
+  // 272 * 0.24 / 40 — same on-screen height as the player sprite
+  displayScale: 1.632,
 }
 
 /**

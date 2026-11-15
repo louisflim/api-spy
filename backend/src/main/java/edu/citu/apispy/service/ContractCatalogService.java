@@ -33,6 +33,7 @@ public class ContractCatalogService {
 		Map<String, List<ApiContract>> byMission = new LinkedHashMap<>();
 
 		loadFile(contentLoader, "content/challenges/module1-challenges.json", byChallenge, byDevice, byMission);
+		loadFile(contentLoader, "content/challenges/module1-scenario-bank-extra.json", byChallenge, byDevice, byMission);
 		loadFile(contentLoader, "content/challenges/module0-training-challenges.json", byChallenge, byDevice, byMission);
 
 		this.contractsByChallengeId = Map.copyOf(byChallenge);

@@ -79,6 +79,67 @@
       },
       "documentation": "PRACTICE MODE — educational review only.\n\nMethod: GET\nPath: /api/practice/sensors\nRequired query parameter:\n- bay = training\n\nExample: /api/practice/sensors?bay=training\n\nNot the graded zone=alpha contract.",
       "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-practice-m1-l4",
+      "variantId": "practice-registration-drill-v1",
+      "missionId": "practice-m1-recruit-l4",
+      "deviceId": "practice-registration",
+      "conceptTags": ["http.method.post", "http.endpoint"],
+      "expectedMethod": "POST",
+      "pathTemplate": "/api/practice/registrations/drill",
+      "pathParameters": {},
+      "queryParameters": {},
+      "successStatus": 201,
+      "successBody": {
+        "id": "drill",
+        "status": "reviewed",
+        "message": "Practice registration drill acknowledged. No mission checkpoint was registered."
+      },
+      "documentation": "PRACTICE MODE — educational review only.\n\nMethod: POST\nPath: /api/practice/registrations/drill\n\nDifferent from graded /api/registrations/{checkpointId}. No mission completion, rewards, or first-attempt RCA.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-practice-m1-l5",
+      "variantId": "practice-clearance-drill-v1",
+      "missionId": "practice-m1-recruit-l5",
+      "deviceId": "practice-clearance",
+      "conceptTags": ["http.method.put", "http.endpoint", "http.path_parameter"],
+      "expectedMethod": "PUT",
+      "pathTemplate": "/api/practice/clearances/{clearanceId}",
+      "pathParameters": {
+        "clearanceId": "drill-desk"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "clearanceId": "drill-desk",
+        "status": "reviewed",
+        "message": "Practice clearance drill acknowledged."
+      },
+      "documentation": "PRACTICE MODE — educational review only.\n\nMethod: PUT\nPath template: /api/practice/clearances/{clearanceId}\nRequired path parameter:\n- clearanceId = drill-desk\n\nExample: /api/practice/clearances/drill-desk\n\nNot the graded north-desk clearance contract.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-practice-m1-l6",
+      "variantId": "practice-badge-drill-v1",
+      "missionId": "practice-m1-recruit-l6",
+      "deviceId": "practice-badge",
+      "conceptTags": ["http.method.delete", "http.endpoint", "http.path_parameter"],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/practice/access-badges/{badgeId}",
+      "pathParameters": {
+        "badgeId": "drill-pass"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "badgeId": "drill-pass",
+        "status": "reviewed",
+        "message": "Practice badge drill acknowledged."
+      },
+      "documentation": "PRACTICE MODE — educational review only.\n\nMethod: DELETE\nPath template: /api/practice/access-badges/{badgeId}\nRequired path parameter:\n- badgeId = drill-pass\n\nExample: /api/practice/access-badges/drill-pass\n\nNot the graded red-pass badge contract.",
+      "deviceUnlockState": "OPEN"
     }
   ]
 }

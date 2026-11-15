@@ -173,8 +173,17 @@ export function GameCanvas({
 
   useEffect(() => {
     inputLockedRef.current = inputLocked
-    if (gameRef.current && startedRef.current) {
-      gameRef.current.events.emit(GAME_EVENTS.INPUT_LOCK, { locked: inputLocked })
+    const game = gameRef.current
+    if (game && startedRef.current) {
+      game.events.emit(GAME_EVENTS.INPUT_LOCK, { locked: inputLocked })
+    }
+    // Also blur the Phaser canvas so focus can move into terminal text fields.
+    if (inputLocked) {
+      const canvas = containerRef.current?.querySelector('canvas')
+      if (canvas instanceof HTMLElement) {
+        canvas.blur()
+        canvas.setAttribute('tabindex', '-1')
+      }
     }
   }, [inputLocked])
 

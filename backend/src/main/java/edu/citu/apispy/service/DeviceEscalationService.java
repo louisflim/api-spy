@@ -57,6 +57,24 @@ public class DeviceEscalationService {
 	}
 
 	public List<ApiContract> requiredMandatoryContracts(String missionId, int apiResetCount) {
+		return requiredMandatoryContracts(missionId, apiResetCount, null);
+	}
+
+	/**
+	 * When {@code selectedChallengeIds} is present (active room selection), those authored
+	 * contracts are authoritative for the run. Otherwise the fixed escalation prefix is used.
+	 */
+	public List<ApiContract> requiredMandatoryContracts(
+			String missionId,
+			int apiResetCount,
+			List<String> selectedChallengeIds) {
+		if (selectedChallengeIds != null && !selectedChallengeIds.isEmpty()) {
+			List<ApiContract> selected = new ArrayList<>();
+			for (String challengeId : selectedChallengeIds) {
+				selected.add(contractCatalogService.requireByChallengeId(challengeId));
+			}
+			return List.copyOf(selected);
+		}
 		MissionEscalationDefinition definition = byMissionId.get(missionId);
 		if (definition == null) {
 			ApiContract primary = fallbackPrimary(missionId);
@@ -75,9 +93,21 @@ public class DeviceEscalationService {
 	}
 
 	public List<String> requiredDeviceIds(String missionId, int apiResetCount) {
-		return requiredMandatoryContracts(missionId, apiResetCount).stream()
+		return requiredDeviceIds(missionId, apiResetCount, null);
+	}
+
+	public List<String> requiredDeviceIds(String missionId, int apiResetCount, List<String> selectedChallengeIds) {
+		return requiredMandatoryContracts(missionId, apiResetCount, selectedChallengeIds).stream()
 				.map(ApiContract::getDeviceId)
 				.toList();
+	}
+
+	public boolean isMandatoryDevice(
+			String missionId,
+			String deviceId,
+			int apiResetCount,
+			List<String> selectedChallengeIds) {
+		return requiredDeviceIds(missionId, apiResetCount, selectedChallengeIds).contains(deviceId);
 	}
 
 	public List<ApiContract> verificationContracts(String missionId) {

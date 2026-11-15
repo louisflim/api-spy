@@ -9,9 +9,48 @@
         "chal-m1-get-door-v5",
         "chal-m1-get-door-v6"
       ],
+      "mandatoryScenarioPools": [
+        [
+          "chal-m1-get-door-v1",
+          "chal-m1-get-camera-v1",
+          "chal-m1-get-checkpoint-v1",
+          "chal-m1-get-equipment-v1",
+          "chal-m1-get-roster-v1"
+        ],
+        [
+          "chal-m1-get-door-v3",
+          "chal-m1-get-camera-v1",
+          "chal-m1-get-checkpoint-v1",
+          "chal-m1-get-equipment-v1"
+        ],
+        [
+          "chal-m1-get-door-v4",
+          "chal-m1-get-roster-v1",
+          "chal-m1-get-camera-v1",
+          "chal-m1-get-checkpoint-v1"
+        ],
+        [
+          "chal-m1-get-door-v5",
+          "chal-m1-get-equipment-v1",
+          "chal-m1-get-roster-v1",
+          "chal-m1-get-camera-v1"
+        ],
+        [
+          "chal-m1-get-door-v6",
+          "chal-m1-get-checkpoint-v1",
+          "chal-m1-get-equipment-v1",
+          "chal-m1-get-roster-v1"
+        ]
+      ],
       "verificationChallengeIds": [
         "chal-m1-get-door-v1",
         "chal-m1-get-door-v2"
+      ],
+      "verificationScenarioPool": [
+        "chal-m1-get-door-v2",
+        "chal-m1-get-camera-v2",
+        "chal-m1-get-roster-v1",
+        "chal-m1-get-equipment-v1"
       ],
       "finalLockChallengeId": "chal-m1-final-lock-l1"
     },
@@ -24,9 +63,47 @@
         "chal-m1-path-lock-v5",
         "chal-m1-path-lock-v6"
       ],
+      "mandatoryScenarioPools": [
+        [
+          "chal-m1-path-lock-v1",
+          "chal-m1-path-camera-v1",
+          "chal-m1-path-panel-v1",
+          "chal-m1-path-asset-v1"
+        ],
+        [
+          "chal-m1-path-lock-v3",
+          "chal-m1-path-camera-v1",
+          "chal-m1-path-panel-v1",
+          "chal-m1-path-asset-v1"
+        ],
+        [
+          "chal-m1-path-lock-v4",
+          "chal-m1-path-panel-v1",
+          "chal-m1-path-asset-v1",
+          "chal-m1-path-camera-v1"
+        ],
+        [
+          "chal-m1-path-lock-v5",
+          "chal-m1-path-asset-v1",
+          "chal-m1-path-camera-v1",
+          "chal-m1-path-panel-v1"
+        ],
+        [
+          "chal-m1-path-lock-v6",
+          "chal-m1-path-camera-v1",
+          "chal-m1-path-panel-v1",
+          "chal-m1-path-asset-v1"
+        ]
+      ],
       "verificationChallengeIds": [
         "chal-m1-path-lock-v1",
         "chal-m1-path-lock-v2"
+      ],
+      "verificationScenarioPool": [
+        "chal-m1-path-lock-v2",
+        "chal-m1-path-camera-v2",
+        "chal-m1-path-panel-v1",
+        "chal-m1-path-asset-v1"
       ],
       "finalLockChallengeId": "chal-m1-final-lock-l2"
     },
@@ -39,9 +116,48 @@
         "chal-m1-query-sensor-v5",
         "chal-m1-query-sensor-v6"
       ],
+      "mandatoryScenarioPools": [
+        [
+          "chal-m1-query-sensor-v1",
+          "chal-m1-query-camera-v1",
+          "chal-m1-query-badge-v1",
+          "chal-m1-query-checkpoint-v1",
+          "chal-m1-query-sensor-floor-v1"
+        ],
+        [
+          "chal-m1-query-sensor-v3",
+          "chal-m1-query-camera-v1",
+          "chal-m1-query-badge-v1",
+          "chal-m1-query-checkpoint-v1"
+        ],
+        [
+          "chal-m1-query-sensor-v4",
+          "chal-m1-query-badge-v1",
+          "chal-m1-query-checkpoint-v1",
+          "chal-m1-query-sensor-floor-v1"
+        ],
+        [
+          "chal-m1-query-sensor-v5",
+          "chal-m1-query-checkpoint-v1",
+          "chal-m1-query-sensor-floor-v1",
+          "chal-m1-query-camera-v1"
+        ],
+        [
+          "chal-m1-query-sensor-v6",
+          "chal-m1-query-sensor-floor-v1",
+          "chal-m1-query-camera-v1",
+          "chal-m1-query-badge-v1"
+        ]
+      ],
       "verificationChallengeIds": [
         "chal-m1-query-sensor-v1",
         "chal-m1-query-sensor-v2"
+      ],
+      "verificationScenarioPool": [
+        "chal-m1-query-sensor-v2",
+        "chal-m1-query-camera-v2",
+        "chal-m1-query-badge-v1",
+        "chal-m1-query-checkpoint-v1"
       ],
       "finalLockChallengeId": "chal-m1-final-lock-l3"
     },
@@ -54,9 +170,41 @@
         "chal-m1-post-registration-v5",
         "chal-m1-post-registration-v6"
       ],
+      "mandatoryScenarioPools": [
+        [
+          "chal-m1-post-registration-v1",
+          "chal-m1-post-intake-v1",
+          "chal-m1-post-signal-v1"
+        ],
+        [
+          "chal-m1-post-registration-v3",
+          "chal-m1-post-intake-v1",
+          "chal-m1-post-signal-v1"
+        ],
+        [
+          "chal-m1-post-registration-v4",
+          "chal-m1-post-signal-v1",
+          "chal-m1-post-intake-v1"
+        ],
+        [
+          "chal-m1-post-registration-v5",
+          "chal-m1-post-intake-v1",
+          "chal-m1-post-signal-v1"
+        ],
+        [
+          "chal-m1-post-registration-v6",
+          "chal-m1-post-signal-v1",
+          "chal-m1-post-intake-v1"
+        ]
+      ],
       "verificationChallengeIds": [
         "chal-m1-post-registration-v1",
         "chal-m1-post-registration-v2"
+      ],
+      "verificationScenarioPool": [
+        "chal-m1-post-registration-v2",
+        "chal-m1-post-intake-v2",
+        "chal-m1-post-signal-v1"
       ],
       "finalLockChallengeId": "chal-m1-final-lock-l4"
     },
@@ -69,9 +217,41 @@
         "chal-m1-put-clearance-v5",
         "chal-m1-put-clearance-v6"
       ],
+      "mandatoryScenarioPools": [
+        [
+          "chal-m1-put-clearance-v1",
+          "chal-m1-put-record-v1",
+          "chal-m1-put-profile-v1"
+        ],
+        [
+          "chal-m1-put-clearance-v3",
+          "chal-m1-put-record-v1",
+          "chal-m1-put-profile-v1"
+        ],
+        [
+          "chal-m1-put-clearance-v4",
+          "chal-m1-put-profile-v1",
+          "chal-m1-put-record-v1"
+        ],
+        [
+          "chal-m1-put-clearance-v5",
+          "chal-m1-put-record-v1",
+          "chal-m1-put-profile-v1"
+        ],
+        [
+          "chal-m1-put-clearance-v6",
+          "chal-m1-put-profile-v1",
+          "chal-m1-put-record-v1"
+        ]
+      ],
       "verificationChallengeIds": [
         "chal-m1-put-clearance-v1",
         "chal-m1-put-clearance-v2"
+      ],
+      "verificationScenarioPool": [
+        "chal-m1-put-clearance-v2",
+        "chal-m1-put-record-v2",
+        "chal-m1-put-profile-v1"
       ],
       "finalLockChallengeId": "chal-m1-final-lock-l5"
     },
@@ -84,9 +264,41 @@
         "chal-m1-delete-badge-v5",
         "chal-m1-delete-badge-v6"
       ],
+      "mandatoryScenarioPools": [
+        [
+          "chal-m1-delete-badge-v1",
+          "chal-m1-delete-token-v1",
+          "chal-m1-delete-session-v1"
+        ],
+        [
+          "chal-m1-delete-badge-v3",
+          "chal-m1-delete-token-v1",
+          "chal-m1-delete-session-v1"
+        ],
+        [
+          "chal-m1-delete-badge-v4",
+          "chal-m1-delete-session-v1",
+          "chal-m1-delete-token-v1"
+        ],
+        [
+          "chal-m1-delete-badge-v5",
+          "chal-m1-delete-token-v1",
+          "chal-m1-delete-session-v1"
+        ],
+        [
+          "chal-m1-delete-badge-v6",
+          "chal-m1-delete-session-v1",
+          "chal-m1-delete-token-v1"
+        ]
+      ],
       "verificationChallengeIds": [
         "chal-m1-delete-badge-v1",
         "chal-m1-delete-badge-v2"
+      ],
+      "verificationScenarioPool": [
+        "chal-m1-delete-badge-v2",
+        "chal-m1-delete-token-v2",
+        "chal-m1-delete-session-v1"
       ],
       "finalLockChallengeId": "chal-m1-final-lock-l6"
     }

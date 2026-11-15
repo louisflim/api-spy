@@ -107,9 +107,7 @@ public class AdaptivePracticeService {
 		if (!capture.newlyRecorded() || capture.record().isFirstAttemptCorrect()) {
 			return activeDoorsForRoom(participantCode, roomMission.getMissionId());
 		}
-		if (!mandatoryContract.getChallengeId().equals(roomMission.getPrimaryChallengeId())) {
-			return activeDoorsForRoom(participantCode, roomMission.getMissionId());
-		}
+		// Caller supplies the active-run primary (selected authored scenario). Catalog primary alone is not used.
 
 		Map<String, Integer> failureCounts = countDistinctMandatoryConceptFailures(participantCode);
 		List<AdaptivePracticeDoorDto> offered = new ArrayList<>();
@@ -192,13 +190,29 @@ public class AdaptivePracticeService {
 	}
 
 	private ApiContract resolvePracticeForConcept(String conceptTag) {
+		// Prefer alternate authored practice resources when available (anti-memorization).
 		return switch (conceptTag) {
 			case "http.method.get", "http.endpoint", "rest.fundamentals" ->
-					safeChallenge("chal-practice-m1-l1");
-			case "http.path_parameter" -> safeChallenge("chal-practice-m1-l2");
-			case "http.query_parameter" -> safeChallenge("chal-practice-m1-l3");
+					firstPresent("chal-practice-m1-camera", "chal-practice-m1-l1");
+			case "http.path_parameter" ->
+					firstPresent("chal-practice-m1-panel", "chal-practice-m1-l2");
+			case "http.query_parameter" ->
+					firstPresent("chal-practice-m1-badge-query", "chal-practice-m1-l3");
+			case "http.method.post" -> safeChallenge("chal-practice-m1-l4");
+			case "http.method.put", "http.method.patch" -> safeChallenge("chal-practice-m1-l5");
+			case "http.method.delete" -> safeChallenge("chal-practice-m1-l6");
 			default -> null;
 		};
+	}
+
+	private ApiContract firstPresent(String... challengeIds) {
+		for (String challengeId : challengeIds) {
+			ApiContract contract = safeChallenge(challengeId);
+			if (contract != null) {
+				return contract;
+			}
+		}
+		return null;
 	}
 
 	private ApiContract safeChallenge(String challengeId) {
@@ -214,11 +228,26 @@ public class AdaptivePracticeService {
 				conceptTag,
 				practice.getChallengeId(),
 				practice.getDeviceId(),
-				"Practice — " + conceptTag,
+				"Ungraded practice · " + friendlyConcept(conceptTag),
 				practice.getDocumentation(),
 				practice.getExpectedMethod(),
 				practice.getPathTemplate(),
 				practice.getMissionId());
+	}
+
+	private static String friendlyConcept(String conceptTag) {
+		return switch (conceptTag) {
+			case "http.method.get" -> "GET requests";
+			case "http.method.post" -> "POST requests";
+			case "http.method.put" -> "PUT requests";
+			case "http.method.patch" -> "PATCH requests";
+			case "http.method.delete" -> "DELETE requests";
+			case "http.endpoint" -> "API endpoints";
+			case "http.path_parameter" -> "path parameters";
+			case "http.query_parameter" -> "query parameters";
+			case "rest.fundamentals" -> "REST fundamentals";
+			default -> conceptTag;
+		};
 	}
 
 	interface AdaptiveTriggerStore {

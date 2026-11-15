@@ -104,6 +104,9 @@ public class ConceptReviewService {
 			case "http.method.get", "http.endpoint", "rest.fundamentals" -> "chal-practice-m1-l1";
 			case "http.path_parameter" -> "chal-practice-m1-l2";
 			case "http.query_parameter" -> "chal-practice-m1-l3";
+			case "http.method.post" -> "chal-practice-m1-l4";
+			case "http.method.put", "http.method.patch" -> "chal-practice-m1-l5";
+			case "http.method.delete" -> "chal-practice-m1-l6";
 			default -> {
 				try {
 					yield contractCatalogService.requireByChallengeId("chal-practice-m1-l1").getChallengeId();

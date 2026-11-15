@@ -32,10 +32,12 @@ public class AgentFeedbackService {
 			if (firstEligible && firstAttemptCorrect) {
 				messages.add(
 						"Excellent work, Agent. Your request satisfies the required contract. "
-								+ "Let's verify that you can apply this concept in another scenario.");
+								+ "Terminal verification evidence was recorded for this challenge.");
 			} else if (!firstEligible) {
 				messages.add(
-						"Mission access granted. Retry recorded — prior first-attempt evidence is preserved.");
+						"Mission access granted. Retry recorded — prior first-attempt evidence is preserved "
+								+ "and does not award new verification slots. Optional Concept Verification "
+								+ "can add eligible evidence from a distinct challenge.");
 			} else {
 				messages.add("Mission access granted. Contract requirements are satisfied.");
 			}

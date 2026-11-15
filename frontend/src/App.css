@@ -277,6 +277,36 @@ button.ghost {
   color: #8fa8bf;
 }
 
+.terminal-offer {
+  margin: 0.75rem 0 0;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid rgba(0, 229, 255, 0.22);
+  background: rgba(6, 16, 28, 0.88);
+}
+
+.terminal-offer--practice {
+  border-color: rgba(255, 176, 64, 0.35);
+}
+
+.terminal-offer__title {
+  margin: 0 0 0.35rem;
+  font-size: 0.82rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--spy-cyan-bright, #7de2ff);
+}
+
+.terminal-offer--practice .terminal-offer__title {
+  color: #ffc46b;
+}
+
+.terminal-offer__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.55rem;
+}
+
 .tabs {
   display: flex;
   gap: 0.5rem;

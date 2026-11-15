@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -51,6 +52,7 @@ public class RequestSimulationService {
 	private final ConceptReviewService conceptReviewService;
 	private final MissionProgressService missionProgressService;
 	private final DeviceEscalationService deviceEscalationService;
+	private final ScenarioSelectionService scenarioSelectionService;
 
 	public RequestSimulationService(
 			ContractCatalogService contractCatalogService,
@@ -65,7 +67,8 @@ public class RequestSimulationService {
 			AdaptivePracticeService adaptivePracticeService,
 			ConceptReviewService conceptReviewService,
 			MissionProgressService missionProgressService,
-			DeviceEscalationService deviceEscalationService) {
+			DeviceEscalationService deviceEscalationService,
+			ScenarioSelectionService scenarioSelectionService) {
 		this.contractCatalogService = contractCatalogService;
 		this.missionCatalogService = missionCatalogService;
 		this.simulatedRequestValidator = simulatedRequestValidator;
@@ -79,6 +82,7 @@ public class RequestSimulationService {
 		this.conceptReviewService = conceptReviewService;
 		this.missionProgressService = missionProgressService;
 		this.deviceEscalationService = deviceEscalationService;
+		this.scenarioSelectionService = scenarioSelectionService;
 	}
 
 	/**
@@ -90,16 +94,24 @@ public class RequestSimulationService {
 			throw new IllegalArgumentException("Terminal verification applies to graded missions only");
 		}
 		MissionDefinition mission = missionCatalogService.requirePlayable(missionId);
-		ApiContract primary = contractCatalogService.requireByChallengeId(mission.getPrimaryChallengeId());
-		String terminalId = resolveTerminalId(mission);
 		MissionProgressDto progress = missionProgressService.getOrCreate(authenticatedPlayerId, missionId);
+		List<String> selectedIds = progress.mandatoryDevices() == null
+				? List.of()
+				: progress.mandatoryDevices().stream()
+						.map(MissionProgressDto.MandatoryDeviceDto::challengeId)
+						.toList();
+		ApiContract primary = selectedIds.isEmpty()
+				? contractCatalogService.requireByChallengeId(mission.getPrimaryChallengeId())
+				: contractCatalogService.requireByChallengeId(selectedIds.getFirst());
+		String terminalId = primary.getDeviceId();
 		boolean mandatoryUnlocked = progress.unlockedDeviceIds() != null && !progress.unlockedDeviceIds().isEmpty();
 		return terminalVerificationService.summarize(
 				authenticatedPlayerId,
 				mission.getMissionId(),
 				terminalId,
 				primary,
-				mandatoryUnlocked);
+				mandatoryUnlocked,
+				scenarioSelectionService.verificationPlan(missionId, selectedIds));
 	}
 
 	public SimulateResponseDto simulate(String authenticatedPlayerId, SimulateRequestDto requestDto) {
@@ -123,16 +135,26 @@ public class RequestSimulationService {
 		}
 
 		MissionDefinition mission = missionCatalogService.requirePlayable(contract.getMissionId());
+		missionProgressService.assertLessonGateClear(authenticatedPlayerId, mission.getMissionId());
 		missionProgressService.recordGradedAttempt(authenticatedPlayerId, mission.getMissionId());
 		MissionProgressDto progressBefore = missionProgressService.getOrCreate(
 				authenticatedPlayerId,
 				mission.getMissionId());
 		boolean replayRun = progressBefore.replayActive();
+		List<String> selectedIds = progressBefore.mandatoryDevices() == null
+				? List.of()
+				: progressBefore.mandatoryDevices().stream()
+						.map(MissionProgressDto.MandatoryDeviceDto::challengeId)
+						.toList();
 		boolean optionalVerification = !deviceEscalationService.isMandatoryDevice(
 				mission.getMissionId(),
 				contract.getDeviceId(),
-				progressBefore.apiResetCount());
-		String terminalId = resolveTerminalId(mission);
+				progressBefore.apiResetCount(),
+				selectedIds);
+		String terminalId = resolveTerminalId(mission, selectedIds);
+		if (!result.isCorrect()) {
+			missionProgressService.recordIncorrectGradedAttempt(authenticatedPlayerId, mission.getMissionId());
+		}
 
 		// Replay must not mutate immutable first-clear RCA records.
 		FirstAttemptService.CaptureResult capture = replayRun
@@ -183,6 +205,24 @@ public class RequestSimulationService {
 				|| optionalVerification
 				|| !progressAfter.unlockedDeviceIds().isEmpty();
 
+		List<ApiContract> tvpPlan = scenarioSelectionService.verificationPlan(mission.getMissionId(), selectedIds);
+		Set<String> completedIds = new LinkedHashSet<>(
+				missionProgressService.completedTerminalChallengeIds(
+						authenticatedPlayerId,
+						mission.getMissionId()));
+		if (result.isCorrect()) {
+			// Room-local sequence only — does not rewrite RCA/TVP. Idempotent on double submit.
+			progressAfter = missionProgressService.completeTerminalChallenge(
+					authenticatedPlayerId,
+					mission.getMissionId(),
+					contract.getChallengeId(),
+					tvpPlan);
+			completedIds = new LinkedHashSet<>(
+					missionProgressService.completedTerminalChallengeIds(
+							authenticatedPlayerId,
+							mission.getMissionId()));
+		}
+
 		// Preserve earned TVP; do not award new evidence slots during replay.
 		TerminalVerificationDto tvp = replayRun
 				? terminalVerificationService.summarize(
@@ -190,7 +230,9 @@ public class RequestSimulationService {
 						mission.getMissionId(),
 						terminalId,
 						contract,
-						mandatoryUnlocked)
+						mandatoryUnlocked,
+						tvpPlan,
+						completedIds)
 				: terminalVerificationService.recordAndSummarize(
 						authenticatedPlayerId,
 						contract,
@@ -198,10 +240,13 @@ public class RequestSimulationService {
 						decisions,
 						capture.newlyRecorded(),
 						result.isCorrect(),
-						mandatoryUnlocked);
+						mandatoryUnlocked,
+						tvpPlan,
+						completedIds);
 
 		List<AdaptivePracticeDoorDto> practiceDoors = List.of();
-		boolean primaryMandatory = contract.getChallengeId().equals(mission.getPrimaryChallengeId());
+		String selectedPrimary = selectedIds.isEmpty() ? mission.getPrimaryChallengeId() : selectedIds.getFirst();
+		boolean primaryMandatory = contract.getChallengeId().equals(selectedPrimary);
 		if (replayRun) {
 			// Do not mint duplicate adaptive triggers from previously counted evidence.
 			practiceDoors = adaptivePracticeService.activeDoorsForRoom(
@@ -251,6 +296,16 @@ public class RequestSimulationService {
 	}
 
 	private String resolveTerminalId(MissionDefinition mission) {
+		return resolveTerminalId(mission, List.of());
+	}
+
+	private String resolveTerminalId(MissionDefinition mission, List<String> selectedIds) {
+		if (selectedIds != null && !selectedIds.isEmpty()) {
+			String primaryId = selectedIds.getFirst();
+			if (!primaryId.startsWith("chal-m1-final-lock-")) {
+				return contractCatalogService.requireByChallengeId(primaryId).getDeviceId();
+			}
+		}
 		ApiContract primary = contractCatalogService.requireByChallengeId(mission.getPrimaryChallengeId());
 		return primary.getDeviceId();
 	}

@@ -7,7 +7,9 @@ import edu.citu.apispy.dto.VerifyAnotherScenarioDto;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Awards unique first-eligible verification evidence slots and computes TVP%.
@@ -47,6 +49,48 @@ public class TerminalVerificationService {
 			boolean firstEligibleSubmission,
 			boolean overallContractSuccess,
 			boolean mandatoryUnlocked) {
+		return recordAndSummarize(
+				participantCode,
+				contract,
+				terminalId,
+				decisions,
+				firstEligibleSubmission,
+				overallContractSuccess,
+				mandatoryUnlocked,
+				null);
+	}
+
+	public TerminalVerificationDto recordAndSummarize(
+			String participantCode,
+			ApiContract contract,
+			String terminalId,
+			List<ConceptDecision> decisions,
+			boolean firstEligibleSubmission,
+			boolean overallContractSuccess,
+			boolean mandatoryUnlocked,
+			List<ApiContract> verificationPlanOverride) {
+		return recordAndSummarize(
+				participantCode,
+				contract,
+				terminalId,
+				decisions,
+				firstEligibleSubmission,
+				overallContractSuccess,
+				mandatoryUnlocked,
+				verificationPlanOverride,
+				Set.of());
+	}
+
+	public TerminalVerificationDto recordAndSummarize(
+			String participantCode,
+			ApiContract contract,
+			String terminalId,
+			List<ConceptDecision> decisions,
+			boolean firstEligibleSubmission,
+			boolean overallContractSuccess,
+			boolean mandatoryUnlocked,
+			List<ApiContract> verificationPlanOverride,
+			Set<String> completedChallengeIds) {
 		// Blocking failures award no TVP. Correct concepts only earn on first-eligible success
 		// (or authored nonblocking partial success where overallContractSuccess is true).
 		if (firstEligibleSubmission && overallContractSuccess) {
@@ -63,7 +107,14 @@ public class TerminalVerificationService {
 			}
 		}
 
-		return summarize(participantCode, contract.getMissionId(), terminalId, contract, mandatoryUnlocked);
+		return summarize(
+				participantCode,
+				contract.getMissionId(),
+				terminalId,
+				contract,
+				mandatoryUnlocked,
+				verificationPlanOverride,
+				completedChallengeIds);
 	}
 
 	public TerminalVerificationDto summarize(
@@ -72,7 +123,37 @@ public class TerminalVerificationService {
 			String terminalId,
 			ApiContract currentContract,
 			boolean mandatoryUnlocked) {
-		List<ApiContract> plan = verificationPlan(missionId);
+		return summarize(participantCode, missionId, terminalId, currentContract, mandatoryUnlocked, null);
+	}
+
+	public TerminalVerificationDto summarize(
+			String participantCode,
+			String missionId,
+			String terminalId,
+			ApiContract currentContract,
+			boolean mandatoryUnlocked,
+			List<ApiContract> verificationPlanOverride) {
+		return summarize(
+				participantCode,
+				missionId,
+				terminalId,
+				currentContract,
+				mandatoryUnlocked,
+				verificationPlanOverride,
+				Set.of());
+	}
+
+	public TerminalVerificationDto summarize(
+			String participantCode,
+			String missionId,
+			String terminalId,
+			ApiContract currentContract,
+			boolean mandatoryUnlocked,
+			List<ApiContract> verificationPlanOverride,
+			Set<String> completedChallengeIds) {
+		List<ApiContract> plan = verificationPlanOverride == null || verificationPlanOverride.isEmpty()
+				? verificationPlan(missionId)
+				: verificationPlanOverride;
 		int required = 0;
 		for (ApiContract challenge : plan) {
 			required += challenge.getConceptTags().size();
@@ -82,9 +163,12 @@ public class TerminalVerificationService {
 		int percent = required <= 0 ? 0 : Math.min(100, (int) Math.floor(100.0 * earnedSlots / required));
 		boolean complete = required > 0 && earnedSlots >= required;
 
+		Set<String> completed = completedChallengeIds == null ? Set.of() : completedChallengeIds;
 		VerifyAnotherScenarioDto next = null;
-		if (mandatoryUnlocked && !complete) {
-			next = findOptionalVerification(plan, currentContract, participantCode, missionId);
+		// Advance through authored plan after mandatory unlock. Sequence completion (no next)
+		// is independent of TVP% — wrong-first challenges still advance without looping back.
+		if (mandatoryUnlocked) {
+			next = findNextVerification(plan, currentContract, completed);
 		}
 
 		return new TerminalVerificationDto(percent, earnedSlots, required, terminalId, complete, next);
@@ -106,32 +190,28 @@ public class TerminalVerificationService {
 		return List.copyOf(graded);
 	}
 
-	private VerifyAnotherScenarioDto findOptionalVerification(
+	/**
+	 * Next authored verification scenario after the current one that has not already been
+	 * successfully completed this room generation. Never returns the identical challenge.
+	 */
+	VerifyAnotherScenarioDto findNextVerification(
 			List<ApiContract> plan,
 			ApiContract currentContract,
-			String participantCode,
-			String missionId) {
+			Set<String> completedChallengeIds) {
+		Set<String> completed = completedChallengeIds == null
+				? Set.of()
+				: new HashSet<>(completedChallengeIds);
+		String currentId = currentContract == null ? null : currentContract.getChallengeId();
 		for (ApiContract candidate : plan) {
-			if (candidate.getChallengeId().equals(currentContract.getChallengeId())) {
+			String id = candidate.getChallengeId();
+			if (id.equals(currentId) || completed.contains(id)) {
 				continue;
 			}
-			boolean missingEvidence = false;
-			for (String tag : candidate.getConceptTags()) {
-				boolean present = store
-						.find(participantCode, missionId, candidate.getChallengeId(), tag)
-						.isPresent();
-				if (!present) {
-					missingEvidence = true;
-					break;
-				}
-			}
-			if (missingEvidence) {
-				return new VerifyAnotherScenarioDto(
-						candidate.getChallengeId(),
-						candidate.getVariantId(),
-						candidate.getDeviceId(),
-						candidate.getDocumentation());
-			}
+			return new VerifyAnotherScenarioDto(
+					candidate.getChallengeId(),
+					candidate.getVariantId(),
+					candidate.getDeviceId(),
+					candidate.getDocumentation());
 		}
 		return null;
 	}

@@ -249,6 +249,21 @@ export async function resetMissionRoom(
   return response.json()
 }
 
+/** Clears the SRS v1.3 forced ungraded-lesson gate after revisiting the required lesson. */
+export async function acknowledgeLessonReview(
+  missionId: string,
+  lessonId: string,
+): Promise<MissionProgressState> {
+  const response = await apiFetch(`/api/missions/${missionId}/acknowledge-lesson-review`, {
+    method: 'POST',
+    body: JSON.stringify({ lessonId }),
+  })
+  if (!response.ok) {
+    throw new Error(await readError(response, 'Lesson review acknowledgement failed'))
+  }
+  return response.json()
+}
+
 /**
  * Report a combat death bound to the active roomGeneration.
  * Authorizes COMBAT reset; does not send client health as proof.

@@ -23,4 +23,6 @@ export {
   SECURITY_OFFICE_PATROL_ROUTES,
   FOOTPRINT_PATROL_ROUTES,
 } from './patrolZones'
+export { NavigationGrid } from './navigationGrid'
+export { findPath, hasPath, pathFromCurrent } from './pathfind'
 export { COMBAT_TEXTURE_KEYS, GUARD_SHEET_PATH } from './combatArt'

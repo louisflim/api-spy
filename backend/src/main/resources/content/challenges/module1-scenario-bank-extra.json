@@ -1,0 +1,615 @@
+{
+  "challenges": [
+    {
+      "challengeId": "chal-m1-get-camera-v1",
+      "variantId": "camera-lobby-v1",
+      "missionId": "m1-recruit-l1",
+      "deviceId": "camera-lobby",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/cameras/lobby-cam",
+      "pathParameters": {},
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "id": "lobby-cam",
+        "status": "online",
+        "message": "Lobby camera feed acknowledged."
+      },
+      "documentation": "FIELD BRIEF — Surveillance Camera API (fictional)\n\nObjective:\nRetrieve the live status of the lobby surveillance camera so CONTROL can confirm the exit corridor is clear.\n\nResources:\n- Camera endpoints live under /api/cameras/{cameraCode}.\n- Camera codes use lowercase words joined by hyphens.\n- The camera covering this room's lobby approach is labeled lobby-cam.\n\nMethod semantics:\n- GET retrieves the current camera status. Use GET for read-only status checks.\n- POST, PUT, PATCH, and DELETE change resources and are not used for a simple status read.\n\nRules:\n- No request body is required.\n- Build method and full path from these rules. The terminal will not paste the completed request.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-get-camera-v2",
+      "variantId": "camera-yard-v2",
+      "missionId": "m1-recruit-l1",
+      "deviceId": "camera-yard",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/cameras/yard-cam",
+      "pathParameters": {},
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "id": "yard-cam",
+        "status": "online",
+        "message": "Yard camera feed acknowledged."
+      },
+      "documentation": "FIELD BRIEF — Surveillance Camera API (fictional)\n\nObjective:\nConfirm the yard camera is online using a distinct camera resource.\n\nResources:\n- Cameras are addressed as /api/cameras/{cameraCode}.\n- This verification camera code is yard-cam.\n\nMethod semantics:\n- GET reads camera status.\n\nRules:\n- No body required. Construct method and path yourself from the brief.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-get-checkpoint-v1",
+      "variantId": "checkpoint-status-v1",
+      "missionId": "m1-recruit-l1",
+      "deviceId": "checkpoint-status-alpha",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/checkpoints/gate-alpha/status",
+      "pathParameters": {},
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "checkpointId": "gate-alpha",
+        "status": "clear",
+        "message": "Gate Alpha checkpoint status retrieved."
+      },
+      "documentation": "FIELD BRIEF — Checkpoint Status API (fictional)\n\nObjective:\nRead the status of security checkpoint Gate Alpha.\n\nResources:\n- Checkpoint status documents are nested resources: /api/checkpoints/{checkpointId}/status.\n- The checkpoint id for this room is gate-alpha (lowercase, hyphenated).\n\nMethod semantics:\n- GET retrieves status documents.\n- Write methods are inappropriate for a read-only status check.\n\nRules:\n- Include the /status suffix exactly as documented.\n- No query string or body is required. Construct the request yourself from these rules.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-get-equipment-v1",
+      "variantId": "equipment-scanner-v1",
+      "missionId": "m1-recruit-l1",
+      "deviceId": "equipment-scanner",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/equipment/scanner-unit",
+      "pathParameters": {},
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "assetId": "scanner-unit",
+        "status": "ready",
+        "message": "Scanner unit record retrieved."
+      },
+      "documentation": "FIELD BRIEF — Equipment Record API (fictional)\n\nObjective:\nRetrieve the equipment record for the room's scanner unit.\n\nResources:\n- Equipment records live under /api/equipment/{assetId}.\n- The asset id for this room's scanner is scanner-unit.\n\nMethod semantics:\n- GET retrieves a record representation.\n\nRules:\n- No body. Assemble method and path from this brief without relying on prior door endpoints. Construct the request yourself from these rules.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-get-roster-v1",
+      "variantId": "roster-night-v1",
+      "missionId": "m1-recruit-l1",
+      "deviceId": "roster-night",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/rosters/night-shift",
+      "pathParameters": {},
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "rosterId": "night-shift",
+        "status": "published",
+        "message": "Night-shift roster retrieved."
+      },
+      "documentation": "FIELD BRIEF — Duty Roster API (fictional)\n\nObjective:\nRetrieve the published night-shift duty roster used by this facility wing.\n\nResources:\n- Rosters are resources under /api/rosters/{rosterId}.\n- The roster id for this wing is night-shift.\n\nMethod semantics:\n- GET reads the roster document.\n\nRules:\n- Do not reuse door or camera paths. Build the roster request from this brief alone.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-path-camera-v1",
+      "variantId": "camera-path-lobby-v1",
+      "missionId": "m1-recruit-l2",
+      "deviceId": "camera-path-lobby",
+      "conceptTags": [
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/cameras/{cameraId}",
+      "pathParameters": {
+        "cameraId": "lobby-east"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "cameraId": "lobby-east",
+        "status": "located",
+        "message": "Lobby-east camera located."
+      },
+      "documentation": "FIELD BRIEF — Camera Locator API (fictional)\n\nObjective:\nLocate a surveillance camera by substituting its camera id into the path.\n\nResources:\n- Cameras: /api/cameras/{cameraId}.\n- {cameraId} is a path parameter — replace the braces with the camera's facility code.\n- This room's target camera code is lobby-east (lowercase words joined by a hyphen).\n\nMethod semantics:\n- GET reads camera state.\n\nRules:\n- Do not leave {cameraId} literally in the path.\n- No query string or body. Construct the request yourself from these rules.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-path-camera-v2",
+      "variantId": "camera-path-dock-v2",
+      "missionId": "m1-recruit-l2",
+      "deviceId": "camera-path-dock",
+      "conceptTags": [
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/cameras/{cameraId}",
+      "pathParameters": {
+        "cameraId": "dock-west"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "cameraId": "dock-west",
+        "status": "located",
+        "message": "Dock-west camera located."
+      },
+      "documentation": "FIELD BRIEF — Camera Locator API (fictional)\n\nObjective:\nVerify path-parameter substitution on a second camera resource.\n\nResources:\n- /api/cameras/{cameraId}\n- Substitute {cameraId} with dock-west.\n\nMethod: GET. No query or body. Construct the request yourself from these rules.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-path-panel-v1",
+      "variantId": "panel-path-v1",
+      "missionId": "m1-recruit-l2",
+      "deviceId": "panel-ops",
+      "conceptTags": [
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/panels/{panelCode}",
+      "pathParameters": {
+        "panelCode": "ops-hub"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "panelCode": "ops-hub",
+        "status": "armed",
+        "message": "Ops-hub panel located."
+      },
+      "documentation": "FIELD BRIEF — Security Panel API (fictional)\n\nObjective:\nRetrieve a security panel by panel code.\n\nResources:\n- Panels: /api/panels/{panelCode}.\n- Replace {panelCode} with the panel's facility code.\n- This room's panel code is ops-hub.\n\nMethod semantics:\n- GET retrieves panel state.\n\nRules:\n- Path parameter must be substituted. No query string or body. Construct the request yourself from these rules.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-path-asset-v1",
+      "variantId": "asset-path-v1",
+      "missionId": "m1-recruit-l2",
+      "deviceId": "asset-drone",
+      "conceptTags": [
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/equipment/{assetId}",
+      "pathParameters": {
+        "assetId": "drone-04"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "assetId": "drone-04",
+        "status": "docked",
+        "message": "Drone-04 asset located."
+      },
+      "documentation": "FIELD BRIEF — Equipment Asset API (fictional)\n\nObjective:\nLocate equipment asset drone-04 using a path parameter.\n\nResources:\n- /api/equipment/{assetId}\n- Substitute {assetId} with drone-04.\n\nMethod: GET. Do not leave braces in the submitted path. Construct the request yourself from these rules.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-query-camera-v1",
+      "variantId": "camera-query-wing-v1",
+      "missionId": "m1-recruit-l3",
+      "deviceId": "camera-query-wing",
+      "conceptTags": [
+        "http.endpoint",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/cameras",
+      "pathParameters": {},
+      "queryParameters": {
+        "wing": "east"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "wing": "east",
+        "count": 2,
+        "message": "East-wing cameras listed."
+      },
+      "documentation": "FIELD BRIEF — Camera Filter API (fictional)\n\nObjective:\nList cameras assigned to a facility wing using a query parameter.\n\nResources:\n- Collection endpoint: /api/cameras\n- Required query parameter name: wing\n- Wing values are lowercase facility codes (East wing → east, West wing → west).\n- This room's terminal is assigned to the East wing.\n- Illustrative shape only (you must choose the real values): /api/cameras?wing=<wingCode>\n\nMethod semantics:\n- GET with a query string filters the collection.\n\nRules:\n- Do not place the wing value in the path. Construct the request yourself from these rules.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-query-camera-v2",
+      "variantId": "camera-query-wing-v2",
+      "missionId": "m1-recruit-l3",
+      "deviceId": "camera-query-west",
+      "conceptTags": [
+        "http.endpoint",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/cameras",
+      "pathParameters": {},
+      "queryParameters": {
+        "wing": "west"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "wing": "west",
+        "count": 1,
+        "message": "West-wing cameras listed."
+      },
+      "documentation": "FIELD BRIEF — Camera Filter API (fictional)\n\nObjective:\nFilter cameras for the west wing.\n\nResources:\n- Collection endpoint: /api/cameras\n- Required query parameter name: wing\n- This verification terminal is assigned to the West wing (value: west).\n- Illustrative shape only (you must choose the real values): /api/cameras?wing=<wingCode>\n\nMethod semantics:\n- GET filters the camera collection.\n\nRules:\n- Construct method and full path-plus-query yourself from this brief.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-query-badge-v1",
+      "variantId": "badge-query-status-v1",
+      "missionId": "m1-recruit-l3",
+      "deviceId": "badge-query-panel",
+      "conceptTags": [
+        "http.endpoint",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/badges",
+      "pathParameters": {},
+      "queryParameters": {
+        "status": "active"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "status": "active",
+        "count": 3,
+        "message": "Active badges listed."
+      },
+      "documentation": "FIELD BRIEF — Badge Directory API (fictional)\n\nObjective:\nList access badges filtered by operational status.\n\nResources:\n- Collection: /api/badges\n- Required query parameter name: status\n- Allowed status values for this facility: active, revoked, pending.\n- This room needs the active badge directory.\n- Illustrative shape only (you must choose the real values): /api/badges?status=<statusCode>\n\nMethod semantics:\n- GET with a query string filters the badge collection.\n\nRules:\n- Do not put status into the path. Construct the request yourself from these rules.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-query-checkpoint-v1",
+      "variantId": "checkpoint-query-lane-v1",
+      "missionId": "m1-recruit-l3",
+      "deviceId": "checkpoint-query-lane",
+      "conceptTags": [
+        "http.endpoint",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/checkpoints",
+      "pathParameters": {},
+      "queryParameters": {
+        "lane": "2"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "lane": "2",
+        "count": 1,
+        "message": "Lane-2 checkpoints listed."
+      },
+      "documentation": "FIELD BRIEF — Checkpoint Directory API (fictional)\n\nObjective:\nFind checkpoints assigned to a processing lane.\n\nResources:\n- Collection: /api/checkpoints\n- Required query parameter name: lane\n- Lane values are numeric strings used by this facility (lane 1 → 1, lane 2 → 2).\n- This room's terminal is assigned to lane 2.\n- Illustrative shape only (you must choose the real values): /api/checkpoints?lane=<laneNumber>\n\nMethod semantics:\n- GET filters the checkpoint collection.\n\nRules:\n- Construct method and full path-plus-query yourself from this brief.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-query-sensor-floor-v1",
+      "variantId": "sensor-floor-v1",
+      "missionId": "m1-recruit-l3",
+      "deviceId": "sensor-floor-panel",
+      "conceptTags": [
+        "http.endpoint",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/sensors",
+      "pathParameters": {},
+      "queryParameters": {
+        "floor": "b1"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "floor": "b1",
+        "count": 4,
+        "message": "B1 sensors listed."
+      },
+      "documentation": "FIELD BRIEF — Sensor Floor Filter API (fictional)\n\nObjective:\nList sensors on basement level B1 using a query parameter named floor.\n\nResources:\n- Collection: /api/sensors\n- Required query parameter name: floor (not zone — read carefully)\n- Floor codes are lowercase facility labels (basement 1 → b1, floor 2 → f2).\n- This room needs basement level B1.\n- Illustrative shape only (you must choose the real values): /api/sensors?floor=<floorCode>\n\nMethod semantics:\n- GET filters the sensor collection.\n\nRules:\n- Construct method and full path-plus-query yourself from this brief.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-post-intake-v1",
+      "variantId": "intake-visitor-v1",
+      "missionId": "m1-recruit-l4",
+      "deviceId": "intake-visitor",
+      "conceptTags": [
+        "http.method.post",
+        "http.endpoint"
+      ],
+      "expectedMethod": "POST",
+      "pathTemplate": "/api/intakes/visitor-desk",
+      "pathParameters": {},
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "intakeId": "visitor-desk",
+        "status": "recorded",
+        "message": "Visitor intake recorded."
+      },
+      "documentation": "FIELD BRIEF — Visitor Intake API (fictional)\n\nObjective:\nSubmit a visitor intake record for the visitor desk.\n\nResources:\n- Intake submissions use /api/intakes/{deskId}.\n- This room's desk id is visitor-desk.\n\nMethod semantics:\n- POST creates/submits a new intake action.\n- GET only reads; it does not submit an intake.\n\nRules:\n- No JSON body is required for this Module 1 drill.\n- Choose POST and assemble the path from the brief.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-post-intake-v2",
+      "variantId": "intake-courier-v2",
+      "missionId": "m1-recruit-l4",
+      "deviceId": "intake-courier",
+      "conceptTags": [
+        "http.method.post",
+        "http.endpoint"
+      ],
+      "expectedMethod": "POST",
+      "pathTemplate": "/api/intakes/courier-bay",
+      "pathParameters": {},
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "intakeId": "courier-bay",
+        "status": "recorded",
+        "message": "Courier intake recorded."
+      },
+      "documentation": "FIELD BRIEF — Visitor Intake API (fictional)\n\nObjective:\nSubmit an intake for the courier bay desk.\n\nResources:\n- /api/intakes/courier-bay\n\nMethod: POST. No body required for this drill. Construct the request yourself from these rules.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-post-signal-v1",
+      "variantId": "signal-relay-v1",
+      "missionId": "m1-recruit-l4",
+      "deviceId": "signal-relay",
+      "conceptTags": [
+        "http.method.post",
+        "http.endpoint"
+      ],
+      "expectedMethod": "POST",
+      "pathTemplate": "/api/signals/relay-north",
+      "pathParameters": {},
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "signalId": "relay-north",
+        "status": "queued",
+        "message": "North relay signal queued."
+      },
+      "documentation": "FIELD BRIEF — Signal Relay API (fictional)\n\nObjective:\nQueue a signal on the north relay.\n\nResources:\n- /api/signals/{relayId}\n- Relay id for this room: relay-north\n\nMethod semantics:\n- POST queues a new signal action.\n\nRules:\n- No body. Do not use registration endpoints from other rooms. Construct the request yourself from these rules.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-put-record-v1",
+      "variantId": "record-put-v1",
+      "missionId": "m1-recruit-l5",
+      "deviceId": "record-ops",
+      "conceptTags": [
+        "http.method.put",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "PUT",
+      "pathTemplate": "/api/records/{recordId}",
+      "pathParameters": {
+        "recordId": "ops-log"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "recordId": "ops-log",
+        "status": "updated",
+        "message": "Ops-log record updated."
+      },
+      "documentation": "FIELD BRIEF — Facility Record API (fictional)\n\nObjective:\nUpdate the ops-log facility record.\n\nResources:\n- /api/records/{recordId}\n- Substitute {recordId} with ops-log.\n\nMethod semantics:\n- PUT replaces/updates the record representation.\n- GET only reads; POST creates elsewhere — use PUT here.\n\nRules:\n- No body required for this Module 1 drill. Path parameter must be substituted. Construct the request yourself from these rules.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-put-record-v2",
+      "variantId": "record-put-v2",
+      "missionId": "m1-recruit-l5",
+      "deviceId": "record-watch",
+      "conceptTags": [
+        "http.method.put",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "PUT",
+      "pathTemplate": "/api/records/{recordId}",
+      "pathParameters": {
+        "recordId": "watch-bill"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "recordId": "watch-bill",
+        "status": "updated",
+        "message": "Watch-bill record updated."
+      },
+      "documentation": "FIELD BRIEF — Facility Record API (fictional)\n\nObjective:\nUpdate the watch-bill record.\n\nResources:\n- /api/records/{recordId} with recordId=watch-bill\n\nMethod: PUT. Construct the request yourself from these rules.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-put-profile-v1",
+      "variantId": "profile-put-v1",
+      "missionId": "m1-recruit-l5",
+      "deviceId": "profile-agent",
+      "conceptTags": [
+        "http.method.put",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "PUT",
+      "pathTemplate": "/api/profiles/{agentCode}",
+      "pathParameters": {
+        "agentCode": "field-07"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "agentCode": "field-07",
+        "status": "updated",
+        "message": "Agent profile field-07 updated."
+      },
+      "documentation": "FIELD BRIEF — Agent Profile API (fictional)\n\nObjective:\nUpdate agent profile field-07.\n\nResources:\n- /api/profiles/{agentCode}\n- Substitute {agentCode} with field-07.\n\nMethod: PUT. Distinct from clearance endpoints. Construct the request yourself from these rules.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-delete-token-v1",
+      "variantId": "token-delete-v1",
+      "missionId": "m1-recruit-l6",
+      "deviceId": "token-temp",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/tokens/{tokenId}",
+      "pathParameters": {
+        "tokenId": "temp-pass"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "tokenId": "temp-pass",
+        "status": "revoked",
+        "message": "Temporary token revoked."
+      },
+      "documentation": "FIELD BRIEF — Temporary Token API (fictional)\n\nObjective:\nRevoke a compromised temporary access token.\n\nResources:\n- /api/tokens/{tokenId}\n- Substitute {tokenId} with temp-pass.\n\nMethod semantics:\n- DELETE removes/revokes the token resource.\n- GET only inspects; POST/PUT do not revoke.\n\nRules:\n- No body. Path parameter required. Construct the request yourself from these rules.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-delete-token-v2",
+      "variantId": "token-delete-v2",
+      "missionId": "m1-recruit-l6",
+      "deviceId": "token-guest",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/tokens/{tokenId}",
+      "pathParameters": {
+        "tokenId": "guest-day"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "tokenId": "guest-day",
+        "status": "revoked",
+        "message": "Guest-day token revoked."
+      },
+      "documentation": "FIELD BRIEF — Temporary Token API (fictional)\n\nObjective:\nRevoke guest-day token.\n\nResources:\n- /api/tokens/{tokenId} with tokenId=guest-day\n\nMethod: DELETE. Construct the request yourself from these rules.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-delete-session-v1",
+      "variantId": "session-delete-v1",
+      "missionId": "m1-recruit-l6",
+      "deviceId": "session-kiosk",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/sessions/{sessionId}",
+      "pathParameters": {
+        "sessionId": "kiosk-3"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "sessionId": "kiosk-3",
+        "status": "closed",
+        "message": "Kiosk-3 session closed."
+      },
+      "documentation": "FIELD BRIEF — Kiosk Session API (fictional)\n\nObjective:\nClose a compromised kiosk session.\n\nResources:\n- /api/sessions/{sessionId}\n- Substitute {sessionId} with kiosk-3.\n\nMethod: DELETE. Distinct from access-badge paths. Construct the request yourself from these rules.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-practice-m1-camera",
+      "variantId": "practice-camera-v1",
+      "missionId": "practice-m1-recruit-l1",
+      "deviceId": "practice-camera",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/practice/cameras/drill-cam",
+      "pathParameters": {},
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "id": "drill-cam",
+        "status": "reviewed",
+        "message": "Practice camera drill acknowledged."
+      },
+      "documentation": "PRACTICE MODE — educational review only.\n\nMethod: GET\nPath: /api/practice/cameras/drill-cam\n\nDifferent fictional resource from graded door/camera contracts. No RCA or mission unlocks.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-practice-m1-panel",
+      "variantId": "practice-panel-path-v1",
+      "missionId": "practice-m1-recruit-l2",
+      "deviceId": "practice-panel-path",
+      "conceptTags": [
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/practice/panels/{panelCode}",
+      "pathParameters": {
+        "panelCode": "drill-hub"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "panelCode": "drill-hub",
+        "status": "reviewed",
+        "message": "Practice panel path drill acknowledged."
+      },
+      "documentation": "PRACTICE MODE — educational review only.\n\nMethod: GET\nPath template: /api/practice/panels/{panelCode}\nRequired path parameter:\n- panelCode = drill-hub\n\nExample: /api/practice/panels/drill-hub\n\nNot a graded lock contract.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-practice-m1-badge-query",
+      "variantId": "practice-badge-query-v1",
+      "missionId": "practice-m1-recruit-l3",
+      "deviceId": "practice-badge-query",
+      "conceptTags": [
+        "http.endpoint",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/practice/badges",
+      "pathParameters": {},
+      "queryParameters": {
+        "status": "training"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "status": "training",
+        "message": "Practice badge query acknowledged."
+      },
+      "documentation": "PRACTICE MODE — educational review only.\n\nMethod: GET\nPath: /api/practice/badges\nRequired query parameter:\n- status = training\n\nExample: /api/practice/badges?status=training\n\nNot the graded zone filter contract.",
+      "deviceUnlockState": "OPEN"
+    }
+  ]
+}

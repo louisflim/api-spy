@@ -160,6 +160,33 @@ class RequestSimulationServiceTest {
 	}
 
 	@Test
+	void correctedRetryUnlocksWithoutEvidenceButStillOffersOptionalVerification() {
+		service.simulate("player-retry-tvp", request(
+				"m1-recruit-l1",
+				"door-alpha",
+				"chal-m1-get-door-v1",
+				"POST",
+				"/api/doors/alpha"));
+
+		SimulateResponseDto corrected = service.simulate("player-retry-tvp", request(
+				"m1-recruit-l1",
+				"door-alpha",
+				"chal-m1-get-door-v1",
+				"GET",
+				"/api/doors/alpha"));
+
+		assertTrue(corrected.correct());
+		assertTrue(corrected.deviceChanges().getFirst().unlocked());
+		assertEquals(0, corrected.terminalVerification().percent());
+		assertEquals(0, corrected.terminalVerification().earnedSlots());
+		assertEquals(4, corrected.terminalVerification().requiredSlots());
+		assertNotNull(
+				corrected.terminalVerification().verifyAnotherScenario(),
+				"Optional concept verification must remain available after unlock without first-attempt evidence");
+		assertEquals("chal-m1-get-door-v2", corrected.terminalVerification().verifyAnotherScenario().challengeId());
+	}
+
+	@Test
 	void optionalVerificationCompletesAfterMandatoryUnlockWithoutBlockingExit() {
 		SimulateResponseDto mandatory = service.simulate("player-opt", request(
 				"m1-recruit-l1",
@@ -169,6 +196,9 @@ class RequestSimulationServiceTest {
 				"/api/doors/alpha"));
 		assertTrue(mandatory.correct());
 		assertNotNull(mandatory.terminalVerification().verifyAnotherScenario());
+		assertEquals(
+				"chal-m1-get-door-v2",
+				mandatory.missionProgress().activeTerminalChallenge().challengeId());
 
 		SimulateResponseDto optional = service.simulate("player-opt", request(
 				"m1-recruit-l1",
@@ -183,6 +213,48 @@ class RequestSimulationServiceTest {
 		assertNull(optional.terminalVerification().verifyAnotherScenario());
 		assertTrue(optional.deviceChanges().getFirst().unlocked());
 		assertEquals("door-bravo", optional.deviceChanges().getFirst().deviceId());
+		assertTrue(optional.missionProgress().activeTerminalChallenge().sequenceComplete());
+	}
+
+	@Test
+	void wrongThenCorrectAdvancesWithoutLoopingCompletedScenarios() {
+		service.simulate("player-seq", request(
+				"m1-recruit-l1",
+				"door-alpha",
+				"chal-m1-get-door-v1",
+				"POST",
+				"/api/doors/alpha"));
+		SimulateResponseDto corrected = service.simulate("player-seq", request(
+				"m1-recruit-l1",
+				"door-alpha",
+				"chal-m1-get-door-v1",
+				"GET",
+				"/api/doors/alpha"));
+		assertTrue(corrected.correct());
+		assertEquals(0, corrected.terminalVerification().percent());
+		assertEquals("chal-m1-get-door-v2", corrected.terminalVerification().verifyAnotherScenario().challengeId());
+
+		SimulateResponseDto optional = service.simulate("player-seq", request(
+				"m1-recruit-l1",
+				"door-bravo",
+				"chal-m1-get-door-v2",
+				"GET",
+				"/api/doors/bravo"));
+		assertTrue(optional.correct());
+		assertNull(
+				optional.terminalVerification().verifyAnotherScenario(),
+				"Must not loop back to a completed scenario lacking first-attempt TVP evidence");
+		assertTrue(optional.missionProgress().activeTerminalChallenge().sequenceComplete());
+
+		// Double success on the last scenario must remain idempotent.
+		SimulateResponseDto again = service.simulate("player-seq", request(
+				"m1-recruit-l1",
+				"door-bravo",
+				"chal-m1-get-door-v2",
+				"GET",
+				"/api/doors/bravo"));
+		assertTrue(again.correct());
+		assertNull(again.terminalVerification().verifyAnotherScenario());
 	}
 
 	@Test

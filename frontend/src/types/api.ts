@@ -133,9 +133,29 @@ export interface MissionProgressState {
   replayActive: boolean
   replayable: boolean
   replayCount: number
+  /** Consecutive unresolved API-driven room resets (not wrong submissions). */
+  consecutiveUnresolvedApiResets: number
+  /** SRS v1.3 gate after 15 consecutive unresolved API-driven room attempts. */
+  lessonReviewRequired: boolean
+  requiredReviewLessonId: string | null
+  /** Server hint: manual Restart Mission would escalate the API device tier. */
+  manualRestartWouldEscalate: boolean
+  /** Mandatory device count after the next escalating restart (capped at 5). */
+  nextRequiredDeviceCount: number
   mandatoryDevices: MandatoryDeviceState[]
   /** Active adaptive practice doors already triggered for this room (max 2). */
   adaptivePracticeDoors?: AdaptivePracticeDoor[]
+  /** Server-selected challenge currently active in the terminal verification sequence. */
+  activeTerminalChallenge?: ActiveTerminalChallenge | null
+}
+
+export interface ActiveTerminalChallenge {
+  challengeId: string
+  variantId: string
+  deviceId: string
+  documentation: string
+  optionalVerification: boolean
+  sequenceComplete: boolean
 }
 
 export interface SavedAttempt {

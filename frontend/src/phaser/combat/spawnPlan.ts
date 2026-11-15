@@ -5,6 +5,8 @@ import {
   patrolGuardCountForRank,
   type PlannedGuardSpawn,
 } from './enemyTypes'
+import { NavigationGrid } from './navigationGrid'
+import { hasPath } from './pathfind'
 import {
   buildCombatExclusionSet,
   patrolRoutesForFootprint,
@@ -14,10 +16,12 @@ import {
 /**
  * Deterministic guard placement from room seed + rank.
  * Never places on spawn / terminals / exit clearance or blocked cells.
+ * Consecutive patrol waypoints must be mutually path-connected on the nav grid.
  */
 export function planPatrolGuardSpawns(
   layout: RoomLayoutPlan,
   rank: string,
+  nav: NavigationGrid = NavigationGrid.fromLayout(layout),
 ): PlannedGuardSpawn[] {
   const count = patrolGuardCountForRank(rank)
   const excluded = buildCombatExclusionSet(layout)
@@ -29,7 +33,7 @@ export function planPatrolGuardSpawns(
     routes.map((route) => {
       const waypoints = resolvePatrolRoute(layout, route, excluded)
       return { route, waypoints }
-    }).filter((c) => c.waypoints.length >= 2),
+    }).filter((c) => c.waypoints.length >= 2 && routeIsPathConnected(nav, c.waypoints)),
   )
 
   const planned: PlannedGuardSpawn[] = []
@@ -43,4 +47,13 @@ export function planPatrolGuardSpawns(
     })
   }
   return planned
+}
+
+function routeIsPathConnected(nav: NavigationGrid, waypoints: { col: number; row: number }[]): boolean {
+  for (let i = 0; i < waypoints.length; i += 1) {
+    const a = waypoints[i]!
+    const b = waypoints[(i + 1) % waypoints.length]!
+    if (!hasPath(nav, a, b)) return false
+  }
+  return true
 }

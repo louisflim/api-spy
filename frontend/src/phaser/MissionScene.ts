@@ -180,6 +180,19 @@ export class MissionScene extends Phaser.Scene {
     this.cursors = this.input.keyboard!.createCursorKeys()
     this.wasd = this.input.keyboard!.addKeys('W,A,S,D') as typeof this.wasd
     this.interactKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.E)
+    {
+      const keyboard = this.input.keyboard
+      if (keyboard) {
+        if (this.inputLocked) {
+          keyboard.enabled = false
+          keyboard.disableGlobalCapture()
+          keyboard.resetKeys()
+        } else {
+          keyboard.enabled = true
+          keyboard.enableGlobalCapture()
+        }
+      }
+    }
 
     this.game.events.on(GAME_EVENTS.EXIT_READY, this.onExitReady, this)
     this.game.events.on(GAME_EVENTS.PRACTICE_DOORS, this.onPracticeDoors, this)
@@ -547,6 +560,19 @@ export class MissionScene extends Phaser.Scene {
 
   private onInputLock = (payload?: { locked?: boolean }): void => {
     this.inputLocked = Boolean(payload?.locked)
+    // Phaser KeyboardManager preventDefaults captured keys globally — hand them
+    // back to the DOM while the terminal/pause UI owns focus.
+    const keyboard = this.input.keyboard
+    if (keyboard) {
+      if (this.inputLocked) {
+        keyboard.enabled = false
+        keyboard.disableGlobalCapture()
+        keyboard.resetKeys()
+      } else {
+        keyboard.enabled = true
+        keyboard.enableGlobalCapture()
+      }
+    }
     if (this.inputLocked && this.player?.body) {
       const body = this.player.body as Phaser.Physics.Arcade.Body
       body.setVelocity(0, 0)

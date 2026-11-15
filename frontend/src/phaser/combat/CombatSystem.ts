@@ -8,6 +8,7 @@ import {
 } from './combatArt'
 import { COMBAT_TUNING } from './combatTuning'
 import { CombatCollisionManager } from './CombatCollisionManager'
+import { NavigationGrid } from './navigationGrid'
 import { PatrolGuard } from './PatrolGuard'
 import { PlayerHealth } from './PlayerHealth'
 import { planPatrolGuardSpawns } from './spawnPlan'
@@ -82,9 +83,11 @@ export class CombatSystem {
   ): void {
     const scene = this.options.scene
     this.enemyGroup = scene.physics.add.group()
-    const planned = planPatrolGuardSpawns(layout, rank)
+    // One nav grid per room — shared by all guards (cached for the layout lifetime).
+    const nav = NavigationGrid.fromLayout(layout)
+    const planned = planPatrolGuardSpawns(layout, rank, nav)
     for (const spawn of planned) {
-      const guard = new PatrolGuard(scene, spawn.waypoints, layout.blocked, spawn.config)
+      const guard = new PatrolGuard(scene, spawn.waypoints, layout.blocked, spawn.config, nav)
       this.guards.push(guard)
       this.enemyGroup.add(guard.sprite)
       scene.physics.add.collider(guard.sprite, solids)

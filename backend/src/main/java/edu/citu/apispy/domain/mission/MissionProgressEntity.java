@@ -66,6 +66,39 @@ public class MissionProgressEntity {
 	@Column(name = "replay_count", nullable = false)
 	private int replayCount;
 
+	/** Consecutive unresolved API-driven room resets (not wrong submissions). */
+	@Column(name = "consecutive_unresolved_api_resets", nullable = false)
+	private int consecutiveUnresolvedApiResets;
+
+	@Column(name = "lesson_review_required", nullable = false)
+	private boolean lessonReviewRequired;
+
+	@Column(name = "required_review_lesson_id", length = 64)
+	private String requiredReviewLessonId;
+
+	@Column(name = "lesson_review_completed_at")
+	private Instant lessonReviewCompletedAt;
+
+	/** Authored challenge IDs selected for the active room generation (JSON array). */
+	@Column(name = "selected_challenge_ids_json", nullable = false, columnDefinition = "TEXT")
+	private String selectedChallengeIdsJson = "[]";
+
+	/** Prior run selections — used to avoid immediate repeats when pools allow. */
+	@Column(name = "previous_challenge_ids_json", nullable = false, columnDefinition = "TEXT")
+	private String previousChallengeIdsJson = "[]";
+
+	/** Operational incorrect graded submissions since last room reset (not RCA). */
+	@Column(name = "incorrect_graded_attempts_since_reset", nullable = false)
+	private int incorrectGradedAttemptsSinceReset;
+
+	/** Challenge currently shown in the mission terminal sequence for this room generation. */
+	@Column(name = "active_terminal_challenge_id", length = 128)
+	private String activeTerminalChallengeId;
+
+	/** Successfully completed terminal challenges this room generation (JSON array). */
+	@Column(name = "completed_terminal_challenge_ids_json", nullable = false, columnDefinition = "TEXT")
+	private String completedTerminalChallengeIdsJson = "[]";
+
 	@Column(name = "completed_at")
 	private Instant completedAt;
 
@@ -91,6 +124,10 @@ public class MissionProgressEntity {
 			boolean combatRestartAuthorized,
 			ActiveRunKind activeRunKind,
 			int replayCount,
+			int consecutiveUnresolvedApiResets,
+			boolean lessonReviewRequired,
+			String requiredReviewLessonId,
+			Instant lessonReviewCompletedAt,
 			Instant completedAt,
 			Instant updatedAt) {
 		this.id = id;
@@ -108,6 +145,10 @@ public class MissionProgressEntity {
 		this.combatRestartAuthorized = combatRestartAuthorized;
 		this.activeRunKind = activeRunKind;
 		this.replayCount = replayCount;
+		this.consecutiveUnresolvedApiResets = consecutiveUnresolvedApiResets;
+		this.lessonReviewRequired = lessonReviewRequired;
+		this.requiredReviewLessonId = requiredReviewLessonId;
+		this.lessonReviewCompletedAt = lessonReviewCompletedAt;
 		this.completedAt = completedAt;
 		this.updatedAt = updatedAt;
 	}
@@ -210,6 +251,93 @@ public class MissionProgressEntity {
 
 	public void setReplayCount(int replayCount) {
 		this.replayCount = replayCount;
+	}
+
+	public int getConsecutiveUnresolvedApiResets() {
+		return consecutiveUnresolvedApiResets;
+	}
+
+	public void setConsecutiveUnresolvedApiResets(int consecutiveUnresolvedApiResets) {
+		this.consecutiveUnresolvedApiResets = consecutiveUnresolvedApiResets;
+	}
+
+	public boolean isLessonReviewRequired() {
+		return lessonReviewRequired;
+	}
+
+	public void setLessonReviewRequired(boolean lessonReviewRequired) {
+		this.lessonReviewRequired = lessonReviewRequired;
+	}
+
+	public String getRequiredReviewLessonId() {
+		return requiredReviewLessonId;
+	}
+
+	public void setRequiredReviewLessonId(String requiredReviewLessonId) {
+		this.requiredReviewLessonId = requiredReviewLessonId;
+	}
+
+	public Instant getLessonReviewCompletedAt() {
+		return lessonReviewCompletedAt;
+	}
+
+	public void setLessonReviewCompletedAt(Instant lessonReviewCompletedAt) {
+		this.lessonReviewCompletedAt = lessonReviewCompletedAt;
+	}
+
+	public String getSelectedChallengeIdsJson() {
+		return selectedChallengeIdsJson == null || selectedChallengeIdsJson.isBlank()
+				? "[]"
+				: selectedChallengeIdsJson;
+	}
+
+	public void setSelectedChallengeIdsJson(String selectedChallengeIdsJson) {
+		this.selectedChallengeIdsJson =
+				selectedChallengeIdsJson == null || selectedChallengeIdsJson.isBlank()
+						? "[]"
+						: selectedChallengeIdsJson;
+	}
+
+	public String getPreviousChallengeIdsJson() {
+		return previousChallengeIdsJson == null || previousChallengeIdsJson.isBlank()
+				? "[]"
+				: previousChallengeIdsJson;
+	}
+
+	public void setPreviousChallengeIdsJson(String previousChallengeIdsJson) {
+		this.previousChallengeIdsJson =
+				previousChallengeIdsJson == null || previousChallengeIdsJson.isBlank()
+						? "[]"
+						: previousChallengeIdsJson;
+	}
+
+	public int getIncorrectGradedAttemptsSinceReset() {
+		return incorrectGradedAttemptsSinceReset;
+	}
+
+	public void setIncorrectGradedAttemptsSinceReset(int incorrectGradedAttemptsSinceReset) {
+		this.incorrectGradedAttemptsSinceReset = incorrectGradedAttemptsSinceReset;
+	}
+
+	public String getActiveTerminalChallengeId() {
+		return activeTerminalChallengeId;
+	}
+
+	public void setActiveTerminalChallengeId(String activeTerminalChallengeId) {
+		this.activeTerminalChallengeId = activeTerminalChallengeId;
+	}
+
+	public String getCompletedTerminalChallengeIdsJson() {
+		return completedTerminalChallengeIdsJson == null || completedTerminalChallengeIdsJson.isBlank()
+				? "[]"
+				: completedTerminalChallengeIdsJson;
+	}
+
+	public void setCompletedTerminalChallengeIdsJson(String completedTerminalChallengeIdsJson) {
+		this.completedTerminalChallengeIdsJson =
+				completedTerminalChallengeIdsJson == null || completedTerminalChallengeIdsJson.isBlank()
+						? "[]"
+						: completedTerminalChallengeIdsJson;
 	}
 
 	public Instant getCompletedAt() {

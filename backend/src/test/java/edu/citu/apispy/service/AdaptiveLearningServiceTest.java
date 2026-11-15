@@ -72,7 +72,7 @@ class AdaptiveLearningServiceTest {
 		assertTrue(room2.adaptivePracticeDoors().stream()
 				.anyMatch(door -> "http.endpoint".equals(door.conceptTag())));
 		assertTrue(room2.adaptivePracticeDoors().stream()
-				.anyMatch(door -> "chal-practice-m1-l1".equals(door.challengeId())));
+				.anyMatch(door -> door.challengeId().startsWith("chal-practice-m1-")));
 		assertTrue(room2.adaptivePracticeDoors().size() <= 2);
 	}
 

@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
+  acknowledgeLessonReview,
   fetchLessons,
+  fetchMissionProgress,
   fetchMyConcepts,
   introduceLesson,
   type ConceptProgressRow,
@@ -46,6 +48,7 @@ export function MissionTrainingScreen({
   const [concepts, setConcepts] = useState<ConceptProgressRow[]>([])
   const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null)
   const [reviewBusy, setReviewBusy] = useState(false)
+  const [forcedReviewLessonId, setForcedReviewLessonId] = useState<string | null>(null)
 
   const refreshConcepts = useCallback(async () => {
     try {
@@ -63,16 +66,22 @@ export function MissionTrainingScreen({
       setLoadState('loading')
       setError(null)
       try {
-        const [lessonData, conceptRows] = await Promise.all([
+        const [lessonData, conceptRows, progress] = await Promise.all([
           fetchLessons(mission.module === 0 ? 1 : mission.module),
           fetchMyConcepts().catch(() => [] as ConceptProgressRow[]),
+          fetchMissionProgress(mission.missionId).catch(() => null),
         ])
         if (cancelled) return
         setLessons(lessonData)
         setConcepts(conceptRows)
+        const forced =
+          progress?.lessonReviewRequired && progress.requiredReviewLessonId
+            ? progress.requiredReviewLessonId
+            : null
+        setForcedReviewLessonId(forced)
         const missing = missingRequiredLessons(mission, lessonData, conceptRows)
         setSelectedLessonId(
-          missing[0] ?? mission.requiredLessonIds[0] ?? lessonData[0]?.id ?? null,
+          forced ?? missing[0] ?? mission.requiredLessonIds[0] ?? lessonData[0]?.id ?? null,
         )
         setLoadState('ready')
       } catch (err) {
@@ -115,6 +124,10 @@ export function MissionTrainingScreen({
       for (const conceptTag of lesson.conceptTags) {
         saveConceptStage(playerId, conceptTag, 'INTRODUCED')
       }
+      if (forcedReviewLessonId && lesson.id === forcedReviewLessonId) {
+        await acknowledgeLessonReview(mission.missionId, lesson.id)
+        setForcedReviewLessonId(null)
+      }
       await refreshConcepts()
     } catch {
       // Content remains readable if introduce fails.
@@ -143,6 +156,13 @@ export function MissionTrainingScreen({
             {moduleLabel(mission.module)} · Level {mission.level} · {rankLabel} track · Ungraded
             prep
           </p>
+          {forcedReviewLessonId ? (
+            <p className="assist" role="status">
+              Required review after 15 unresolved API-driven room attempts: reopen{' '}
+              {lessonTitle(forcedReviewLessonId, lessons)} before returning to the field. This does
+              not reveal the graded challenge solution.
+            </p>
+          ) : null}
         </div>
         <div className="mission-training__header-actions">
           <button type="button" className="dash-btn" onClick={onReturnToBriefing}>

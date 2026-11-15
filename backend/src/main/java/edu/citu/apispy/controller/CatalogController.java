@@ -7,9 +7,11 @@ import edu.citu.apispy.dto.CatalogResponseDto;
 import edu.citu.apispy.dto.MissionDetailDto;
 import edu.citu.apispy.dto.MissionSummaryDto;
 import edu.citu.apispy.security.AuthenticatedPlayer;
+import edu.citu.apispy.dto.MissionProgressDto;
 import edu.citu.apispy.service.ConceptReviewService;
 import edu.citu.apispy.service.ContractCatalogService;
 import edu.citu.apispy.service.MissionCatalogService;
+import edu.citu.apispy.service.MissionProgressService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,14 +27,17 @@ public class CatalogController {
 	private final MissionCatalogService missionCatalogService;
 	private final ContractCatalogService contractCatalogService;
 	private final ConceptReviewService conceptReviewService;
+	private final MissionProgressService missionProgressService;
 
 	public CatalogController(
 			MissionCatalogService missionCatalogService,
 			ContractCatalogService contractCatalogService,
-			ConceptReviewService conceptReviewService) {
+			ConceptReviewService conceptReviewService,
+			MissionProgressService missionProgressService) {
 		this.missionCatalogService = missionCatalogService;
 		this.contractCatalogService = contractCatalogService;
 		this.conceptReviewService = conceptReviewService;
+		this.missionProgressService = missionProgressService;
 	}
 
 	@GetMapping("/catalog")
@@ -56,13 +61,17 @@ public class CatalogController {
 		Rank parsedRank = Rank.valueOf(rank.trim().toUpperCase(Locale.ROOT).replace('-', '_').replace(' ', '_'));
 		String missionId = MissionCatalogService.missionId(module, parsedRank, level);
 		MissionDefinition mission = missionCatalogService.requirePlayable(missionId);
-		ApiContract primary = contractCatalogService.requireByChallengeId(mission.getPrimaryChallengeId());
+		String playerId = AuthenticatedPlayer.requireUserIdString();
+		MissionProgressDto progress = missionProgressService.getOrCreate(playerId, missionId);
+		String selectedPrimaryId = progress.mandatoryDevices() != null && !progress.mandatoryDevices().isEmpty()
+				? progress.mandatoryDevices().getFirst().challengeId()
+				: mission.getPrimaryChallengeId();
+		ApiContract primary = contractCatalogService.requireByChallengeId(selectedPrimaryId);
 		List<MissionDetailDto.ChallengeSummaryDto> variants = contractCatalogService
 				.findByMissionId(missionId)
 				.stream()
 				.map(CatalogController::toChallenge)
 				.toList();
-		String playerId = AuthenticatedPlayer.requireUserIdString();
 		return new MissionDetailDto(
 				toSummary(mission),
 				toChallenge(primary),

@@ -44,10 +44,14 @@ final class SimulationTestFixtures {
 				missions,
 				contracts,
 				reviews);
+		ScenarioSelectionService scenarioSelection = new ScenarioSelectionService(escalation, contracts);
 		MissionProgressService missionProgress = MissionProgressService.inMemory(
 				missions,
 				escalation,
 				adaptive,
+				scenarioSelection,
+				contracts,
+				tvp,
 				objectMapper);
 		RequestSimulationService service = new RequestSimulationService(
 				contracts,
@@ -66,7 +70,8 @@ final class SimulationTestFixtures {
 				adaptive,
 				reviews,
 				missionProgress,
-				escalation);
+				escalation,
+				scenarioSelection);
 		return new Bundle(
 				service,
 				firstAttempts,

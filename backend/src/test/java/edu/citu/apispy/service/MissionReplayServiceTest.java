@@ -19,6 +19,7 @@ class MissionReplayServiceTest {
 	private RequestSimulationService simulate;
 	private MissionProgressService progress;
 	private FirstAttemptService firstAttempts;
+	private ContractCatalogService contracts;
 
 	@BeforeEach
 	void setUp() {
@@ -26,6 +27,7 @@ class MissionReplayServiceTest {
 		simulate = bundle.service();
 		progress = bundle.missionProgress();
 		firstAttempts = bundle.firstAttempts();
+		contracts = bundle.contracts();
 	}
 
 	@Test
@@ -65,7 +67,35 @@ class MissionReplayServiceTest {
 		String originalCompletedAt = progress.getOrCreate("r2", "m1-recruit-l1").completedAt();
 
 		MissionProgressDto replay = progress.startReplay("r2", "m1-recruit-l1");
-		SimulateResponseDto again = simulate.simulate("r2", request("GET", "/api/doors/alpha"));
+		assertFalse(replay.mandatoryDevices().isEmpty());
+		MissionProgressDto.MandatoryDeviceDto selected = replay.mandatoryDevices().getFirst();
+		var contract = contracts.requireByChallengeId(selected.challengeId());
+		String path = contract.getPathTemplate();
+		for (var entry : contract.getPathParameters().entrySet()) {
+			path = path.replace("{" + entry.getKey() + "}", entry.getValue());
+		}
+		if (!contract.getQueryParameters().isEmpty()) {
+			StringBuilder query = new StringBuilder();
+			for (var entry : contract.getQueryParameters().entrySet()) {
+				if (!query.isEmpty()) {
+					query.append('&');
+				}
+				query.append(entry.getKey()).append('=').append(entry.getValue());
+			}
+			path = path + "?" + query;
+		}
+		SimulateResponseDto again = simulate.simulate(
+				"r2",
+				new SimulateRequestDto(
+						"participant",
+						"m1-recruit-l1",
+						selected.deviceId(),
+						selected.challengeId(),
+						contract.getExpectedMethod(),
+						path,
+						Map.of(),
+						"",
+						"MISSION"));
 		assertTrue(again.correct());
 		assertFalse(again.firstAttemptRecorded(), "replay must not rewrite RCA first attempts");
 		assertTrue(again.missionProgress().exitReady());

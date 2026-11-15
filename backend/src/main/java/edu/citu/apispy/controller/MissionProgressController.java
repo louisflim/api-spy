@@ -1,6 +1,7 @@
 package edu.citu.apispy.controller;
 
 import edu.citu.apispy.domain.mission.RoomResetReason;
+import edu.citu.apispy.dto.AcknowledgeLessonReviewDto;
 import edu.citu.apispy.dto.CombatDeathRequestDto;
 import edu.citu.apispy.dto.MissionCompleteRequestDto;
 import edu.citu.apispy.dto.MissionProgressDto;
@@ -63,6 +64,20 @@ public class MissionProgressController {
 				missionId,
 				reason,
 				request.roomGeneration()));
+	}
+
+	/**
+	 * Clears the SRS v1.3 forced ungraded-lesson gate after the player revisits the
+	 * required lesson. Does not reveal graded challenge solutions.
+	 */
+	@PostMapping("/{missionId}/acknowledge-lesson-review")
+	public ResponseEntity<MissionProgressDto> acknowledgeLessonReview(
+			@PathVariable String missionId,
+			@Valid @RequestBody AcknowledgeLessonReviewDto request) {
+		return ResponseEntity.ok(missionProgressService.acknowledgeLessonReview(
+				AuthenticatedPlayer.requireUserIdString(),
+				missionId,
+				request.lessonId()));
 	}
 
 	/** Starts a server-authorized temporary replay run for a career-cleared mission. */

@@ -1,0 +1,225 @@
+{
+  "lessons": [
+    {
+      "id": "rest-fundamentals",
+      "module": 1,
+      "order": 1,
+      "title": "REST API Fundamentals",
+      "conceptTags": ["rest.fundamentals"],
+      "explanation": "A REST API lets programs exchange data over HTTP. Clients send a request that names a method and a resource. Servers reply with a status code and a body. In API Spy, every terminal request is fictional practice data. Nothing you type is sent to the public internet.",
+      "workedExample": {
+        "title": "Training request (not a live mission)",
+        "notes": "This worked example uses a training resource. It does not unlock any mission door.",
+        "method": "GET",
+        "path": "/api/training/agents/demo",
+        "responseStatus": 200,
+        "responseBody": {
+          "id": "demo",
+          "role": "trainee",
+          "message": "Training agent profile loaded."
+        }
+      },
+      "practiceScenario": {
+        "summary": "After you finish this lesson, open the Module 1 practice room and retrieve a door resource with GET.",
+        "linkedMissionId": "m1-recruit-l1",
+        "ungraded": true
+      }
+    },
+    {
+      "id": "http-get",
+      "module": 1,
+      "order": 2,
+      "title": "HTTP GET",
+      "conceptTags": ["http.method.get"],
+      "explanation": "GET asks a server for a representation of a resource. It should not create or change data. Choose GET when documentation says you need to retrieve or inspect something that already exists.",
+      "workedExample": {
+        "title": "Training GET (not a live mission)",
+        "notes": "This example retrieves a sample briefing. Mission locks use different paths.",
+        "method": "GET",
+        "path": "/api/training/briefings/intro",
+        "responseStatus": 200,
+        "responseBody": {
+          "id": "intro",
+          "title": "Welcome briefing",
+          "cleared": true
+        }
+      },
+      "practiceScenario": {
+        "summary": "In the practice room, select GET for the documented door resource.",
+        "linkedMissionId": "m1-recruit-l1",
+        "ungraded": true
+      }
+    },
+    {
+      "id": "endpoints",
+      "module": 1,
+      "order": 3,
+      "title": "API Endpoints",
+      "conceptTags": ["http.endpoint"],
+      "explanation": "An endpoint is the resource path in the URL after the host, such as /api/training/lockers/sample. Paths identify which fictional resource you are talking to. Spelling, segment order, and resource names must match the documentation for that resource — mission terminals use different contracts from these training examples.",
+      "workedExample": {
+        "title": "Training endpoint (not a live mission)",
+        "notes": "Notice the path names a training locker, not a mission door.",
+        "method": "GET",
+        "path": "/api/training/lockers/sample",
+        "responseStatus": 200,
+        "responseBody": {
+          "lockerId": "sample",
+          "contents": ["badge", "radio"]
+        }
+      },
+      "practiceScenario": {
+        "summary": "In the mission terminal, construct the door resource path from the field brief rules (the brief will not paste the completed request).",
+        "linkedMissionId": "m1-recruit-l1",
+        "ungraded": true
+      }
+    },
+    {
+      "id": "path-parameters",
+      "module": 1,
+      "order": 4,
+      "title": "Path Parameters",
+      "conceptTags": ["http.path_parameter"],
+      "explanation": "Path parameters sit inside the path and identify one item in a collection. Documentation often writes them as {id}. In a real request you replace the placeholder with an actual value, for example /api/locks/north-gate.",
+      "workedExample": {
+        "title": "Training path parameter (not a live mission)",
+        "notes": "The value crate-42 belongs only to this lesson example.",
+        "method": "GET",
+        "path": "/api/training/crates/crate-42",
+        "responseStatus": 200,
+        "responseBody": {
+          "crateId": "crate-42",
+          "sealed": false
+        }
+      },
+      "practiceScenario": {
+        "summary": "In Level 2, replace {lockId} with the documented lock identifier.",
+        "linkedMissionId": "m1-recruit-l2",
+        "ungraded": true
+      }
+    },
+    {
+      "id": "query-parameters",
+      "module": 1,
+      "order": 5,
+      "title": "Query Parameters",
+      "conceptTags": ["http.query_parameter"],
+      "explanation": "Query parameters appear after ? and filter or configure a request, such as /api/sensors?zone=alpha. Names and values must match the contract. Missing or wrong values are separate mistakes from choosing the wrong path.",
+      "workedExample": {
+        "title": "Training query parameter (not a live mission)",
+        "notes": "This filter value is only for the lesson example.",
+        "method": "GET",
+        "path": "/api/training/signals?channel=green",
+        "responseStatus": 200,
+        "responseBody": {
+          "channel": "green",
+          "strength": 3
+        }
+      },
+      "practiceScenario": {
+        "summary": "In Level 3, add the documented query parameter to the sensor endpoint.",
+        "linkedMissionId": "m1-recruit-l3",
+        "ungraded": true
+      }
+    },
+    {
+      "id": "simulated-responses",
+      "module": 1,
+      "order": 6,
+      "title": "Simulated HTTP Responses",
+      "conceptTags": ["http.response"],
+      "explanation": "After you send a request, read the status and JSON body. A 200-style success can change a device state. A 4xx-style response means the request did not match the contract. Wrong requests never remove hearts. Academic scores stay hidden.",
+      "workedExample": {
+        "title": "Training response reading (not a live mission)",
+        "notes": "Compare a success body with an error body. Neither example is a mission solution.",
+        "method": "GET",
+        "path": "/api/training/status/ok",
+        "responseStatus": 200,
+        "responseBody": {
+          "ok": true,
+          "detail": "Training endpoint responded successfully."
+        }
+      },
+      "practiceScenario": {
+        "summary": "Submit requests in the practice room and read the simulated status before trying again.",
+        "linkedMissionId": "m1-recruit-l1",
+        "ungraded": true
+      }
+    },
+    {
+      "id": "http-post",
+      "module": 1,
+      "order": 7,
+      "title": "HTTP POST",
+      "conceptTags": ["http.method.post"],
+      "explanation": "POST asks the server to accept a new submission for a collection or process. Use POST when documentation says you are registering, creating, or submitting something that did not exist yet. In Module 1, focus on choosing POST and the correct fictional endpoint — advanced JSON body design belongs later.",
+      "workedExample": {
+        "title": "Training POST (not a live mission)",
+        "notes": "This training path registers a sample visitor badge. Mission terminals use different registration resources.",
+        "method": "POST",
+        "path": "/api/training/visitors/check-in",
+        "responseStatus": 201,
+        "responseBody": {
+          "visitorId": "train-01",
+          "status": "registered",
+          "message": "Training visitor check-in accepted."
+        }
+      },
+      "practiceScenario": {
+        "summary": "In Level 4 practice, choose POST for the documented training registration path.",
+        "linkedMissionId": "m1-recruit-l4",
+        "ungraded": true
+      }
+    },
+    {
+      "id": "http-put-patch",
+      "module": 1,
+      "order": 8,
+      "title": "HTTP PUT and PATCH",
+      "conceptTags": ["http.method.put", "http.method.patch"],
+      "explanation": "PUT replaces or fully updates an existing resource identified in the path. PATCH applies a partial update when the contract supports it. Module 1 graded work uses PUT with a clear resource identifier. Do not use GET to change a record, and do not invent a new path when documentation names an existing clearance id.",
+      "workedExample": {
+        "title": "Training PUT (not a live mission)",
+        "notes": "This example updates a training locker schedule. Live mission clearance ids are different.",
+        "method": "PUT",
+        "path": "/api/training/lockers/sample/schedule",
+        "responseStatus": 200,
+        "responseBody": {
+          "lockerId": "sample",
+          "schedule": "updated",
+          "message": "Training locker schedule replaced."
+        }
+      },
+      "practiceScenario": {
+        "summary": "In Level 5 practice, use PUT on the documented training clearance path with the substituted id.",
+        "linkedMissionId": "m1-recruit-l5",
+        "ungraded": true
+      }
+    },
+    {
+      "id": "http-delete",
+      "module": 1,
+      "order": 9,
+      "title": "HTTP DELETE",
+      "conceptTags": ["http.method.delete"],
+      "explanation": "DELETE asks the server to remove or deactivate an existing resource. Use DELETE when documentation says a compromised or obsolete resource must be taken out of service. Identify the resource in the path; do not use GET or POST for deactivation when DELETE is specified.",
+      "workedExample": {
+        "title": "Training DELETE (not a live mission)",
+        "notes": "This example deactivates a training badge. Mission badge codes are different.",
+        "method": "DELETE",
+        "path": "/api/training/badges/demo-pass",
+        "responseStatus": 200,
+        "responseBody": {
+          "badgeId": "demo-pass",
+          "status": "deactivated",
+          "message": "Training badge deactivated."
+        }
+      },
+      "practiceScenario": {
+        "summary": "In Level 6 practice, choose DELETE for the documented training badge path.",
+        "linkedMissionId": "m1-recruit-l6",
+        "ungraded": true
+      }
+    }
+  ]
+}

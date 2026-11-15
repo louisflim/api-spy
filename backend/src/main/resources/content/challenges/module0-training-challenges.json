@@ -1,0 +1,84 @@
+{
+  "challenges": [
+    {
+      "challengeId": "chal-m0-training-terminal",
+      "variantId": "training-locker-v1",
+      "missionId": "m0-training-room",
+      "deviceId": "training-terminal",
+      "conceptTags": ["http.method.get", "http.endpoint"],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/training/lockers/academy",
+      "pathParameters": {},
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "lockerId": "academy",
+        "cleared": true,
+        "message": "Training locker acknowledged. Field orientation complete for this terminal."
+      },
+      "documentation": "MODULE 0 FIELD TRAINING — not a graded mission.\n\nRetrieve the academy training locker.\n\nMethod: GET\nPath: /api/training/lockers/academy\n\nThis path is never used by Module 1 Door Alpha. Unlimited retries. No hearts, coins, or RCA.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-practice-m1-l1",
+      "variantId": "practice-door-drill-v1",
+      "missionId": "practice-m1-recruit-l1",
+      "deviceId": "practice-panel",
+      "conceptTags": ["http.method.get", "http.endpoint"],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/practice/doors/drill",
+      "pathParameters": {},
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "id": "drill",
+        "status": "reviewed",
+        "message": "Practice door drill acknowledged. No mission door was unlocked."
+      },
+      "documentation": "PRACTICE MODE — educational review only.\n\nMethod: GET\nPath: /api/practice/doors/drill\n\nDifferent from the graded Door Alpha contract. No mission completion, rewards, or first-attempt RCA.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-practice-m1-l2",
+      "variantId": "practice-lock-drill-v1",
+      "missionId": "practice-m1-recruit-l2",
+      "deviceId": "practice-lock",
+      "conceptTags": ["http.endpoint", "http.path_parameter"],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/practice/locks/{lockId}",
+      "pathParameters": {
+        "lockId": "drill-bay"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "lockId": "drill-bay",
+        "status": "reviewed",
+        "message": "Practice lock drill acknowledged."
+      },
+      "documentation": "PRACTICE MODE — educational review only.\n\nMethod: GET\nPath template: /api/practice/locks/{lockId}\nRequired path parameter:\n- lockId = drill-bay\n\nExample: /api/practice/locks/drill-bay\n\nNot the graded north-gate contract.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-practice-m1-l3",
+      "variantId": "practice-sensor-drill-v1",
+      "missionId": "practice-m1-recruit-l3",
+      "deviceId": "practice-sensor",
+      "conceptTags": ["http.endpoint", "http.query_parameter"],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/practice/sensors",
+      "pathParameters": {},
+      "queryParameters": {
+        "bay": "training"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "bay": "training",
+        "status": "reviewed",
+        "message": "Practice sensor drill acknowledged."
+      },
+      "documentation": "PRACTICE MODE — educational review only.\n\nMethod: GET\nPath: /api/practice/sensors\nRequired query parameter:\n- bay = training\n\nExample: /api/practice/sensors?bay=training\n\nNot the graded zone=alpha contract.",
+      "deviceUnlockState": "OPEN"
+    }
+  ]
+}

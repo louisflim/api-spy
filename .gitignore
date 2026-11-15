@@ -1,0 +1,47 @@
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+frontend/.env.*.local
+
+# Backend
+backend/target/
+backend/.mvn/wrapper/maven-wrapper.jar
+backend/.env
+backend/.env.local
+
+# Secrets (any directory) — never upload credentials
+.env
+**/.env
+.env.local
+**/.env.local
+.env.*.local
+**/.env.*.local
+!.env.example
+!**/.env.example
+
+# Capstone docs & spreadsheets — local only, do not publish to GitHub
+docs/
+**/docs/
+!**/node_modules/**/docs/
+*.xlsx
+*.xls
+*.xlsm
+*.csv
+*.docx
+*.doc
+*.pdf
+API_Spy_*.docx
+API_Spy_*.xlsx
+API_Spy_*.pdf
+
+# IDE / OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

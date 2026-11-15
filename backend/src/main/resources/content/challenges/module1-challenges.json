@@ -1,0 +1,998 @@
+{
+  "challenges": [
+    {
+      "challengeId": "chal-m1-get-door-v1",
+      "variantId": "door-alpha-v1",
+      "missionId": "m1-recruit-l1",
+      "deviceId": "door-alpha",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/doors/alpha",
+      "pathParameters": {},
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "id": "alpha",
+        "status": "unlocked",
+        "message": "Door Alpha unlocked."
+      },
+      "documentation": "FIELD BRIEF — Door Status API (fictional)\n\nObjective:\nUnlock the exit by retrieving the status of this room's exit door.\n\nResources:\n- Door panels are resources under /api/doors/{doorId}.\n- {doorId} is the door's facility label in lowercase (the exit door in this room is labeled Alpha).\n\nMethod semantics:\n- GET retrieves the current representation of a resource. Use GET when you only need to read status.\n- POST, PUT, PATCH, and DELETE create or change resources and are not appropriate for a simple status check.\n\nRules:\n- No request body is required for a status retrieval.\n- Build the method and full resource path yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-get-door-v2",
+      "variantId": "door-bravo-v2",
+      "missionId": "m1-recruit-l1",
+      "deviceId": "door-bravo",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/doors/bravo",
+      "pathParameters": {},
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "id": "bravo",
+        "status": "unlocked",
+        "message": "Door Bravo unlocked."
+      },
+      "documentation": "FIELD BRIEF — Door Status API (fictional)\n\nObjective:\nVerify the concept on a second door panel in this facility.\n\nResources:\n- Door panels are resources under /api/doors/{doorId}.\n- {doorId} is the door's facility label in lowercase (this verification panel is labeled Bravo).\n\nMethod semantics:\n- GET retrieves status. Prefer GET for read-only checks.\n- Write methods (POST/PUT/PATCH/DELETE) are not used for status retrieval.\n\nRules:\n- No request body is required.\n- Construct method and path independently from these rules.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-path-lock-v1",
+      "variantId": "lock-north-v1",
+      "missionId": "m1-recruit-l2",
+      "deviceId": "lock-north",
+      "conceptTags": [
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/locks/{lockId}",
+      "pathParameters": {
+        "lockId": "north-gate"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "lockId": "north-gate",
+        "status": "open",
+        "message": "North gate lock released."
+      },
+      "documentation": "FIELD BRIEF — Lock Locator API (fictional)\n\nObjective:\nLocate the active lock for this room so the exit can open.\n\nResources:\n- Locks live under /api/locks/{lockId}.\n- {lockId} is a path parameter: replace the braces with the lock's facility code. Do not leave {lockId} literally in the request.\n- Facility codes use lowercase words joined by hyphens (pattern: <direction>-gate).\n- This room's active lock is the north gate.\n\nMethod semantics:\n- GET reads lock state. Use GET when locating or checking a lock.\n- Write methods are not required for this check.\n\nRules:\n- No query string or body is required.\n- Choose the method and assemble the path with the correct substituted lock id.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-path-lock-v2",
+      "variantId": "lock-east-v2",
+      "missionId": "m1-recruit-l2",
+      "deviceId": "lock-east",
+      "conceptTags": [
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/locks/{lockId}",
+      "pathParameters": {
+        "lockId": "east-wing"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "lockId": "east-wing",
+        "status": "open",
+        "message": "East wing lock released."
+      },
+      "documentation": "FIELD BRIEF — Lock Locator API (fictional)\n\nObjective:\nVerify path-parameter usage on a second lock in this facility.\n\nResources:\n- Locks live under /api/locks/{lockId}.\n- Substitute {lockId} with the lock's facility code (lowercase words joined by hyphens).\n- This verification lock is the east wing lock (facility code pattern: east-wing).\n\nMethod semantics:\n- GET reads lock state.\n\nRules:\n- Do not leave braces in the submitted path.\n- No query string or body is required.\n- Construct the request yourself from these rules.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-query-sensor-v1",
+      "variantId": "sensor-zone-alpha-v1",
+      "missionId": "m1-recruit-l3",
+      "deviceId": "sensor-panel",
+      "conceptTags": [
+        "http.endpoint",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/sensors",
+      "pathParameters": {},
+      "queryParameters": {
+        "zone": "alpha"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "zone": "alpha",
+        "active": true,
+        "message": "Zone alpha sensors cleared the door."
+      },
+      "documentation": "FIELD BRIEF — Sensor Filter API (fictional)\n\nObjective:\nClear the exit by filtering sensors for the zone assigned to this terminal.\n\nResources:\n- Sensors are listed at /api/sensors.\n- Filtering uses a query string after ?: name=value.\n\nMethod semantics:\n- GET retrieves a filtered list. Use GET for read/filter operations.\n\nParameter rules:\n- Required query parameter name: zone\n- Zone values are lowercase sector codes used in this facility (Alpha sector → alpha, Bravo sector → bravo).\n- This terminal is assigned to the Alpha sector.\n- Illustrative shape only (you must choose the real values): /api/sensors?zone=<sector>\n\nRules:\n- No request body is required.\n- Select the method and build the full path plus query yourself.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-query-sensor-v2",
+      "variantId": "sensor-zone-bravo-v2",
+      "missionId": "m1-recruit-l3",
+      "deviceId": "sensor-panel-b",
+      "conceptTags": [
+        "http.endpoint",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/sensors",
+      "pathParameters": {},
+      "queryParameters": {
+        "zone": "bravo"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "zone": "bravo",
+        "active": true,
+        "message": "Zone bravo sensors cleared the door."
+      },
+      "documentation": "FIELD BRIEF — Sensor Filter API (fictional)\n\nObjective:\nVerify query-parameter filtering on a second sensor assignment.\n\nResources:\n- Sensors are listed at /api/sensors.\n- Filters use query parameters: ?name=value.\n\nMethod semantics:\n- GET retrieves a filtered list.\n\nParameter rules:\n- Required query parameter name: zone\n- Zone values are lowercase sector codes (Alpha → alpha, Bravo → bravo).\n- This verification panel is assigned to the Bravo sector.\n- Illustrative shape only: /api/sensors?zone=<sector>\n\nRules:\n- No request body is required.\n- Construct method, path, and query independently.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-get-door-v3",
+      "variantId": "door-charlie-v3",
+      "missionId": "m1-recruit-l1",
+      "deviceId": "door-charlie",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/doors/charlie",
+      "pathParameters": {},
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "id": "charlie",
+        "status": "unlocked",
+        "message": "Door Charlie unlocked."
+      },
+      "documentation": "FIELD BRIEF — Door Status API (fictional)\n\nObjective:\nActivate mandatory panel Charlie after an API-driven room retry.\n\nResources:\n- Doors under /api/doors/{doorId}; {doorId} is the lowercase facility label (Charlie).\n\nMethod semantics:\n- GET retrieves status for a read-only check.\n\nRules:\n- No body. Construct method and path independently.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-get-door-v4",
+      "variantId": "door-delta-v4",
+      "missionId": "m1-recruit-l1",
+      "deviceId": "door-delta",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/doors/delta",
+      "pathParameters": {},
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "id": "delta",
+        "status": "unlocked",
+        "message": "Door Delta unlocked."
+      },
+      "documentation": "FIELD BRIEF — Door Status API (fictional)\n\nObjective:\nActivate mandatory panel Delta.\n\nResources:\n- /api/doors/{doorId}; label Delta → lowercase doorId.\n\nMethod semantics:\n- GET for status retrieval.\n\nRules:\n- No body. Build the request yourself.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-get-door-v5",
+      "variantId": "door-echo-v5",
+      "missionId": "m1-recruit-l1",
+      "deviceId": "door-echo",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/doors/echo",
+      "pathParameters": {},
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "id": "echo",
+        "status": "unlocked",
+        "message": "Door Echo unlocked."
+      },
+      "documentation": "FIELD BRIEF — Door Status API (fictional)\n\nObjective:\nActivate mandatory panel Echo.\n\nResources:\n- /api/doors/{doorId}; label Echo → lowercase doorId.\n\nMethod semantics:\n- GET for status retrieval.\n\nRules:\n- No body. Build the request yourself.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-get-door-v6",
+      "variantId": "door-foxtrot-v6",
+      "missionId": "m1-recruit-l1",
+      "deviceId": "door-foxtrot",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/doors/foxtrot",
+      "pathParameters": {},
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "id": "foxtrot",
+        "status": "unlocked",
+        "message": "Door Foxtrot unlocked."
+      },
+      "documentation": "FIELD BRIEF — Door Status API (fictional)\n\nObjective:\nActivate mandatory panel Foxtrot.\n\nResources:\n- /api/doors/{doorId}; label Foxtrot → lowercase doorId.\n\nMethod semantics:\n- GET for status retrieval.\n\nRules:\n- No body. Build the request yourself.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-final-lock-l1",
+      "variantId": "final-lock-l1-v1",
+      "missionId": "m1-recruit-l1",
+      "deviceId": "final-lock-l1",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/final-locks/l1",
+      "pathParameters": {},
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "id": "l1",
+        "status": "released",
+        "message": "Final lock released."
+      },
+      "documentation": "FIELD BRIEF — Final Lock API (fictional)\n\nObjective:\nRelease the additional final lock that appears only after an API-driven room retry.\n\nResources:\n- Final locks live under /api/final-locks/{roomCode}.\n- This room's code is l1.\n\nMethod semantics:\n- GET releases/read-checks the final lock status.\n\nRules:\n- No body. Construct method and path independently. This device is not an adaptive practice door and is separate from the 1/3/5 mandatory count.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-path-lock-v3",
+      "variantId": "lock-west-v3",
+      "missionId": "m1-recruit-l2",
+      "deviceId": "lock-west",
+      "conceptTags": [
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/locks/{lockId}",
+      "pathParameters": {
+        "lockId": "west-bay"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "lockId": "west-bay",
+        "status": "open",
+        "message": "West bay lock released."
+      },
+      "documentation": "FIELD BRIEF — Lock Locator API (fictional)\n\nObjective:\nActivate mandatory west bay lock after API-driven retry escalation.\n\nResources:\n- /api/locks/{lockId}; substitute facility code (west-bay pattern).\n\nMethod semantics:\n- GET reads lock state.\n\nRules:\n- No query/body. Do not leave braces in the path. Construct the request yourself.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-path-lock-v4",
+      "variantId": "lock-south-v4",
+      "missionId": "m1-recruit-l2",
+      "deviceId": "lock-south",
+      "conceptTags": [
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/locks/{lockId}",
+      "pathParameters": {
+        "lockId": "south-dock"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "lockId": "south-dock",
+        "status": "open",
+        "message": "South dock lock released."
+      },
+      "documentation": "FIELD BRIEF — Lock Locator API (fictional)\n\nObjective:\nActivate mandatory south dock lock.\n\nResources:\n- /api/locks/{lockId}; facility code south-dock.\n\nMethod semantics:\n- GET reads lock state.\n\nRules:\n- Substitute {lockId}. No query/body. Build the request yourself.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-path-lock-v5",
+      "variantId": "lock-core-v5",
+      "missionId": "m1-recruit-l2",
+      "deviceId": "lock-core",
+      "conceptTags": [
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/locks/{lockId}",
+      "pathParameters": {
+        "lockId": "core-vault"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "lockId": "core-vault",
+        "status": "open",
+        "message": "Core vault lock released."
+      },
+      "documentation": "FIELD BRIEF — Lock Locator API (fictional)\n\nObjective:\nActivate mandatory core vault lock.\n\nResources:\n- /api/locks/{lockId}; facility code core-vault.\n\nMethod semantics:\n- GET reads lock state.\n\nRules:\n- Substitute {lockId}. No query/body. Construct independently.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-path-lock-v6",
+      "variantId": "lock-ridge-v6",
+      "missionId": "m1-recruit-l2",
+      "deviceId": "lock-ridge",
+      "conceptTags": [
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/locks/{lockId}",
+      "pathParameters": {
+        "lockId": "ridge-hatch"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "lockId": "ridge-hatch",
+        "status": "open",
+        "message": "Ridge hatch lock released."
+      },
+      "documentation": "FIELD BRIEF — Lock Locator API (fictional)\n\nObjective:\nActivate mandatory ridge hatch lock.\n\nResources:\n- /api/locks/{lockId}; facility code ridge-hatch.\n\nMethod semantics:\n- GET reads lock state.\n\nRules:\n- Substitute {lockId}. No query/body. Choose method and path yourself.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-final-lock-l2",
+      "variantId": "final-lock-l2-v1",
+      "missionId": "m1-recruit-l2",
+      "deviceId": "final-lock-l2",
+      "conceptTags": [
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/final-locks/{lockId}",
+      "pathParameters": {
+        "lockId": "l2"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "lockId": "l2",
+        "status": "released",
+        "message": "Final lock released."
+      },
+      "documentation": "FIELD BRIEF — Final Lock API (fictional)\n\nObjective:\nRelease the retry-only final lock for this room.\n\nResources:\n- /api/final-locks/{lockId}; this room uses lockId l2.\n\nMethod semantics:\n- GET checks/releases final lock status.\n\nRules:\n- Substitute {lockId}. Construct the request yourself. Separate from the 1/3/5 mandatory count and from practice doors.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-query-sensor-v3",
+      "variantId": "sensor-zone-charlie-v3",
+      "missionId": "m1-recruit-l3",
+      "deviceId": "sensor-panel-c",
+      "conceptTags": [
+        "http.endpoint",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/sensors",
+      "pathParameters": {},
+      "queryParameters": {
+        "zone": "charlie"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "zone": "charlie",
+        "active": true,
+        "message": "Zone charlie sensors cleared."
+      },
+      "documentation": "FIELD BRIEF — Sensor Filter API (fictional)\n\nObjective:\nActivate mandatory Charlie-sector sensors after API-driven retry escalation.\n\nResources:\n- /api/sensors with required query zone.\n- Sector Charlie → lowercase zone value.\n\nMethod semantics:\n- GET filters the collection.\n\nRules:\n- Illustrative shape: /api/sensors?zone=<sector>. Build the real request yourself.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-query-sensor-v4",
+      "variantId": "sensor-zone-delta-v4",
+      "missionId": "m1-recruit-l3",
+      "deviceId": "sensor-panel-d",
+      "conceptTags": [
+        "http.endpoint",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/sensors",
+      "pathParameters": {},
+      "queryParameters": {
+        "zone": "delta"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "zone": "delta",
+        "active": true,
+        "message": "Zone delta sensors cleared."
+      },
+      "documentation": "FIELD BRIEF — Sensor Filter API (fictional)\n\nObjective:\nActivate mandatory Delta-sector sensors.\n\nResources:\n- /api/sensors?zone=<sector>; Delta → lowercase.\n\nMethod semantics:\n- GET filters sensors.\n\nRules:\n- Required query name: zone. Construct independently.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-query-sensor-v5",
+      "variantId": "sensor-zone-echo-v5",
+      "missionId": "m1-recruit-l3",
+      "deviceId": "sensor-panel-e",
+      "conceptTags": [
+        "http.endpoint",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/sensors",
+      "pathParameters": {},
+      "queryParameters": {
+        "zone": "echo"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "zone": "echo",
+        "active": true,
+        "message": "Zone echo sensors cleared."
+      },
+      "documentation": "FIELD BRIEF — Sensor Filter API (fictional)\n\nObjective:\nActivate mandatory Echo-sector sensors.\n\nResources:\n- /api/sensors?zone=<sector>; Echo → lowercase.\n\nMethod semantics:\n- GET filters sensors.\n\nRules:\n- Required query name: zone. Construct independently.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-query-sensor-v6",
+      "variantId": "sensor-zone-foxtrot-v6",
+      "missionId": "m1-recruit-l3",
+      "deviceId": "sensor-panel-f",
+      "conceptTags": [
+        "http.endpoint",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/sensors",
+      "pathParameters": {},
+      "queryParameters": {
+        "zone": "foxtrot"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "zone": "foxtrot",
+        "active": true,
+        "message": "Zone foxtrot sensors cleared."
+      },
+      "documentation": "FIELD BRIEF — Sensor Filter API (fictional)\n\nObjective:\nActivate mandatory Foxtrot-sector sensors.\n\nResources:\n- /api/sensors?zone=<sector>; Foxtrot → lowercase.\n\nMethod semantics:\n- GET filters sensors.\n\nRules:\n- Required query name: zone. Construct independently.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-final-lock-l3",
+      "variantId": "final-lock-l3-v1",
+      "missionId": "m1-recruit-l3",
+      "deviceId": "final-lock-l3",
+      "conceptTags": [
+        "http.endpoint",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/final-locks",
+      "pathParameters": {},
+      "queryParameters": {
+        "room": "l3"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "room": "l3",
+        "status": "released",
+        "message": "Final lock released."
+      },
+      "documentation": "FIELD BRIEF — Final Lock API (fictional)\n\nObjective:\nRelease the retry-only final lock for this sensor room.\n\nResources:\n- /api/final-locks with required query room.\n- This room's code is l3.\n\nMethod semantics:\n- GET checks/releases final lock status.\n\nRules:\n- Build method, path, and query independently. Separate from the 1/3/5 mandatory count and from adaptive practice doors.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-post-registration-v1",
+      "variantId": "reg-alpha-v1",
+      "missionId": "m1-recruit-l4",
+      "deviceId": "checkpoint-alpha",
+      "conceptTags": [
+        "http.method.post",
+        "http.endpoint"
+      ],
+      "expectedMethod": "POST",
+      "pathTemplate": "/api/registrations/alpha",
+      "pathParameters": {},
+      "queryParameters": {},
+      "successStatus": 201,
+      "successBody": {
+        "checkpointId": "alpha",
+        "status": "registered",
+        "message": "Checkpoint Alpha registration accepted."
+      },
+      "documentation": "FIELD BRIEF — Checkpoint Registration API (fictional)\n\nObjective:\nActivate the primary registration terminal by submitting the checkpoint registration.\n\nResources:\n- Registrations are submitted under /api/registrations/{checkpointId}.\n- {checkpointId} is the lowercase facility label for this panel (alpha).\n\nMethod semantics:\n- POST submits a new registration for the checkpoint.\n- GET retrieves existing records and will not activate this panel.\n- PUT/PATCH/DELETE are not used for first-time registration here.\n\nRules:\n- No query string is required.\n- Module 1 grades method and path only — leave the body blank unless docs later require fields.\n- Construct method and path yourself from these rules.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-post-registration-v2",
+      "variantId": "reg-bravo-v2",
+      "missionId": "m1-recruit-l4",
+      "deviceId": "checkpoint-bravo",
+      "conceptTags": [
+        "http.method.post",
+        "http.endpoint"
+      ],
+      "expectedMethod": "POST",
+      "pathTemplate": "/api/registrations/bravo",
+      "pathParameters": {},
+      "queryParameters": {},
+      "successStatus": 201,
+      "successBody": {
+        "checkpointId": "bravo",
+        "status": "registered",
+        "message": "Checkpoint Bravo registration accepted."
+      },
+      "documentation": "FIELD BRIEF — Checkpoint Registration API (fictional)\n\nObjective:\nVerify POST registration on the Bravo checkpoint panel.\n\nResources:\n- Registrations are submitted under /api/registrations/{checkpointId}.\n- {checkpointId} is the lowercase facility label for this panel (bravo).\n\nMethod semantics:\n- POST submits a new registration for the checkpoint.\n- GET retrieves existing records and will not activate this panel.\n- PUT/PATCH/DELETE are not used for first-time registration here.\n\nRules:\n- No query string is required.\n- Module 1 grades method and path only — leave the body blank unless docs later require fields.\n- Construct method and path yourself from these rules.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-post-registration-v3",
+      "variantId": "reg-charlie-v3",
+      "missionId": "m1-recruit-l4",
+      "deviceId": "checkpoint-charlie",
+      "conceptTags": [
+        "http.method.post",
+        "http.endpoint"
+      ],
+      "expectedMethod": "POST",
+      "pathTemplate": "/api/registrations/charlie",
+      "pathParameters": {},
+      "queryParameters": {},
+      "successStatus": 201,
+      "successBody": {
+        "checkpointId": "charlie",
+        "status": "registered",
+        "message": "Checkpoint Charlie registration accepted."
+      },
+      "documentation": "FIELD BRIEF — Checkpoint Registration API (fictional)\n\nObjective:\nActivate mandatory Charlie registration after API-driven retry escalation.\n\nResources:\n- Registrations are submitted under /api/registrations/{checkpointId}.\n- {checkpointId} is the lowercase facility label for this panel (charlie).\n\nMethod semantics:\n- POST submits a new registration for the checkpoint.\n- GET retrieves existing records and will not activate this panel.\n- PUT/PATCH/DELETE are not used for first-time registration here.\n\nRules:\n- No query string is required.\n- Module 1 grades method and path only — leave the body blank unless docs later require fields.\n- Construct method and path yourself from these rules.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-post-registration-v4",
+      "variantId": "reg-delta-v4",
+      "missionId": "m1-recruit-l4",
+      "deviceId": "checkpoint-delta",
+      "conceptTags": [
+        "http.method.post",
+        "http.endpoint"
+      ],
+      "expectedMethod": "POST",
+      "pathTemplate": "/api/registrations/delta",
+      "pathParameters": {},
+      "queryParameters": {},
+      "successStatus": 201,
+      "successBody": {
+        "checkpointId": "delta",
+        "status": "registered",
+        "message": "Checkpoint Delta registration accepted."
+      },
+      "documentation": "FIELD BRIEF — Checkpoint Registration API (fictional)\n\nObjective:\nActivate mandatory Delta registration.\n\nResources:\n- Registrations are submitted under /api/registrations/{checkpointId}.\n- {checkpointId} is the lowercase facility label for this panel (delta).\n\nMethod semantics:\n- POST submits a new registration for the checkpoint.\n- GET retrieves existing records and will not activate this panel.\n- PUT/PATCH/DELETE are not used for first-time registration here.\n\nRules:\n- No query string is required.\n- Module 1 grades method and path only — leave the body blank unless docs later require fields.\n- Construct method and path yourself from these rules.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-post-registration-v5",
+      "variantId": "reg-echo-v5",
+      "missionId": "m1-recruit-l4",
+      "deviceId": "checkpoint-echo",
+      "conceptTags": [
+        "http.method.post",
+        "http.endpoint"
+      ],
+      "expectedMethod": "POST",
+      "pathTemplate": "/api/registrations/echo",
+      "pathParameters": {},
+      "queryParameters": {},
+      "successStatus": 201,
+      "successBody": {
+        "checkpointId": "echo",
+        "status": "registered",
+        "message": "Checkpoint Echo registration accepted."
+      },
+      "documentation": "FIELD BRIEF — Checkpoint Registration API (fictional)\n\nObjective:\nActivate mandatory Echo registration.\n\nResources:\n- Registrations are submitted under /api/registrations/{checkpointId}.\n- {checkpointId} is the lowercase facility label for this panel (echo).\n\nMethod semantics:\n- POST submits a new registration for the checkpoint.\n- GET retrieves existing records and will not activate this panel.\n- PUT/PATCH/DELETE are not used for first-time registration here.\n\nRules:\n- No query string is required.\n- Module 1 grades method and path only — leave the body blank unless docs later require fields.\n- Construct method and path yourself from these rules.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-post-registration-v6",
+      "variantId": "reg-foxtrot-v6",
+      "missionId": "m1-recruit-l4",
+      "deviceId": "checkpoint-foxtrot",
+      "conceptTags": [
+        "http.method.post",
+        "http.endpoint"
+      ],
+      "expectedMethod": "POST",
+      "pathTemplate": "/api/registrations/foxtrot",
+      "pathParameters": {},
+      "queryParameters": {},
+      "successStatus": 201,
+      "successBody": {
+        "checkpointId": "foxtrot",
+        "status": "registered",
+        "message": "Checkpoint Foxtrot registration accepted."
+      },
+      "documentation": "FIELD BRIEF — Checkpoint Registration API (fictional)\n\nObjective:\nActivate mandatory Foxtrot registration.\n\nResources:\n- Registrations are submitted under /api/registrations/{checkpointId}.\n- {checkpointId} is the lowercase facility label for this panel (foxtrot).\n\nMethod semantics:\n- POST submits a new registration for the checkpoint.\n- GET retrieves existing records and will not activate this panel.\n- PUT/PATCH/DELETE are not used for first-time registration here.\n\nRules:\n- No query string is required.\n- Module 1 grades method and path only — leave the body blank unless docs later require fields.\n- Construct method and path yourself from these rules.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-final-lock-l4",
+      "variantId": "final-lock-l4-v1",
+      "missionId": "m1-recruit-l4",
+      "deviceId": "final-lock-l4",
+      "conceptTags": [
+        "http.method.post",
+        "http.endpoint"
+      ],
+      "expectedMethod": "POST",
+      "pathTemplate": "/api/final-locks/l4",
+      "pathParameters": {},
+      "queryParameters": {},
+      "successStatus": 201,
+      "successBody": {
+        "id": "l4",
+        "status": "released",
+        "message": "Final lock released."
+      },
+      "documentation": "FIELD BRIEF — Final Lock API (fictional)\n\nObjective:\nRelease the retry-only final lock for this registration room.\n\nResources:\n- Final locks under /api/final-locks/{roomCode}; this room code is l4.\n\nMethod semantics:\n- POST submits the final-lock release for this room.\n\nRules:\n- Construct method and path independently. Separate from the 1/3/5 mandatory count.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-put-clearance-v1",
+      "variantId": "clr-north-v1",
+      "missionId": "m1-recruit-l5",
+      "deviceId": "clearance-north",
+      "conceptTags": [
+        "http.method.put",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "PUT",
+      "pathTemplate": "/api/clearances/{clearanceId}",
+      "pathParameters": {
+        "clearanceId": "north-desk"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "clearanceId": "north-desk",
+        "status": "updated",
+        "message": "Clearance north-desk updated."
+      },
+      "documentation": "FIELD BRIEF — Clearance Update API (fictional)\n\nObjective:\nUpdate the north-desk clearance so the exit route can open.\n\nResources:\n- Clearance records live under /api/clearances/{clearanceId}.\n- Substitute {clearanceId} with the facility code (this panel: north-desk).\n- Do not leave braces in the submitted path.\n\nMethod semantics:\n- PUT fully updates the existing clearance record.\n- PATCH is a related partial-update idea covered in training; this panel expects PUT.\n- GET reads without updating. POST creates new records and is wrong here.\n\nRules:\n- No query string is required.\n- Construct method and path with the substituted id yourself.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-put-clearance-v2",
+      "variantId": "clr-east-v2",
+      "missionId": "m1-recruit-l5",
+      "deviceId": "clearance-east",
+      "conceptTags": [
+        "http.method.put",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "PUT",
+      "pathTemplate": "/api/clearances/{clearanceId}",
+      "pathParameters": {
+        "clearanceId": "east-desk"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "clearanceId": "east-desk",
+        "status": "updated",
+        "message": "Clearance east-desk updated."
+      },
+      "documentation": "FIELD BRIEF — Clearance Update API (fictional)\n\nObjective:\nVerify PUT clearance update on the east-desk panel.\n\nResources:\n- Clearance records live under /api/clearances/{clearanceId}.\n- Substitute {clearanceId} with the facility code (this panel: east-desk).\n- Do not leave braces in the submitted path.\n\nMethod semantics:\n- PUT fully updates the existing clearance record.\n- PATCH is a related partial-update idea covered in training; this panel expects PUT.\n- GET reads without updating. POST creates new records and is wrong here.\n\nRules:\n- No query string is required.\n- Construct method and path with the substituted id yourself.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-put-clearance-v3",
+      "variantId": "clr-west-v3",
+      "missionId": "m1-recruit-l5",
+      "deviceId": "clearance-west",
+      "conceptTags": [
+        "http.method.put",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "PUT",
+      "pathTemplate": "/api/clearances/{clearanceId}",
+      "pathParameters": {
+        "clearanceId": "west-desk"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "clearanceId": "west-desk",
+        "status": "updated",
+        "message": "Clearance west-desk updated."
+      },
+      "documentation": "FIELD BRIEF — Clearance Update API (fictional)\n\nObjective:\nActivate mandatory west-desk clearance after API-driven retry escalation.\n\nResources:\n- Clearance records live under /api/clearances/{clearanceId}.\n- Substitute {clearanceId} with the facility code (this panel: west-desk).\n- Do not leave braces in the submitted path.\n\nMethod semantics:\n- PUT fully updates the existing clearance record.\n- PATCH is a related partial-update idea covered in training; this panel expects PUT.\n- GET reads without updating. POST creates new records and is wrong here.\n\nRules:\n- No query string is required.\n- Construct method and path with the substituted id yourself.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-put-clearance-v4",
+      "variantId": "clr-south-v4",
+      "missionId": "m1-recruit-l5",
+      "deviceId": "clearance-south",
+      "conceptTags": [
+        "http.method.put",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "PUT",
+      "pathTemplate": "/api/clearances/{clearanceId}",
+      "pathParameters": {
+        "clearanceId": "south-desk"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "clearanceId": "south-desk",
+        "status": "updated",
+        "message": "Clearance south-desk updated."
+      },
+      "documentation": "FIELD BRIEF — Clearance Update API (fictional)\n\nObjective:\nActivate mandatory south-desk clearance.\n\nResources:\n- Clearance records live under /api/clearances/{clearanceId}.\n- Substitute {clearanceId} with the facility code (this panel: south-desk).\n- Do not leave braces in the submitted path.\n\nMethod semantics:\n- PUT fully updates the existing clearance record.\n- PATCH is a related partial-update idea covered in training; this panel expects PUT.\n- GET reads without updating. POST creates new records and is wrong here.\n\nRules:\n- No query string is required.\n- Construct method and path with the substituted id yourself.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-put-clearance-v5",
+      "variantId": "clr-core-v5",
+      "missionId": "m1-recruit-l5",
+      "deviceId": "clearance-core",
+      "conceptTags": [
+        "http.method.put",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "PUT",
+      "pathTemplate": "/api/clearances/{clearanceId}",
+      "pathParameters": {
+        "clearanceId": "core-desk"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "clearanceId": "core-desk",
+        "status": "updated",
+        "message": "Clearance core-desk updated."
+      },
+      "documentation": "FIELD BRIEF — Clearance Update API (fictional)\n\nObjective:\nActivate mandatory core-desk clearance.\n\nResources:\n- Clearance records live under /api/clearances/{clearanceId}.\n- Substitute {clearanceId} with the facility code (this panel: core-desk).\n- Do not leave braces in the submitted path.\n\nMethod semantics:\n- PUT fully updates the existing clearance record.\n- PATCH is a related partial-update idea covered in training; this panel expects PUT.\n- GET reads without updating. POST creates new records and is wrong here.\n\nRules:\n- No query string is required.\n- Construct method and path with the substituted id yourself.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-put-clearance-v6",
+      "variantId": "clr-ridge-v6",
+      "missionId": "m1-recruit-l5",
+      "deviceId": "clearance-ridge",
+      "conceptTags": [
+        "http.method.put",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "PUT",
+      "pathTemplate": "/api/clearances/{clearanceId}",
+      "pathParameters": {
+        "clearanceId": "ridge-desk"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "clearanceId": "ridge-desk",
+        "status": "updated",
+        "message": "Clearance ridge-desk updated."
+      },
+      "documentation": "FIELD BRIEF — Clearance Update API (fictional)\n\nObjective:\nActivate mandatory ridge-desk clearance.\n\nResources:\n- Clearance records live under /api/clearances/{clearanceId}.\n- Substitute {clearanceId} with the facility code (this panel: ridge-desk).\n- Do not leave braces in the submitted path.\n\nMethod semantics:\n- PUT fully updates the existing clearance record.\n- PATCH is a related partial-update idea covered in training; this panel expects PUT.\n- GET reads without updating. POST creates new records and is wrong here.\n\nRules:\n- No query string is required.\n- Construct method and path with the substituted id yourself.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-final-lock-l5",
+      "variantId": "final-lock-l5-v1",
+      "missionId": "m1-recruit-l5",
+      "deviceId": "final-lock-l5",
+      "conceptTags": [
+        "http.method.put",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "PUT",
+      "pathTemplate": "/api/final-locks/{lockId}",
+      "pathParameters": {
+        "lockId": "l5"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "lockId": "l5",
+        "status": "released",
+        "message": "Final lock released."
+      },
+      "documentation": "FIELD BRIEF — Final Lock API (fictional)\n\nObjective:\nRelease the retry-only final lock for this clearance hall.\n\nResources:\n- /api/final-locks/{lockId}; this room uses lockId l5.\n\nMethod semantics:\n- PUT updates/releases the final lock record.\n\nRules:\n- Substitute {lockId}. Construct independently. Separate from the 1/3/5 mandatory count.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-delete-badge-v1",
+      "variantId": "badge-red-v1",
+      "missionId": "m1-recruit-l6",
+      "deviceId": "badge-red",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/access-badges/{badgeId}",
+      "pathParameters": {
+        "badgeId": "red-pass"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "badgeId": "red-pass",
+        "status": "deactivated",
+        "message": "Badge red-pass deactivated."
+      },
+      "documentation": "FIELD BRIEF — Access Badge Deactivation API (fictional)\n\nObjective:\nDeactivate the compromised red-pass badge blocking this route.\n\nResources:\n- Badges live under /api/access-badges/{badgeId}.\n- Substitute {badgeId} with the badge facility code (this panel: red-pass).\n\nMethod semantics:\n- DELETE deactivates the compromised badge.\n- GET only inspects status. POST/PUT create or replace records and are wrong for deactivation.\n\nRules:\n- No query string or body is required.\n- Construct method and path with the substituted badge id yourself.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-delete-badge-v2",
+      "variantId": "badge-blue-v2",
+      "missionId": "m1-recruit-l6",
+      "deviceId": "badge-blue",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/access-badges/{badgeId}",
+      "pathParameters": {
+        "badgeId": "blue-pass"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "badgeId": "blue-pass",
+        "status": "deactivated",
+        "message": "Badge blue-pass deactivated."
+      },
+      "documentation": "FIELD BRIEF — Access Badge Deactivation API (fictional)\n\nObjective:\nVerify DELETE deactivation on the blue-pass badge panel.\n\nResources:\n- Badges live under /api/access-badges/{badgeId}.\n- Substitute {badgeId} with the badge facility code (this panel: blue-pass).\n\nMethod semantics:\n- DELETE deactivates the compromised badge.\n- GET only inspects status. POST/PUT create or replace records and are wrong for deactivation.\n\nRules:\n- No query string or body is required.\n- Construct method and path with the substituted badge id yourself.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-delete-badge-v3",
+      "variantId": "badge-green-v3",
+      "missionId": "m1-recruit-l6",
+      "deviceId": "badge-green",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/access-badges/{badgeId}",
+      "pathParameters": {
+        "badgeId": "green-pass"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "badgeId": "green-pass",
+        "status": "deactivated",
+        "message": "Badge green-pass deactivated."
+      },
+      "documentation": "FIELD BRIEF — Access Badge Deactivation API (fictional)\n\nObjective:\nActivate mandatory green-pass deactivation after API-driven retry escalation.\n\nResources:\n- Badges live under /api/access-badges/{badgeId}.\n- Substitute {badgeId} with the badge facility code (this panel: green-pass).\n\nMethod semantics:\n- DELETE deactivates the compromised badge.\n- GET only inspects status. POST/PUT create or replace records and are wrong for deactivation.\n\nRules:\n- No query string or body is required.\n- Construct method and path with the substituted badge id yourself.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-delete-badge-v4",
+      "variantId": "badge-amber-v4",
+      "missionId": "m1-recruit-l6",
+      "deviceId": "badge-amber",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/access-badges/{badgeId}",
+      "pathParameters": {
+        "badgeId": "amber-pass"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "badgeId": "amber-pass",
+        "status": "deactivated",
+        "message": "Badge amber-pass deactivated."
+      },
+      "documentation": "FIELD BRIEF — Access Badge Deactivation API (fictional)\n\nObjective:\nActivate mandatory amber-pass deactivation.\n\nResources:\n- Badges live under /api/access-badges/{badgeId}.\n- Substitute {badgeId} with the badge facility code (this panel: amber-pass).\n\nMethod semantics:\n- DELETE deactivates the compromised badge.\n- GET only inspects status. POST/PUT create or replace records and are wrong for deactivation.\n\nRules:\n- No query string or body is required.\n- Construct method and path with the substituted badge id yourself.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-delete-badge-v5",
+      "variantId": "badge-violet-v5",
+      "missionId": "m1-recruit-l6",
+      "deviceId": "badge-violet",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/access-badges/{badgeId}",
+      "pathParameters": {
+        "badgeId": "violet-pass"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "badgeId": "violet-pass",
+        "status": "deactivated",
+        "message": "Badge violet-pass deactivated."
+      },
+      "documentation": "FIELD BRIEF — Access Badge Deactivation API (fictional)\n\nObjective:\nActivate mandatory violet-pass deactivation.\n\nResources:\n- Badges live under /api/access-badges/{badgeId}.\n- Substitute {badgeId} with the badge facility code (this panel: violet-pass).\n\nMethod semantics:\n- DELETE deactivates the compromised badge.\n- GET only inspects status. POST/PUT create or replace records and are wrong for deactivation.\n\nRules:\n- No query string or body is required.\n- Construct method and path with the substituted badge id yourself.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-delete-badge-v6",
+      "variantId": "badge-silver-v6",
+      "missionId": "m1-recruit-l6",
+      "deviceId": "badge-silver",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/access-badges/{badgeId}",
+      "pathParameters": {
+        "badgeId": "silver-pass"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "badgeId": "silver-pass",
+        "status": "deactivated",
+        "message": "Badge silver-pass deactivated."
+      },
+      "documentation": "FIELD BRIEF — Access Badge Deactivation API (fictional)\n\nObjective:\nActivate mandatory silver-pass deactivation.\n\nResources:\n- Badges live under /api/access-badges/{badgeId}.\n- Substitute {badgeId} with the badge facility code (this panel: silver-pass).\n\nMethod semantics:\n- DELETE deactivates the compromised badge.\n- GET only inspects status. POST/PUT create or replace records and are wrong for deactivation.\n\nRules:\n- No query string or body is required.\n- Construct method and path with the substituted badge id yourself.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-final-lock-l6",
+      "variantId": "final-lock-l6-v1",
+      "missionId": "m1-recruit-l6",
+      "deviceId": "final-lock-l6",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/final-locks/{lockId}",
+      "pathParameters": {
+        "lockId": "l6"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "lockId": "l6",
+        "status": "released",
+        "message": "Final lock released."
+      },
+      "documentation": "FIELD BRIEF — Final Lock API (fictional)\n\nObjective:\nRelease the retry-only final lock for this purge bay.\n\nResources:\n- /api/final-locks/{lockId}; this room uses lockId l6.\n\nMethod semantics:\n- DELETE deactivates the final lock record.\n\nRules:\n- Substitute {lockId}. Construct independently. Separate from the 1/3/5 mandatory count.",
+      "deviceUnlockState": "OPEN"
+    }
+  ]
+}

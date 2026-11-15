@@ -1,0 +1,566 @@
+import { useCallback, useEffect, useRef, useState } from 'react'
+import {
+  completeMissionAtExit,
+  fetchHealth,
+  fetchLessons,
+  fetchMissionDetail,
+  fetchMissionProgress,
+  fetchMyConcepts,
+  reportCombatDeath,
+  resetMissionRoom,
+  startMissionReplay,
+  type ConceptProgressRow,
+} from '../api/client'
+import { useAuth } from '../auth/AuthContext'
+import { lessonTitle, missingRequiredLessons } from '../learning/prerequisites'
+import type { RoomLayoutPlan } from '../phaser/room/types'
+import { ROOM_LAYOUT } from '../phaser/roomLayout'
+import { loadMissionProgress, saveMissionProgress } from '../storage/attemptStorage'
+import type {
+  AdaptivePracticeDoor,
+  Lesson,
+  MissionDetail,
+  MissionProgressState,
+  MissionSummary,
+} from '../types/api'
+import { ApiRequestEditor } from '../ui/ApiRequestEditor'
+import { FieldHud } from '../ui/field/FieldHud'
+import { FieldMinimap } from '../ui/field/FieldMinimap'
+import { FieldObjectives } from '../ui/field/FieldObjectives'
+import { FieldPauseMenu } from '../ui/field/FieldPauseMenu'
+import { GameCanvas, type PlayerPosition } from '../ui/GameCanvas'
+import { GameErrorBoundary } from '../ui/GameErrorBoundary'
+import { MissionCompleteOverlay } from '../ui/MissionCompleteOverlay'
+
+interface GameWorkspaceProps {
+  initialScreen?: 'mission'
+  /** When set, opens this mission in the practice room (from Operations Board launch). */
+  launchMission?: MissionSummary | null
+  onBackToMenu: () => void
+  /** Return to the shared Operations Board under the application navbar. */
+  onOpenOpsBoard?: () => void
+  /** Prefer Mission Briefing after training instead of auto-entering the room. */
+  onReturnToBriefing?: () => void
+  /** Next playable mission on the same track, if any. */
+  nextMission?: MissionSummary | null
+  onContinueNextMission?: (mission: MissionSummary) => void
+}
+
+/**
+ * Graded field-room workspace, keyed by authenticated Spring user id.
+ * Lesson review lives on Mission Training — this shell never shows the legacy Academy page.
+ */
+export function GameWorkspace({
+  initialScreen = 'mission',
+  launchMission = null,
+  onBackToMenu,
+  onOpenOpsBoard,
+  onReturnToBriefing,
+  nextMission = null,
+  onContinueNextMission,
+}: GameWorkspaceProps) {
+  const { profile } = useAuth()
+  const playerId = profile?.userId ?? ''
+  const enterFieldDirectly = Boolean(launchMission) && initialScreen === 'mission'
+
+  const [openingFieldRoom, setOpeningFieldRoom] = useState(enterFieldDirectly)
+  const [lessons, setLessons] = useState<Lesson[]>([])
+  const [missionDetail, setMissionDetail] = useState<MissionDetail | null>(null)
+  const [gateMessage, setGateMessage] = useState<string | null>(null)
+  const [editorOpen, setEditorOpen] = useState(false)
+  const [practiceEditorDoor, setPracticeEditorDoor] = useState<AdaptivePracticeDoor | null>(null)
+  const [exitReady, setExitReady] = useState(false)
+  const [practiceDoors, setPracticeDoors] = useState<AdaptivePracticeDoor[]>([])
+  const [roomProgress, setRoomProgress] = useState<MissionProgressState | null>(null)
+  const [missionCompleteOpen, setMissionCompleteOpen] = useState(false)
+  const [replayClear, setReplayClear] = useState(false)
+  const [pauseOpen, setPauseOpen] = useState(false)
+  const [terminalLocated, setTerminalLocated] = useState(false)
+  const [playerPos, setPlayerPos] = useState<PlayerPosition>(ROOM_LAYOUT.playerStart)
+  const [roomLayout, setRoomLayout] = useState<RoomLayoutPlan | null>(null)
+  /** Temporary run hearts — reset with each roomGeneration; never career progress. */
+  const [hearts, setHearts] = useState(3)
+  const [combatDeathPending, setCombatDeathPending] = useState(false)
+  const [resetLevelBusy, setResetLevelBusy] = useState(false)
+
+  const refreshConcepts = useCallback(async () => {
+    try {
+      return await fetchMyConcepts()
+    } catch {
+      return [] as ConceptProgressRow[]
+    }
+  }, [])
+
+  const applyRoomProgress = useCallback((server: MissionProgressState, _code: string, _missionId: string) => {
+    setRoomProgress(server)
+    const activeRun = server.replayActive || server.activeRunKind === 'PRIMARY'
+    setExitReady(activeRun ? server.exitReady : false)
+    if (server.adaptivePracticeDoors && server.adaptivePracticeDoors.length > 0) {
+      setPracticeDoors(server.adaptivePracticeDoors.slice(0, 2))
+    } else if (server.replayActive) {
+      setPracticeDoors([])
+    }
+  }, [])
+
+  /** Ensures PRIMARY or REPLAY active run; restores mid-replay after refresh. */
+  const ensureActiveRoomRun = useCallback(async (missionId: string): Promise<MissionProgressState> => {
+    const server = await fetchMissionProgress(missionId)
+    if (server.replayActive || server.activeRunKind === 'PRIMARY') {
+      return server
+    }
+    if (server.completed || server.replayable) {
+      return startMissionReplay(missionId)
+    }
+    return server
+  }, [])
+
+  const refreshSavedAttempt = useCallback(
+    (code: string, missionId: string | null) => {
+      if (!missionId) {
+        setExitReady(false)
+        return
+      }
+      void fetchMissionProgress(missionId)
+        .then((server) => applyRoomProgress(server, code, missionId))
+        .catch(() => {
+          const local = loadMissionProgress(code, missionId)
+          setExitReady(Boolean(local?.completed))
+        })
+    },
+    [applyRoomProgress],
+  )
+
+  const enterMissionRoom = useCallback(
+    (detail: MissionDetail) => {
+      setGateMessage(null)
+      setOpeningFieldRoom(false)
+      setMissionDetail(detail)
+      setMissionCompleteOpen(false)
+      setReplayClear(false)
+      setPracticeEditorDoor(null)
+      setPauseOpen(false)
+      setTerminalLocated(false)
+      setPlayerPos(ROOM_LAYOUT.playerStart)
+      setRoomLayout(null)
+      void ensureActiveRoomRun(detail.mission.missionId)
+        .then((server) => {
+          applyRoomProgress(server, playerId, detail.mission.missionId)
+          setPlayerPos(ROOM_LAYOUT.playerStart)
+        })
+        .catch((err) => {
+          setGateMessage(err instanceof Error ? err.message : 'Could not start room run')
+          refreshSavedAttempt(playerId, detail.mission.missionId)
+        })
+    },
+    [playerId, ensureActiveRoomRun, applyRoomProgress, refreshSavedAttempt],
+  )
+
+  const returnToOps = useCallback(() => {
+    setPauseOpen(false)
+    setEditorOpen(false)
+    setPracticeEditorDoor(null)
+    if (onOpenOpsBoard) {
+      onOpenOpsBoard()
+    } else {
+      onBackToMenu()
+    }
+  }, [onBackToMenu, onOpenOpsBoard])
+
+  const leaveForTraining = useCallback(() => {
+    setOpeningFieldRoom(false)
+    setMissionDetail(null)
+    if (onReturnToBriefing) {
+      onReturnToBriefing()
+      return
+    }
+    if (onOpenOpsBoard) {
+      onOpenOpsBoard()
+      return
+    }
+    onBackToMenu()
+  }, [onBackToMenu, onOpenOpsBoard, onReturnToBriefing])
+
+  const openMission = useCallback(
+    async (mission: MissionSummary) => {
+      if (!mission.playable) {
+        setOpeningFieldRoom(false)
+        setGateMessage(`Mission not playable: ${mission.title}`)
+        leaveForTraining()
+        return
+      }
+      try {
+        const detail = await fetchMissionDetail(mission.module, mission.rank, mission.level)
+        const conceptRows = await refreshConcepts()
+        const missing = missingRequiredLessons(detail.mission, lessons, conceptRows)
+        if (missing.length > 0) {
+          const titles = missing.map((id) => lessonTitle(id, lessons))
+          setGateMessage(
+            `Before your first independent attempt on ${detail.mission.title}, review these topics: ${titles.join(', ')}.`,
+          )
+          leaveForTraining()
+          return
+        }
+        enterMissionRoom(detail)
+      } catch (err) {
+        setOpeningFieldRoom(false)
+        setGateMessage(err instanceof Error ? err.message : 'Failed to open mission')
+        leaveForTraining()
+      }
+    },
+    [enterMissionRoom, leaveForTraining, lessons, refreshConcepts],
+  )
+
+  useEffect(() => {
+    let cancelled = false
+    const lessonModule = launchMission?.module && launchMission.module > 0 ? launchMission.module : 1
+
+    async function bootstrap() {
+      for (let attempt = 0; attempt < 12; attempt += 1) {
+        try {
+          await fetchHealth()
+          if (cancelled) return
+          const lessonData = await fetchLessons(lessonModule)
+          if (cancelled) return
+          setLessons(lessonData)
+          return
+        } catch {
+          await new Promise((resolve) => setTimeout(resolve, 800))
+        }
+      }
+    }
+
+    void bootstrap()
+    return () => {
+      cancelled = true
+    }
+  }, [launchMission?.module])
+
+  useEffect(() => {
+    if (missionDetail && playerId) {
+      refreshSavedAttempt(playerId, missionDetail.mission.missionId)
+    }
+  }, [playerId, missionDetail, refreshSavedAttempt])
+
+  useEffect(() => {
+    if (roomProgress && roomProgress.unlockedDeviceIds.length > 0) {
+      setTerminalLocated(true)
+    }
+  }, [roomProgress])
+
+  const openedMissionIdRef = useRef<string | null>(null)
+
+  useEffect(() => {
+    if (!launchMission || lessons.length === 0) return
+    // One open per missionId mount — refresh/re-render must not start a second run.
+    if (openedMissionIdRef.current === launchMission.missionId) return
+    openedMissionIdRef.current = launchMission.missionId
+    void openMission(launchMission)
+  }, [launchMission, lessons.length, openMission])
+
+  const requiredCount = roomProgress?.requiredDeviceIds.length ?? 1
+  const unlockedCount = roomProgress?.unlockedDeviceIds.length ?? 0
+  const devicesComplete =
+    Boolean(roomProgress) &&
+    roomProgress!.requiredDeviceIds.every((id) => roomProgress!.unlockedDeviceIds.includes(id))
+  const missionCompleted = Boolean(roomProgress?.completed) && !roomProgress?.replayActive
+  const inputLocked = editorOpen || pauseOpen || missionCompleteOpen
+
+  const handleResetLevel = useCallback(() => {
+    if (!missionDetail || !roomProgress?.roomGeneration || resetLevelBusy) return
+    setGateMessage(null)
+    setResetLevelBusy(true)
+    // Close terminal before remount so combat/input locks clear with the new generation.
+    setEditorOpen(false)
+    setPracticeEditorDoor(null)
+    const missionId = missionDetail.mission.missionId
+    const generation = roomProgress.roomGeneration
+    void resetMissionRoom(missionId, 'PLAYER', generation)
+      .then((server) => {
+        setRoomProgress(server)
+        setExitReady(false)
+        setPracticeDoors(server.adaptivePracticeDoors?.slice(0, 2) ?? [])
+        setTerminalLocated(false)
+        setPauseOpen(false)
+        setPlayerPos(ROOM_LAYOUT.playerStart)
+        setRoomLayout(null)
+        setHearts(3)
+        setCombatDeathPending(false)
+        refreshSavedAttempt(playerId, missionId)
+      })
+      .catch((err) => {
+        setGateMessage(err instanceof Error ? err.message : 'Level reset rejected')
+      })
+      .finally(() => {
+        setResetLevelBusy(false)
+      })
+  }, [missionDetail, playerId, refreshSavedAttempt, resetLevelBusy, roomProgress?.roomGeneration])
+
+  useEffect(() => {
+    if (!missionDetail && !openingFieldRoom) return
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return
+      if (missionCompleteOpen) return
+      event.preventDefault()
+      if (editorOpen) {
+        setEditorOpen(false)
+        setPracticeEditorDoor(null)
+        return
+      }
+      setPauseOpen((open) => !open)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [missionDetail, openingFieldRoom, missionCompleteOpen, editorOpen])
+
+  // QA helper: `window.dispatchEvent(new Event('apispy:open-terminal'))` opens the graded terminal.
+  useEffect(() => {
+    if (!missionDetail) return
+    const open = () => {
+      setPracticeEditorDoor(null)
+      setTerminalLocated(true)
+      setEditorOpen(true)
+    }
+    window.addEventListener('apispy:open-terminal', open)
+    return () => window.removeEventListener('apispy:open-terminal', open)
+  }, [missionDetail])
+
+  const applyCombatRoomReset = useCallback(
+    (server: MissionProgressState) => {
+      setRoomProgress(server)
+      setExitReady(false)
+      setPauseOpen(false)
+      setHearts(3)
+      setCombatDeathPending(false)
+      setPlayerPos(roomLayout?.playerStart ?? ROOM_LAYOUT.playerStart)
+      setRoomLayout(null)
+      if (missionDetail) {
+        refreshSavedAttempt(playerId, missionDetail.mission.missionId)
+      }
+    },
+    [missionDetail, playerId, refreshSavedAttempt, roomLayout?.playerStart],
+  )
+
+  const handleCombatRestart = useCallback(() => {
+    if (!missionDetail || !roomProgress?.combatRestartAuthorized) return
+    void resetMissionRoom(missionDetail.mission.missionId, 'COMBAT')
+      .then(applyCombatRoomReset)
+      .catch((err) => {
+        setGateMessage(err instanceof Error ? err.message : 'Combat reset rejected')
+      })
+  }, [applyCombatRoomReset, missionDetail, roomProgress?.combatRestartAuthorized])
+
+  const handleCombatDeath = useCallback(() => {
+    if (!missionDetail || !roomProgress?.roomGeneration || combatDeathPending) return
+    setCombatDeathPending(true)
+    const missionId = missionDetail.mission.missionId
+    const generation = roomProgress.roomGeneration
+    void reportCombatDeath(missionId, generation)
+      .then(() => resetMissionRoom(missionId, 'COMBAT'))
+      .then(applyCombatRoomReset)
+      .catch((err) => {
+        setCombatDeathPending(false)
+        setGateMessage(err instanceof Error ? err.message : 'Combat restart rejected')
+      })
+  }, [
+    applyCombatRoomReset,
+    combatDeathPending,
+    missionDetail,
+    roomProgress?.roomGeneration,
+  ])
+
+  return (
+    <div className="field-room">
+      {missionDetail ? (
+        <>
+          <FieldHud
+            missionTitle={missionDetail.mission.title}
+            module={missionDetail.mission.module}
+            level={missionDetail.mission.level}
+            rank={missionDetail.mission.rank}
+            hearts={hearts}
+            pauseOpen={pauseOpen}
+            onTogglePause={() => setPauseOpen((open) => !open)}
+            onReturnToOps={returnToOps}
+          />
+          {gateMessage ? (
+            <p className="field-room__gate-error" role="alert">
+              {gateMessage}
+            </p>
+          ) : null}
+          <div className="field-room__body">
+            <aside className="field-room__sidebar">
+              <FieldObjectives
+                terminalLocated={terminalLocated}
+                unlockedCount={unlockedCount}
+                requiredCount={requiredCount}
+                devicesComplete={devicesComplete}
+                exitReady={exitReady}
+                missionCompleted={missionCompleted}
+              />
+              <FieldMinimap
+                player={playerPos}
+                practiceDoorCount={Math.min(2, practiceDoors.length)}
+                exitReady={exitReady}
+                devicesComplete={devicesComplete}
+                layout={roomLayout}
+              />
+            </aside>
+            <section className="field-room__stage">
+              <div className="field-room__stage-chrome">
+                <h2 className="field-room__stage-title">Security room · top-down view</h2>
+              </div>
+              <div className="field-room__canvas-frame">
+                {roomProgress ? (
+                  <GameErrorBoundary>
+                    <GameCanvas
+                      key={roomProgress.roomGeneration}
+                      missionId={missionDetail.mission.missionId}
+                      deviceId={missionDetail.challenge.deviceId}
+                      documentation={missionDetail.challenge.documentation}
+                      exitReady={exitReady}
+                      practiceDoors={practiceDoors}
+                      inputLocked={inputLocked}
+                      rank={missionDetail.mission.rank}
+                      roomInstance={roomProgress.apiResetCount}
+                      mandatoryTerminalCount={Math.max(
+                        1,
+                        roomProgress.requiredDeviceIds.length ||
+                          roomProgress.requiredDeviceCount ||
+                          1,
+                      )}
+                      combatEnabled
+                      onPlayerMoved={setPlayerPos}
+                      onRoomLayoutReady={(plan) => {
+                        setRoomLayout(plan)
+                        setPlayerPos(plan.playerStart)
+                        setHearts(3)
+                      }}
+                      onHeartsChanged={(next) => setHearts(next)}
+                      onCombatDeath={handleCombatDeath}
+                      onOpenTerminal={() => {
+                        setPracticeEditorDoor(null)
+                        setTerminalLocated(true)
+                        setEditorOpen(true)
+                      }}
+                      onOpenPractice={(door) => {
+                        setPracticeEditorDoor(door)
+                        setEditorOpen(true)
+                      }}
+                      onExitReached={() => {
+                        const generation = roomProgress?.roomGeneration
+                        if (!generation) {
+                          setGateMessage('Active room generation missing — reload mission progress.')
+                          return
+                        }
+                        const finishingReplay = Boolean(roomProgress?.replayActive)
+                        void completeMissionAtExit(missionDetail.mission.missionId, generation)
+                          .then((server) => {
+                            setRoomProgress(server)
+                            setExitReady(false)
+                            setReplayClear(finishingReplay)
+                            saveMissionProgress({
+                              participantCode: playerId,
+                              missionId: missionDetail.mission.missionId,
+                              doorUnlocked: true,
+                              unlockedDeviceIds: server.unlockedDeviceIds,
+                              completed: true,
+                              updatedAt: new Date().toISOString(),
+                            })
+                            setMissionCompleteOpen(true)
+                            refreshSavedAttempt(playerId, missionDetail.mission.missionId)
+                          })
+                          .catch((err) => {
+                            setGateMessage(
+                              err instanceof Error ? err.message : 'Exit completion failed',
+                            )
+                          })
+                      }}
+                    />
+                  </GameErrorBoundary>
+                ) : (
+                  <p className="assist" style={{ margin: 'auto' }}>
+                    Preparing security room…
+                  </p>
+                )}
+              </div>
+            </section>
+          </div>
+          <FieldPauseMenu
+            open={pauseOpen && !editorOpen && !missionCompleteOpen}
+            onResume={() => setPauseOpen(false)}
+            onResetLevel={handleResetLevel}
+            onCombatRestart={handleCombatRestart}
+            combatRestartAvailable={Boolean(roomProgress?.combatRestartAuthorized)}
+            onReturnToOps={returnToOps}
+            resetBusy={resetLevelBusy}
+          />
+        </>
+      ) : (
+        <div className="field-room__body" style={{ placeItems: 'center' }}>
+          <p className="assist">{openingFieldRoom ? 'Opening field room…' : 'Preparing mission…'}</p>
+        </div>
+      )}
+
+      {editorOpen && missionDetail && playerId ? (
+        <ApiRequestEditor
+          participantCode={playerId}
+          mission={
+            practiceEditorDoor
+              ? {
+                  ...missionDetail,
+                  challenge: {
+                    ...missionDetail.challenge,
+                    challengeId: practiceEditorDoor.challengeId,
+                    variantId: practiceEditorDoor.challengeId,
+                    deviceId: practiceEditorDoor.deviceId,
+                    conceptTags: [practiceEditorDoor.conceptTag],
+                    documentation: practiceEditorDoor.documentation,
+                    expectedMethod: practiceEditorDoor.expectedMethod,
+                    pathTemplate: practiceEditorDoor.pathTemplate,
+                    pathParameters: {},
+                    queryParameters: {},
+                  },
+                }
+              : missionDetail
+          }
+          mode={practiceEditorDoor ? 'PRACTICE' : 'MISSION'}
+          onClose={() => {
+            setEditorOpen(false)
+            setPracticeEditorDoor(null)
+          }}
+          onSuccess={(payload) => {
+            if (payload?.exitReady) {
+              setExitReady(true)
+            }
+            refreshSavedAttempt(playerId, missionDetail.mission.missionId)
+          }}
+          onAttemptSaved={() => refreshSavedAttempt(playerId, missionDetail.mission.missionId)}
+          onAdaptivePracticeDoors={setPracticeDoors}
+        />
+      ) : null}
+
+      {missionCompleteOpen && missionDetail ? (
+        <MissionCompleteOverlay
+          missionId={missionDetail.mission.missionId}
+          title={missionDetail.mission.title}
+          replayClear={replayClear}
+          nextMissionTitle={!replayClear && nextMission ? nextMission.title : null}
+          onContinueNext={
+            !replayClear && nextMission && onContinueNextMission
+              ? () => {
+                  setMissionCompleteOpen(false)
+                  setReplayClear(false)
+                  onContinueNextMission(nextMission)
+                }
+              : undefined
+          }
+          onContinue={() => {
+            setMissionCompleteOpen(false)
+            setReplayClear(false)
+            returnToOps()
+          }}
+        />
+      ) : null}
+    </div>
+  )
+}

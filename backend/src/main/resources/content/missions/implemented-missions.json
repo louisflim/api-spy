@@ -1,0 +1,76 @@
+{
+  "missions": [
+    {
+      "missionId": "m1-recruit-l1",
+      "module": 1,
+      "rank": "RECRUIT",
+      "level": 1,
+      "title": "Retrieve a door resource",
+      "status": "IMPLEMENTED",
+      "primaryChallengeId": "chal-m1-get-door-v1",
+      "requiredLessonIds": ["rest-fundamentals", "http-get", "endpoints", "simulated-responses"],
+      "conceptTags": ["http.method.get", "http.endpoint"],
+      "scenarioFocus": "Retrieve a fictional resource using an appropriate HTTP method and endpoint"
+    },
+    {
+      "missionId": "m1-recruit-l2",
+      "module": 1,
+      "rank": "RECRUIT",
+      "level": 2,
+      "title": "Locate a lock with a path parameter",
+      "status": "IMPLEMENTED",
+      "primaryChallengeId": "chal-m1-path-lock-v1",
+      "requiredLessonIds": ["path-parameters", "endpoints", "http-get"],
+      "conceptTags": ["http.endpoint", "http.path_parameter"],
+      "scenarioFocus": "Locate a specific resource through a documented path parameter"
+    },
+    {
+      "missionId": "m1-recruit-l3",
+      "module": 1,
+      "rank": "RECRUIT",
+      "level": 3,
+      "title": "Filter sensors with a query parameter",
+      "status": "IMPLEMENTED",
+      "primaryChallengeId": "chal-m1-query-sensor-v1",
+      "requiredLessonIds": ["query-parameters", "endpoints", "http-get"],
+      "conceptTags": ["http.endpoint", "http.query_parameter"],
+      "scenarioFocus": "Filter a collection using relevant query parameters"
+    },
+    {
+      "missionId": "m1-recruit-l4",
+      "module": 1,
+      "rank": "RECRUIT",
+      "level": 4,
+      "title": "Submit a checkpoint registration",
+      "status": "IMPLEMENTED",
+      "primaryChallengeId": "chal-m1-post-registration-v1",
+      "requiredLessonIds": ["http-post", "endpoints", "simulated-responses"],
+      "conceptTags": ["http.method.post", "http.endpoint"],
+      "scenarioFocus": "Submit a fictional security registration using POST and the correct endpoint"
+    },
+    {
+      "missionId": "m1-recruit-l5",
+      "module": 1,
+      "rank": "RECRUIT",
+      "level": 5,
+      "title": "Update a clearance record",
+      "status": "IMPLEMENTED",
+      "primaryChallengeId": "chal-m1-put-clearance-v1",
+      "requiredLessonIds": ["http-put-patch", "path-parameters", "endpoints"],
+      "conceptTags": ["http.method.put", "http.endpoint", "http.path_parameter"],
+      "scenarioFocus": "Update an existing fictional access-control resource with PUT and a path identifier"
+    },
+    {
+      "missionId": "m1-recruit-l6",
+      "module": 1,
+      "rank": "RECRUIT",
+      "level": 6,
+      "title": "Deactivate a compromised badge",
+      "status": "IMPLEMENTED",
+      "primaryChallengeId": "chal-m1-delete-badge-v1",
+      "requiredLessonIds": ["http-delete", "path-parameters", "endpoints"],
+      "conceptTags": ["http.method.delete", "http.endpoint", "http.path_parameter"],
+      "scenarioFocus": "Deactivate a compromised fictional access badge with DELETE and the correct resource path"
+    }
+  ]
+}

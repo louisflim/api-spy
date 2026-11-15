@@ -1,0 +1,156 @@
+{
+  "moduleId": "module0",
+  "title": "Agent Training Academy",
+  "topics": [
+    {
+      "id": "welcome",
+      "order": 1,
+      "title": "Welcome to the Agency",
+      "objective": "Learn why you are here and how to move through HQ.",
+      "controlIntro": "Welcome, recruit. I am CONTROL. This academy is orientation only — no grades, no SCR, and no live mission doors.",
+      "explanation": "API Spy trains you to read documentation and build HTTP requests inside fictional escape-room missions. You play as a field agent. Training rooms teach concepts safely. Independent missions on the Operations Board are separate assessed practice rooms.",
+      "workedExample": {
+        "title": "Movement briefing",
+        "notes": "Use WASD or arrow keys to walk. Stand near a yellow terminal and press E to open the API editor. Hearts never drop for API mistakes.",
+        "body": "Controls: WASD / Arrows · Interact: E · API mistakes: no heart loss"
+      },
+      "interaction": {
+        "type": "multi_choice",
+        "prompt": "Which statement correctly describes Module 0?",
+        "options": [
+          { "id": "a", "label": "It grades your first independent mission for RCA." },
+          { "id": "b", "label": "It is ungraded orientation before independent missions." },
+          { "id": "c", "label": "It unlocks Door Alpha permanently." }
+        ],
+        "correctOptionId": "b",
+        "successFeedback": "Correct. Module 0 is orientation. Graded first attempts begin only on independent Module 1 missions.",
+        "failureFeedback": "Not quite. Module 0 never grades RCA or unlocks live mission doors. Review the briefing and try again."
+      },
+      "completionMessage": "Topic complete. You understand training versus independent operations."
+    },
+    {
+      "id": "understanding-apis",
+      "order": 2,
+      "title": "Understanding APIs",
+      "objective": "See how a client request becomes a server response.",
+      "controlIntro": "An API is a contract: you send a structured request, the server replies with a status and body. In API Spy every exchange is fictional.",
+      "explanation": "Think of an intelligence records desk. Your terminal asks for a file. The desk replies with a code (such as 200) and JSON. Nothing you type leaves this training network.",
+      "workedExample": {
+        "title": "Fictional records exchange",
+        "notes": "Request GET /api/training/records/demo → Response 200 with a sample agent card.",
+        "body": "GET /api/training/records/demo\n→ 200 { \"id\": \"demo\", \"clearance\": \"trainee\" }"
+      },
+      "interaction": {
+        "type": "request_response",
+        "prompt": "Press Send on the demo request. Confirm you can read the simulated 200 response.",
+        "demoMethod": "GET",
+        "demoPath": "/api/training/records/demo",
+        "demoStatus": 200,
+        "demoBody": { "id": "demo", "clearance": "trainee", "note": "Training record only." },
+        "successFeedback": "Good. You read a simulated response. Live missions use different paths.",
+        "failureFeedback": "Send the demo request and read the status before continuing."
+      },
+      "completionMessage": "Topic complete. You can follow a request → response loop."
+    },
+    {
+      "id": "http-methods",
+      "order": 3,
+      "title": "HTTP Methods",
+      "objective": "Choose the right method for a fictional objective.",
+      "controlIntro": "Methods name the action. GET reads. POST creates. PUT replaces. PATCH updates part. DELETE removes. Module 1 focuses on GET first.",
+      "explanation": "Each method has a job. Escaping a locked door usually means retrieving status with GET. Creating a new dossier would use POST. API Spy Module 1 practice rooms emphasize GET.",
+      "workedExample": {
+        "title": "Separate fictional examples",
+        "notes": "GET /api/training/briefings/intro · POST /api/training/notes · DELETE /api/training/notes/temp-1",
+        "body": "GET reads · POST creates · PUT replaces · PATCH patches · DELETE removes"
+      },
+      "interaction": {
+        "type": "multi_choice",
+        "prompt": "You must retrieve an existing door status without changing it. Which method fits?",
+        "options": [
+          { "id": "a", "label": "POST" },
+          { "id": "b", "label": "DELETE" },
+          { "id": "c", "label": "GET" },
+          { "id": "d", "label": "PATCH" }
+        ],
+        "correctOptionId": "c",
+        "successFeedback": "Correct. GET retrieves a representation without creating or deleting the resource.",
+        "failureFeedback": "Retrieve means read. Choose GET, then revisit the method chart if needed."
+      },
+      "completionMessage": "Topic complete. You can match objectives to HTTP methods."
+    },
+    {
+      "id": "endpoints",
+      "order": 4,
+      "title": "Endpoints and Resources",
+      "objective": "Recognize resource paths in fictional URLs.",
+      "controlIntro": "An endpoint is the path after the host — the resource you are talking to. Spelling matters.",
+      "explanation": "A path like /api/training/lockers/academy names a locker resource. Collections often look like /api/items and one item like /api/items/alpha. Mission doors use different paths than training lockers.",
+      "workedExample": {
+        "title": "URL structure",
+        "notes": "https://hq.local/api/training/lockers/academy → path /api/training/lockers/academy",
+        "body": "/api/{collection}/{id} identifies one resource in a collection."
+      },
+      "interaction": {
+        "type": "multi_choice",
+        "prompt": "Which path correctly targets the academy training locker?",
+        "options": [
+          { "id": "a", "label": "/api/doors/alpha" },
+          { "id": "b", "label": "/api/training/lockers/academy" },
+          { "id": "c", "label": "/api/locks/north-gate" }
+        ],
+        "correctOptionId": "b",
+        "successFeedback": "Correct. Training lockers live under /api/training/…. Door Alpha is a graded Module 1 path — leave it for later.",
+        "failureFeedback": "Avoid mission door paths here. Pick the /api/training/lockers/academy endpoint."
+      },
+      "completionMessage": "Topic complete. You can tell training endpoints from mission endpoints."
+    },
+    {
+      "id": "parameters-responses",
+      "order": 5,
+      "title": "Parameters and Responses",
+      "objective": "Separate path params, query params, and common status codes.",
+      "controlIntro": "Path parameters sit inside the path. Query parameters follow ?. Status codes tell you how the server answered.",
+      "explanation": "Path example: /api/training/crates/{crateId} → /api/training/crates/crate-42. Query example: /api/training/signals?channel=green. Statuses: 200 OK, 201 Created, 400 Bad Request, 401 Unauthorized, 404 Not Found, 500 Server Error.",
+      "workedExample": {
+        "title": "Statuses to remember",
+        "notes": "200 success · 201 created · 400 client mistake · 401 auth · 404 missing · 500 server fault",
+        "body": "Wrong path or params often produce 400-style simulated errors in API Spy."
+      },
+      "interaction": {
+        "type": "multi_choice",
+        "prompt": "In /api/training/crates/crate-42, what is crate-42?",
+        "options": [
+          { "id": "a", "label": "A query parameter" },
+          { "id": "b", "label": "A path parameter value" },
+          { "id": "c", "label": "An HTTP method" }
+        ],
+        "correctOptionId": "b",
+        "successFeedback": "Correct. It replaces {crateId} inside the path. Query parameters would appear after ?.",
+        "failureFeedback": "Values inside the path are path parameters. Query parameters appear after ?."
+      },
+      "completionMessage": "Topic complete. You can separate parameters and read status codes."
+    },
+    {
+      "id": "terminal-field",
+      "order": 6,
+      "title": "Terminal Field Training",
+      "objective": "Walk to a training terminal and submit a fictional GET.",
+      "controlIntro": "Enter the safe training room. Walk to the terminal, press E, and retrieve /api/training/lockers/academy. Unlimited retries. No graded first attempt.",
+      "explanation": "This room has no enemies. Completing the terminal interaction finishes Module 0. The contract uses a training path — never Door Alpha.",
+      "workedExample": {
+        "title": "Training contract reminder",
+        "notes": "GET /api/training/lockers/academy → 200 training locker cleared.",
+        "body": "Challenge id: chal-m0-training-terminal · Mode: TRAINING"
+      },
+      "interaction": {
+        "type": "terminal_training",
+        "prompt": "Complete the training terminal request successfully.",
+        "challengeId": "chal-m0-training-terminal",
+        "successFeedback": "Training terminal cleared. Orientation can be marked complete.",
+        "failureFeedback": "Check method and path against the training documentation, then retry."
+      },
+      "completionMessage": "Field training complete. Report back to the Operations Board when ready."
+    }
+  ]
+}

@@ -1,0 +1,94 @@
+{
+  "missions": [
+    {
+      "missionId": "m1-recruit-l1",
+      "mandatoryChallengeIds": [
+        "chal-m1-get-door-v1",
+        "chal-m1-get-door-v3",
+        "chal-m1-get-door-v4",
+        "chal-m1-get-door-v5",
+        "chal-m1-get-door-v6"
+      ],
+      "verificationChallengeIds": [
+        "chal-m1-get-door-v1",
+        "chal-m1-get-door-v2"
+      ],
+      "finalLockChallengeId": "chal-m1-final-lock-l1"
+    },
+    {
+      "missionId": "m1-recruit-l2",
+      "mandatoryChallengeIds": [
+        "chal-m1-path-lock-v1",
+        "chal-m1-path-lock-v3",
+        "chal-m1-path-lock-v4",
+        "chal-m1-path-lock-v5",
+        "chal-m1-path-lock-v6"
+      ],
+      "verificationChallengeIds": [
+        "chal-m1-path-lock-v1",
+        "chal-m1-path-lock-v2"
+      ],
+      "finalLockChallengeId": "chal-m1-final-lock-l2"
+    },
+    {
+      "missionId": "m1-recruit-l3",
+      "mandatoryChallengeIds": [
+        "chal-m1-query-sensor-v1",
+        "chal-m1-query-sensor-v3",
+        "chal-m1-query-sensor-v4",
+        "chal-m1-query-sensor-v5",
+        "chal-m1-query-sensor-v6"
+      ],
+      "verificationChallengeIds": [
+        "chal-m1-query-sensor-v1",
+        "chal-m1-query-sensor-v2"
+      ],
+      "finalLockChallengeId": "chal-m1-final-lock-l3"
+    },
+    {
+      "missionId": "m1-recruit-l4",
+      "mandatoryChallengeIds": [
+        "chal-m1-post-registration-v1",
+        "chal-m1-post-registration-v3",
+        "chal-m1-post-registration-v4",
+        "chal-m1-post-registration-v5",
+        "chal-m1-post-registration-v6"
+      ],
+      "verificationChallengeIds": [
+        "chal-m1-post-registration-v1",
+        "chal-m1-post-registration-v2"
+      ],
+      "finalLockChallengeId": "chal-m1-final-lock-l4"
+    },
+    {
+      "missionId": "m1-recruit-l5",
+      "mandatoryChallengeIds": [
+        "chal-m1-put-clearance-v1",
+        "chal-m1-put-clearance-v3",
+        "chal-m1-put-clearance-v4",
+        "chal-m1-put-clearance-v5",
+        "chal-m1-put-clearance-v6"
+      ],
+      "verificationChallengeIds": [
+        "chal-m1-put-clearance-v1",
+        "chal-m1-put-clearance-v2"
+      ],
+      "finalLockChallengeId": "chal-m1-final-lock-l5"
+    },
+    {
+      "missionId": "m1-recruit-l6",
+      "mandatoryChallengeIds": [
+        "chal-m1-delete-badge-v1",
+        "chal-m1-delete-badge-v3",
+        "chal-m1-delete-badge-v4",
+        "chal-m1-delete-badge-v5",
+        "chal-m1-delete-badge-v6"
+      ],
+      "verificationChallengeIds": [
+        "chal-m1-delete-badge-v1",
+        "chal-m1-delete-badge-v2"
+      ],
+      "finalLockChallengeId": "chal-m1-final-lock-l6"
+    }
+  ]
+}

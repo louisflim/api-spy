@@ -301,6 +301,54 @@
         "chal-m1-delete-session-v1"
       ],
       "finalLockChallengeId": "chal-m1-final-lock-l6"
+    },
+    {
+      "missionId": "m1-recruit-l7",
+      "mandatoryChallengeIds": [
+        "chal-m1-boss-status-v1",
+        "chal-m1-boss-circuit-v1",
+        "chal-m1-boss-alarms-v1",
+        "chal-m1-boss-breach-v1",
+        "chal-m1-boss-lockdown-v1"
+      ],
+      "mandatoryScenarioPools": [
+        [
+          "chal-m1-boss-status-v1",
+          "chal-m1-boss-status-v3",
+          "chal-m1-boss-status-v2"
+        ],
+        [
+          "chal-m1-boss-circuit-v1",
+          "chal-m1-boss-circuit-v3",
+          "chal-m1-boss-circuit-v2"
+        ],
+        [
+          "chal-m1-boss-alarms-v1",
+          "chal-m1-boss-alarms-v3",
+          "chal-m1-boss-alarms-v2"
+        ],
+        [
+          "chal-m1-boss-breach-v1",
+          "chal-m1-boss-breach-v3",
+          "chal-m1-boss-breach-v2"
+        ],
+        [
+          "chal-m1-boss-lockdown-v1",
+          "chal-m1-boss-lockdown-v3",
+          "chal-m1-boss-lockdown-v2"
+        ]
+      ],
+      "verificationChallengeIds": [
+        "chal-m1-boss-status-v1",
+        "chal-m1-boss-status-v2"
+      ],
+      "verificationScenarioPool": [
+        "chal-m1-boss-status-v2",
+        "chal-m1-boss-circuit-v2",
+        "chal-m1-boss-alarms-v2",
+        "chal-m1-boss-circuit-v1"
+      ],
+      "finalLockChallengeId": "chal-m1-final-lock-l7"
     }
   ]
 }

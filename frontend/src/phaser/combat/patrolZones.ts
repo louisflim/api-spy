@@ -127,6 +127,26 @@ export const FOOTPRINT_PATROL_ROUTES: Record<FootprintId, PatrolRoute[]> = {
       ],
     },
   ],
+  security_command_nexus: [
+    {
+      id: 'west-ring',
+      waypoints: [
+        { col: 2, row: 5 },
+        { col: 3, row: 8 },
+        { col: 2, row: 11 },
+        { col: 3, row: 12 },
+      ],
+    },
+    {
+      id: 'east-ring',
+      waypoints: [
+        { col: 17, row: 5 },
+        { col: 16, row: 8 },
+        { col: 17, row: 11 },
+        { col: 16, row: 12 },
+      ],
+    },
+  ],
 }
 
 /** @deprecated Prefer {@link patrolRoutesForFootprint} — kept for older selftests. */

@@ -5,7 +5,7 @@ import type { FootprintId } from './types'
  * Replays keep the same footprint because selection depends only on missionId
  * (not roomInstance / apiResetCount). Seeded props may still vary by roomInstance.
  *
- * Module-1 Recruit L1–L6 map to six authored HQ footprints; other missions
+ * Module-1 Recruit L1–L7 map to seven authored HQ footprints; other missions
  * fall back by level number when present in the id, else Security Office.
  */
 export function footprintIdForMission(missionId: string): FootprintId {
@@ -17,6 +17,7 @@ export function footprintIdForMission(missionId: string): FootprintId {
   if (id === 'm1-recruit-l4') return 'security_checkpoint'
   if (id === 'm1-recruit-l5') return 'security_clearance_hall'
   if (id === 'm1-recruit-l6') return 'security_purge_bay'
+  if (id === 'm1-recruit-l7') return 'security_command_nexus'
 
   const levelMatch = id.match(/-l(\d+)\b/)
   if (levelMatch) {
@@ -27,6 +28,7 @@ export function footprintIdForMission(missionId: string): FootprintId {
     if (level === 4) return 'security_checkpoint'
     if (level === 5) return 'security_clearance_hall'
     if (level === 6) return 'security_purge_bay'
+    if (level === 7) return 'security_command_nexus'
     return 'security_server_wing'
   }
 

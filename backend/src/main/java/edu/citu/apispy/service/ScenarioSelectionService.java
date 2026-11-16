@@ -29,10 +29,12 @@ public class ScenarioSelectionService {
 	}
 
 	/**
-	 * Selects mandatory challenge IDs for the active tier.
-	 * First career/room selection uses the fixed escalation prefix (stable curriculum).
-	 * Later eligible generations (API reset / replay) rotate through authored pools and
-	 * avoid immediately repeating the previous run when alternatives exist.
+	 * Selects mandatory challenge IDs for the active tier from authored scenario pools.
+	 * Selection is deterministic for a given {@code roomGeneration} (stable across refresh /
+	 * terminal reopen) and varies across different room generations / players.
+	 * When {@code previousChallengeIds} is present, immediately repeating those ids is avoided
+	 * when the pool has alternatives. Falls back to the fixed escalation prefix only when no
+	 * pool is authored for a slot.
 	 */
 	public List<String> selectMandatoryChallengeIds(
 			String missionId,
@@ -40,34 +42,57 @@ public class ScenarioSelectionService {
 			UUID roomGeneration,
 			List<String> previousChallengeIds) {
 		MissionEscalationDefinition definition = deviceEscalationService.find(missionId).orElse(null);
-		boolean rotate = previousChallengeIds != null && !previousChallengeIds.isEmpty();
-		if (!rotate) {
+		int count = deviceEscalationService.mandatoryDeviceCount(missionId, apiResetCount);
+		List<String> selected = new ArrayList<>();
+		Set<String> usedThisRun = new LinkedHashSet<>();
+		Set<String> previous = previousChallengeIds == null
+				? Set.of()
+				: new LinkedHashSet<>(previousChallengeIds);
+
+		boolean anyPool = definition != null
+				&& definition.mandatoryScenarioPools() != null
+				&& !definition.mandatoryScenarioPools().isEmpty();
+		if (!anyPool) {
 			return deviceEscalationService.requiredMandatoryContracts(missionId, apiResetCount).stream()
 					.map(ApiContract::getChallengeId)
 					.toList();
 		}
 
-		int count = deviceEscalationService.mandatoryDeviceCount(apiResetCount);
-		List<String> selected = new ArrayList<>();
-		Set<String> usedThisRun = new LinkedHashSet<>();
-		Set<String> previous = new LinkedHashSet<>(previousChallengeIds);
-
 		for (int slot = 0; slot < count; slot++) {
 			List<String> pool = poolForSlot(definition, slot);
+			if (pool.isEmpty()) {
+				List<ApiContract> prefix = deviceEscalationService.requiredMandatoryContracts(missionId, apiResetCount);
+				if (slot < prefix.size()) {
+					selected.add(prefix.get(slot).getChallengeId());
+					usedThisRun.add(prefix.get(slot).getChallengeId());
+					continue;
+				}
+				throw new IllegalStateException("No scenario pool for mission " + missionId + " slot " + slot);
+			}
 			String pick = pickFromPool(pool, roomGeneration, missionId, slot, previous, usedThisRun);
 			selected.add(pick);
 			usedThisRun.add(pick);
 		}
 
-		if (deviceEscalationService.finalLockRequired(apiResetCount) && definition != null
+		if (deviceEscalationService.finalLockRequired(missionId, apiResetCount) && definition != null
 				&& definition.finalLockChallengeId() != null) {
 			selected.add(definition.finalLockChallengeId());
 		}
 		return List.copyOf(selected);
 	}
 
-	/** Verification plan for TVP — prefer pool when authored. */
+	/**
+	 * Verification plan for TVP — primary mandatory plus one seeded pool pick that differs
+	 * from the primary when alternatives exist. Bound to roomGeneration for refresh stability.
+	 */
 	public List<ApiContract> verificationPlan(String missionId, List<String> selectedMandatoryIds) {
+		return verificationPlan(missionId, selectedMandatoryIds, null);
+	}
+
+	public List<ApiContract> verificationPlan(
+			String missionId,
+			List<String> selectedMandatoryIds,
+			UUID roomGeneration) {
 		MissionEscalationDefinition definition = deviceEscalationService.find(missionId).orElse(null);
 		List<String> ids = new ArrayList<>();
 		if (selectedMandatoryIds != null && !selectedMandatoryIds.isEmpty()) {
@@ -80,17 +105,29 @@ public class ScenarioSelectionService {
 				|| definition.verificationScenarioPool().isEmpty()
 				? (definition == null ? List.of() : definition.verificationChallengeIds())
 				: definition.verificationScenarioPool();
-		for (String candidate : verifyPool) {
-			if (!ids.contains(candidate)) {
-				ids.add(candidate);
-				break;
+		UUID seed = roomGeneration == null ? UUID.nameUUIDFromBytes(missionId.getBytes(StandardCharsets.UTF_8)) : roomGeneration;
+		Set<String> previous = new LinkedHashSet<>(ids);
+		Set<String> used = new LinkedHashSet<>(ids);
+		Set<String> selectedSet = selectedMandatoryIds == null
+				? Set.of()
+				: new LinkedHashSet<>(selectedMandatoryIds);
+		// Follow-up verification must not reuse another selected mandatory challenge —
+		// those map to distinct physical terminals (Command Nexus boss).
+		List<String> nonSelectedPool = verifyPool.stream()
+				.filter(id -> !selectedSet.contains(id))
+				.toList();
+		if (!nonSelectedPool.isEmpty()) {
+			String pick = pickFromPool(nonSelectedPool, seed, missionId, 100, previous, used);
+			if (!ids.contains(pick)) {
+				ids.add(pick);
 			}
 		}
 		if (ids.size() < 2 && definition != null) {
 			for (String fallback : definition.verificationChallengeIds()) {
-				if (!ids.contains(fallback)) {
-					ids.add(fallback);
+				if (ids.contains(fallback) || selectedSet.contains(fallback)) {
+					continue;
 				}
+				ids.add(fallback);
 				if (ids.size() >= 2) {
 					break;
 				}

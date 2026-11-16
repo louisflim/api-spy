@@ -18,10 +18,8 @@ interface MissionBriefingScreenProps {
   mission: MissionSummary
   onBack: () => void
   onBeginMission: () => void
-  /** Open Module 0 orientation on the Operations Board. */
-  onCompleteOrientation: () => void
-  /** Open mission lesson Training Academy while preserving this briefing. */
-  onCompleteTraining: () => void
+  /** Open existing mission-specific level training (/missions/:id/training). */
+  onOpenLevelTraining: () => void
   /** Optional ungraded practice for this mission when a drill is authored. */
   onPractice?: (mission: MissionSummary) => void
 }
@@ -36,8 +34,7 @@ export function MissionBriefingScreen({
   mission,
   onBack,
   onBeginMission,
-  onCompleteOrientation,
-  onCompleteTraining,
+  onOpenLevelTraining,
   onPractice,
 }: MissionBriefingScreenProps) {
   const [loadState, setLoadState] = useState<LoadState>('loading')
@@ -99,12 +96,6 @@ export function MissionBriefingScreen({
   const rankLabel = RANK_LABELS[normalizeRank(mission.rank)]
   const ready =
     loadState === 'ready' && orientationCompleted && missingLessonIds.length === 0
-
-  const trainingTarget: 'orientation' | 'lessons' | null = !orientationCompleted
-    ? 'orientation'
-    : missingLessonIds.length > 0
-      ? 'lessons'
-      : null
 
   return (
     <div className="briefing" role="main" aria-label="Mission briefing">
@@ -226,21 +217,9 @@ export function MissionBriefingScreen({
               </button>
             ) : null}
 
-            {trainingTarget === 'orientation' ? (
-              <button type="button" className="ops-launch" onClick={onCompleteOrientation}>
-                <span aria-hidden="true">{'<<'}</span>
-                Open Training Academy
-                <span aria-hidden="true">{'>>'}</span>
-              </button>
-            ) : null}
-
-            {trainingTarget === 'lessons' ? (
-              <button type="button" className="ops-launch" onClick={onCompleteTraining}>
-                <span aria-hidden="true">{'<<'}</span>
-                Open Mission Training
-                <span aria-hidden="true">{'>>'}</span>
-              </button>
-            ) : null}
+            <button type="button" className="ops-practice" onClick={onOpenLevelTraining}>
+              Open Level Training
+            </button>
 
             <button
               type="button"

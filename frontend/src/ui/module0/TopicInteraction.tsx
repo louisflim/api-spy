@@ -20,15 +20,20 @@ export function TopicInteraction({
 }: TopicInteractionProps) {
   const interaction = topic.interaction
   const [selected, setSelected] = useState<string | null>(null)
-  const [feedback, setFeedback] = useState<string | null>(null)
+  const [feedback, setFeedback] = useState<string | null>(
+    alreadyComplete ? interaction.successFeedback : null,
+  )
   const [ok, setOk] = useState(alreadyComplete)
   const [demoSent, setDemoSent] = useState(alreadyComplete)
 
   if (interaction.type === 'terminal_training') {
     return (
       <div className="m0-interaction">
-        <h3>Interactive exercise</h3>
+        <h3>Interactive exercise · field training</h3>
         <p>{interaction.prompt}</p>
+        <p className="m0-visual__lead">
+          Educational only — unlimited retries, no graded first attempt, no TVP.
+        </p>
         <button type="button" className="dash-btn dash-btn--primary" onClick={onLaunchTerminalTraining}>
           Enter training room
         </button>
@@ -40,7 +45,7 @@ export function TopicInteraction({
                 Confirm field training complete
               </button>
             ) : (
-              <p className="dash-note">Interaction already completed.</p>
+              <p className="dash-note">Field training already completed. You may revisit anytime.</p>
             )}
           </>
         ) : (
@@ -53,14 +58,26 @@ export function TopicInteraction({
   if (interaction.type === 'request_response') {
     return (
       <div className="m0-interaction">
-        <h3>Interactive exercise</h3>
+        <h3>Interactive exercise · simulated exchange</h3>
         <p>{interaction.prompt}</p>
-        <pre className="m0-demo-pre">
-{`${interaction.demoMethod ?? 'GET'} ${interaction.demoPath ?? ''}
-
-Response ${interaction.demoStatus ?? 200}
+        <div className="m0-response-card" aria-label="Demo request and response">
+          <div className="m0-response-card__status">
+            <span>{interaction.demoMethod ?? 'GET'}</span>
+            <strong>{interaction.demoPath ?? ''}</strong>
+          </div>
+          <pre className="m0-demo-pre">
+{`Response ${interaction.demoStatus ?? 200}
 ${JSON.stringify(interaction.demoBody ?? {}, null, 2)}`}
-        </pre>
+          </pre>
+          <ul className="m0-annotation-list">
+            <li>
+              <strong>Status</strong> — how the fictional server answered
+            </li>
+            <li>
+              <strong>Body</strong> — JSON payload for this training record only
+            </li>
+          </ul>
+        </div>
         <button
           type="button"
           className="dash-btn dash-btn--primary"
@@ -84,12 +101,15 @@ ${JSON.stringify(interaction.demoBody ?? {}, null, 2)}`}
     <div className="m0-interaction">
       <h3>Interactive exercise</h3>
       <p>{interaction.prompt}</p>
+      <p className="m0-visual__lead">Unlimited retries. Mistakes are not graded and never affect RCA/SCR/HLCR.</p>
       <div className="m0-options" role="group" aria-label="Answer choices">
         {(interaction.options ?? []).map((option) => (
           <button
             key={option.id}
             type="button"
-            className={`m0-option ${selected === option.id ? 'is-selected' : ''}`.trim()}
+            className={`m0-option ${selected === option.id ? 'is-selected' : ''} ${
+              ok && alreadyComplete && option.id === interaction.correctOptionId ? 'is-correct' : ''
+            }`.trim()}
             disabled={ok && alreadyComplete}
             onClick={() => setSelected(option.id)}
           >
@@ -118,7 +138,7 @@ ${JSON.stringify(interaction.demoBody ?? {}, null, 2)}`}
       {feedback ? (
         <ControlGuide tone={ok ? 'success' : 'warn'} message={feedback} />
       ) : (
-        <ControlGuide message="Unlimited retries. Mistakes are not graded." />
+        <ControlGuide message="Review the briefing above, then choose the best statement." />
       )}
     </div>
   )

@@ -151,6 +151,14 @@ export async function fetchLessons(module = 1): Promise<Lesson[]> {
   return response.json()
 }
 
+export async function fetchLesson(lessonId: string): Promise<Lesson> {
+  const response = await apiFetch(`/api/lessons/${encodeURIComponent(lessonId)}`)
+  if (!response.ok) {
+    throw new Error(`Lesson failed: ${response.status}`)
+  }
+  return response.json()
+}
+
 export async function introduceLesson(lessonId: string): Promise<void> {
   const response = await apiFetch(`/api/lessons/${encodeURIComponent(lessonId)}/introduce`, {
     method: 'POST',

@@ -24,7 +24,7 @@ import { RegisterScreen } from '../screens/RegisterScreen'
 import { isMissionCompleted, isMissionInProgress } from '../storage/attemptStorage'
 import type { MissionSummary } from '../types/api'
 import { useMissionOutlet } from './MissionRoute'
-import { parsePracticeFrom, paths, type PracticeFrom } from './paths'
+import { parsePracticeFrom, paths, safeInternalPath, type PracticeFrom } from './paths'
 
 function isInProgressMission(
   mission: MissionSummary,
@@ -148,13 +148,18 @@ export function OperationsPage() {
 
 export function TrainingAcademyPage() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const returnTo = safeInternalPath(searchParams.get('returnTo'))
+  const leaveAcademy = () => navigate(returnTo ?? paths.operations)
+
   return (
     <OperationsBoardScreen
-      key="training-academy"
+      key={`training-academy-${returnTo ?? 'ops'}`}
       initialModule={0}
       onPlay={(mission) => navigate(paths.missionBriefing(mission.missionId))}
       onPractice={(mission) => navigate(paths.missionPractice(mission.missionId, 'ops'))}
-      onOrientationCompleted={() => navigate(paths.operations)}
+      onOrientationCompleted={leaveAcademy}
+      onReturnToBriefing={returnTo ? leaveAcademy : undefined}
     />
   )
 }
@@ -195,8 +200,7 @@ export function MissionBriefingPage() {
       mission={mission}
       onBack={() => navigate(paths.operationsModule(mission.module))}
       onBeginMission={() => navigate(paths.missionField(mission.missionId))}
-      onCompleteOrientation={() => navigate(paths.trainingAcademy)}
-      onCompleteTraining={() => navigate(paths.missionTraining(mission.missionId))}
+      onOpenLevelTraining={() => navigate(paths.missionTraining(mission.missionId))}
       onPractice={(m) => navigate(paths.missionPractice(m.missionId, 'briefing'))}
     />
   )

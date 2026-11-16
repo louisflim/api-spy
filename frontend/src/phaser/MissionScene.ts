@@ -1,5 +1,4 @@
 import Phaser from 'phaser'
-import type { AdaptivePracticeDoor } from '../types/api'
 import { CombatSystem } from './combat'
 import { COMBAT_TEXTURE_KEYS, GUARD_SHEET_PATH } from './combat/combatArt'
 import { PATROL_GUARD_CONFIG } from './combat/enemyTypes'
@@ -10,12 +9,10 @@ import { ROOM_HEIGHT, ROOM_WIDTH } from './roomLayout'
 
 export const GAME_EVENTS = {
   OPEN_TERMINAL: 'open-terminal',
-  OPEN_PRACTICE: 'open-practice',
   CLOSE_TERMINAL: 'close-terminal',
   DOOR_UNLOCKED: 'door-unlocked',
   EXIT_READY: 'exit-ready',
   EXIT_REACHED: 'exit-reached',
-  PRACTICE_DOORS: 'practice-doors',
   INPUT_LOCK: 'input-lock',
   PLAYER_MOVED: 'player-moved',
   ROOM_LAYOUT_READY: 'room-layout-ready',
@@ -42,19 +39,23 @@ export class MissionScene extends Phaser.Scene {
   }
   private interactKey!: Phaser.Input.Keyboard.Key
   private nearTerminalIndex = -1
-  private nearPracticeIndex = -1
   private nearExit = false
   private exitReady = false
   private inputLocked = false
   private missionId = 'm1-recruit-l1'
   private deviceId = 'door-alpha'
   private documentation = ''
+  /** Per-terminal bindings aligned with mandatorySprites index order. */
+  private terminalBindings: Array<{
+    deviceId: string
+    challengeId: string
+    documentation: string
+    finalLock: boolean
+  }> = []
   private rank = 'RECRUIT'
   private roomInstance = 0
   private mandatoryTerminalCount = 1
-  private practiceDoors: AdaptivePracticeDoor[] = []
   private mandatorySprites: Phaser.Physics.Arcade.Sprite[] = []
-  private practiceSprites: Phaser.Physics.Arcade.Sprite[] = []
   private promptText!: Phaser.GameObjects.Text
   private facing: Facing = 'down'
   private readonly speed = 180
@@ -76,11 +77,17 @@ export class MissionScene extends Phaser.Scene {
     missionId?: string
     deviceId?: string
     documentation?: string
-    practiceDoors?: AdaptivePracticeDoor[]
     inputLocked?: boolean
     rank?: string
     roomInstance?: number
     mandatoryTerminalCount?: number
+    /** One binding per physical mandatory terminal (includes final lock when required). */
+    terminalBindings?: Array<{
+      deviceId: string
+      challengeId: string
+      documentation: string
+      finalLock: boolean
+    }>
     /** Mission field only — Practice Mode and Module 0 stay enemy-free. */
     combatEnabled?: boolean
   }): void {
@@ -88,11 +95,14 @@ export class MissionScene extends Phaser.Scene {
     this.missionId = data?.missionId ?? this.missionId
     this.deviceId = data?.deviceId ?? this.deviceId
     this.documentation = data?.documentation ?? this.documentation
-    this.practiceDoors = (data?.practiceDoors ?? []).slice(0, 2)
+    this.terminalBindings = Array.isArray(data?.terminalBindings) ? data.terminalBindings : []
     this.inputLocked = Boolean(data?.inputLocked)
     this.rank = data?.rank ?? this.rank
     this.roomInstance = data?.roomInstance ?? this.roomInstance
-    this.mandatoryTerminalCount = Math.max(1, data?.mandatoryTerminalCount ?? 1)
+    this.mandatoryTerminalCount = Math.max(
+      1,
+      data?.mandatoryTerminalCount ?? this.terminalBindings.length ?? 1,
+    )
     this.combatEnabled = Boolean(data?.combatEnabled)
   }
 
@@ -195,17 +205,14 @@ export class MissionScene extends Phaser.Scene {
     }
 
     this.game.events.on(GAME_EVENTS.EXIT_READY, this.onExitReady, this)
-    this.game.events.on(GAME_EVENTS.PRACTICE_DOORS, this.onPracticeDoors, this)
     this.game.events.on(GAME_EVENTS.INPUT_LOCK, this.onInputLock, this)
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.game.events.off(GAME_EVENTS.EXIT_READY, this.onExitReady, this)
-      this.game.events.off(GAME_EVENTS.PRACTICE_DOORS, this.onPracticeDoors, this)
       this.game.events.off(GAME_EVENTS.INPUT_LOCK, this.onInputLock, this)
       this.combat?.destroy()
       this.combat = null
     })
 
-    this.renderPracticeDoors(this.practiceDoors)
     this.game.events.emit(GAME_EVENTS.ROOM_LAYOUT_READY, this.layout)
     this.emitPlayerPosition(true)
   }
@@ -357,6 +364,13 @@ export class MissionScene extends Phaser.Scene {
       sprite.setDepth(8 + pos.y)
       sprite.setData('kind', 'mandatory')
       sprite.setData('index', i)
+      const binding = this.terminalBindings[i]
+      if (binding) {
+        sprite.setData('deviceId', binding.deviceId)
+        sprite.setData('challengeId', binding.challengeId)
+        sprite.setData('documentation', binding.documentation)
+        sprite.setData('finalLock', binding.finalLock)
+      }
       this.mandatorySprites.push(sprite)
       this.add.image(pos.x, pos.y + 12, 'spy-shadow').setAlpha(0.3).setDepth(4)
     }
@@ -375,26 +389,6 @@ export class MissionScene extends Phaser.Scene {
     }
     this.exitSprite.refreshBody()
     this.exitSprite.setDepth(8 + this.layout.exit.y)
-
-    // Invisible collision reserves for practice slots until doors actually spawn.
-    this.practiceSprites = []
-    for (let i = 0; i < this.layout.practiceSlots.length; i += 1) {
-      const pos = this.layout.practiceSlots[i]!
-      const sprite = this.solids.create(
-        pos.x,
-        pos.y,
-        'spy-terminal-practice',
-      ) as Phaser.Physics.Arcade.Sprite
-      sprite.setImmovable(true)
-      sprite.refreshBody()
-      sprite.setDepth(8)
-      sprite.setVisible(false)
-      sprite.setAlpha(0)
-      sprite.setData('kind', 'practice')
-      sprite.setData('index', i)
-      sprite.setData('active', false)
-      this.practiceSprites.push(sprite)
-    }
   }
 
   private emitPlayerPosition(force: boolean): void {
@@ -477,7 +471,6 @@ export class MissionScene extends Phaser.Scene {
 
   private updateProximityPrompt(): void {
     this.nearTerminalIndex = -1
-    this.nearPracticeIndex = -1
     this.nearExit = false
 
     let bestTerminal = Infinity
@@ -487,16 +480,6 @@ export class MissionScene extends Phaser.Scene {
       if (dist < INTERACT_RANGE && dist < bestTerminal && this.hasLineOfSight(sprite)) {
         bestTerminal = dist
         this.nearTerminalIndex = i
-      }
-    }
-
-    for (let i = 0; i < this.practiceSprites.length; i += 1) {
-      const sprite = this.practiceSprites[i]!
-      if (!sprite.getData('active')) continue
-      const dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, sprite.x, sprite.y)
-      if (dist < INTERACT_RANGE && this.hasLineOfSight(sprite)) {
-        this.nearPracticeIndex = i
-        break
       }
     }
 
@@ -511,8 +494,6 @@ export class MissionScene extends Phaser.Scene {
 
     if (this.nearExit) {
       this.promptText.setText('Press E to leave through the exit and complete the mission.')
-    } else if (this.nearPracticeIndex >= 0) {
-      this.promptText.setText('Press E to open this adaptive practice terminal (optional).')
     } else if (this.nearTerminalIndex >= 0) {
       this.promptText.setText('Press E to open the API request editor.')
     } else if (this.exitReady) {
@@ -532,17 +513,18 @@ export class MissionScene extends Phaser.Scene {
       this.game.events.emit(GAME_EVENTS.EXIT_REACHED, { missionId: this.missionId })
       return
     }
-    if (this.nearPracticeIndex >= 0) {
-      const door = this.practiceDoors[this.nearPracticeIndex]
-      if (door) {
-        this.game.events.emit(GAME_EVENTS.OPEN_PRACTICE, door)
-      }
-      return
-    }
     if (this.nearTerminalIndex >= 0) {
+      const sprite = this.mandatorySprites[this.nearTerminalIndex]
+      const binding = this.terminalBindings[this.nearTerminalIndex]
       this.game.events.emit(GAME_EVENTS.OPEN_TERMINAL, {
-        deviceId: this.deviceId,
-        documentation: this.documentation,
+        deviceId: (sprite?.getData('deviceId') as string) || binding?.deviceId || this.deviceId,
+        challengeId:
+          (sprite?.getData('challengeId') as string) || binding?.challengeId || undefined,
+        documentation:
+          (sprite?.getData('documentation') as string) ||
+          binding?.documentation ||
+          this.documentation,
+        finalLock: Boolean(sprite?.getData('finalLock') ?? binding?.finalLock),
         missionId: this.missionId,
         terminalIndex: this.nearTerminalIndex,
       })
@@ -552,10 +534,6 @@ export class MissionScene extends Phaser.Scene {
   private onExitReady = (payload?: { ready?: boolean }): void => {
     this.exitReady = Boolean(payload?.ready ?? true)
     this.exitSprite.setTexture(this.exitReady ? 'spy-exit-unlocked' : 'spy-exit-locked')
-  }
-
-  private onPracticeDoors = (payload: { doors?: AdaptivePracticeDoor[] }): void => {
-    this.renderPracticeDoors((payload?.doors ?? []).slice(0, 2))
   }
 
   private onInputLock = (payload?: { locked?: boolean }): void => {
@@ -578,16 +556,5 @@ export class MissionScene extends Phaser.Scene {
       body.setVelocity(0, 0)
     }
     this.combat?.setPaused(this.inputLocked)
-  }
-
-  private renderPracticeDoors(doors: AdaptivePracticeDoor[]): void {
-    this.practiceDoors = doors.slice(0, 2)
-    for (let i = 0; i < this.practiceSprites.length; i += 1) {
-      const sprite = this.practiceSprites[i]!
-      const active = i < this.practiceDoors.length
-      sprite.setData('active', active)
-      sprite.setVisible(active)
-      sprite.setAlpha(active ? 1 : 0)
-    }
   }
 }

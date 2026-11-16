@@ -4,25 +4,34 @@ import { createGame, MissionScene } from '../phaser/createGame'
 import { GAME_EVENTS } from '../phaser/MissionScene'
 import { ROOM_LAYOUT } from '../phaser/roomLayout'
 import type { RoomLayoutPlan } from '../phaser/room/types'
-import type { AdaptivePracticeDoor } from '../types/api'
+import type { MandatoryDeviceState } from '../types/api'
 
 export type PlayerFacing = 'down' | 'left' | 'right' | 'up'
 export type PlayerPosition = { x: number; y: number; facing?: PlayerFacing }
+
+export type OpenTerminalPayload = {
+  documentation: string
+  deviceId: string
+  challengeId?: string
+  finalLock?: boolean
+  terminalIndex: number
+  missionId?: string
+}
 
 interface GameCanvasProps {
   missionId: string
   deviceId: string
   documentation: string
   exitReady: boolean
-  practiceDoors?: AdaptivePracticeDoor[]
   inputLocked?: boolean
   rank?: string
   roomInstance?: number
   mandatoryTerminalCount?: number
+  /** Physical terminal → authored challenge bindings (index-aligned). */
+  terminalBindings?: MandatoryDeviceState[]
   /** False for Practice Mode and Module 0 (enemy-free). */
   combatEnabled?: boolean
-  onOpenTerminal: (documentation: string) => void
-  onOpenPractice: (door: AdaptivePracticeDoor) => void
+  onOpenTerminal: (payload: OpenTerminalPayload) => void
   onExitReached: () => void
   onPlayerMoved?: (position: PlayerPosition) => void
   onRoomLayoutReady?: (layout: RoomLayoutPlan) => void
@@ -35,14 +44,13 @@ export function GameCanvas({
   deviceId,
   documentation,
   exitReady,
-  practiceDoors = [],
   inputLocked = false,
   rank = 'RECRUIT',
   roomInstance = 0,
   mandatoryTerminalCount = 1,
+  terminalBindings = [],
   combatEnabled = false,
   onOpenTerminal,
-  onOpenPractice,
   onExitReached,
   onPlayerMoved,
   onRoomLayoutReady,
@@ -52,7 +60,6 @@ export function GameCanvas({
   const containerRef = useRef<HTMLDivElement | null>(null)
   const gameRef = useRef<Phaser.Game | null>(null)
   const onOpenTerminalRef = useRef(onOpenTerminal)
-  const onOpenPracticeRef = useRef(onOpenPractice)
   const onExitReachedRef = useRef(onExitReached)
   const onPlayerMovedRef = useRef(onPlayerMoved)
   const onRoomLayoutReadyRef = useRef(onRoomLayoutReady)
@@ -64,9 +71,6 @@ export function GameCanvas({
   useEffect(() => {
     onOpenTerminalRef.current = onOpenTerminal
   }, [onOpenTerminal])
-  useEffect(() => {
-    onOpenPracticeRef.current = onOpenPractice
-  }, [onOpenPractice])
   useEffect(() => {
     onExitReachedRef.current = onExitReached
   }, [onExitReached])
@@ -94,11 +98,8 @@ export function GameCanvas({
     gameRef.current = game
     game.scene.add('MissionScene', MissionScene, false)
 
-    const openHandler = (payload: { documentation: string }) => {
-      onOpenTerminalRef.current(payload.documentation)
-    }
-    const practiceHandler = (door: AdaptivePracticeDoor) => {
-      onOpenPracticeRef.current(door)
+    const openHandler = (payload: OpenTerminalPayload) => {
+      onOpenTerminalRef.current(payload)
     }
     const exitHandler = () => {
       onExitReachedRef.current()
@@ -116,7 +117,6 @@ export function GameCanvas({
       onCombatDeathRef.current?.()
     }
     game.events.on(GAME_EVENTS.OPEN_TERMINAL, openHandler)
-    game.events.on(GAME_EVENTS.OPEN_PRACTICE, practiceHandler)
     game.events.on(GAME_EVENTS.EXIT_REACHED, exitHandler)
     game.events.on(GAME_EVENTS.PLAYER_MOVED, movedHandler)
     game.events.on(GAME_EVENTS.ROOM_LAYOUT_READY, layoutHandler)
@@ -131,11 +131,11 @@ export function GameCanvas({
         missionId,
         deviceId,
         documentation,
-        practiceDoors: practiceDoors.slice(0, 2),
         inputLocked: inputLockedRef.current,
         rank,
         roomInstance,
         mandatoryTerminalCount,
+        terminalBindings,
         combatEnabled,
       })
     }, 0)
@@ -144,7 +144,6 @@ export function GameCanvas({
       cancelled = true
       window.clearTimeout(timer)
       game.events.off(GAME_EVENTS.OPEN_TERMINAL, openHandler)
-      game.events.off(GAME_EVENTS.OPEN_PRACTICE, practiceHandler)
       game.events.off(GAME_EVENTS.EXIT_REACHED, exitHandler)
       game.events.off(GAME_EVENTS.PLAYER_MOVED, movedHandler)
       game.events.off(GAME_EVENTS.ROOM_LAYOUT_READY, layoutHandler)
@@ -153,23 +152,25 @@ export function GameCanvas({
       game.destroy(true)
       if (gameRef.current === game) gameRef.current = null
     }
-    // Recreate only when mission identity, room instance, or combat mode changes.
+    // Recreate only when mission identity, room instance, bindings, or combat mode changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [missionId, deviceId, documentation, rank, roomInstance, mandatoryTerminalCount, combatEnabled])
+  }, [
+    missionId,
+    deviceId,
+    documentation,
+    rank,
+    roomInstance,
+    mandatoryTerminalCount,
+    combatEnabled,
+    // Bindings identity for this room generation (device/challenge pairing).
+    terminalBindings.map((b) => `${b.deviceId}:${b.challengeId}`).join('|'),
+  ])
 
   useEffect(() => {
     if (gameRef.current && startedRef.current) {
       gameRef.current.events.emit(GAME_EVENTS.EXIT_READY, { ready: exitReady })
     }
   }, [exitReady])
-
-  useEffect(() => {
-    if (gameRef.current && startedRef.current) {
-      gameRef.current.events.emit(GAME_EVENTS.PRACTICE_DOORS, {
-        doors: practiceDoors.slice(0, 2),
-      })
-    }
-  }, [practiceDoors])
 
   useEffect(() => {
     inputLockedRef.current = inputLocked

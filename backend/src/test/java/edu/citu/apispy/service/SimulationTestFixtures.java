@@ -22,7 +22,9 @@ final class SimulationTestFixtures {
 			AdaptivePracticeService adaptivePractice,
 			ConceptReviewService conceptReview,
 			MissionProgressService missionProgress,
-			DeviceEscalationService escalation) {
+			DeviceEscalationService escalation,
+			ConceptProgressService conceptProgress,
+			ConceptConsistencyService conceptConsistency) {
 	}
 
 	static Bundle create() {
@@ -45,6 +47,11 @@ final class SimulationTestFixtures {
 				contracts,
 				reviews);
 		ScenarioSelectionService scenarioSelection = new ScenarioSelectionService(escalation, contracts);
+		ConceptConsistencyService consistency = ConceptConsistencyService.inMemory(
+				contracts,
+				progress,
+				reviews,
+				objectMapper);
 		MissionProgressService missionProgress = MissionProgressService.inMemory(
 				missions,
 				escalation,
@@ -52,6 +59,7 @@ final class SimulationTestFixtures {
 				scenarioSelection,
 				contracts,
 				tvp,
+				consistency,
 				objectMapper);
 		RequestSimulationService service = new RequestSimulationService(
 				contracts,
@@ -69,9 +77,11 @@ final class SimulationTestFixtures {
 				new AgentFeedbackService(),
 				adaptive,
 				reviews,
+				PracticeOutcomeService.inMemory(),
 				missionProgress,
 				escalation,
-				scenarioSelection);
+				scenarioSelection,
+				consistency);
 		return new Bundle(
 				service,
 				firstAttempts,
@@ -81,7 +91,9 @@ final class SimulationTestFixtures {
 				adaptive,
 				reviews,
 				missionProgress,
-				escalation);
+				escalation,
+				progress,
+				consistency);
 	}
 
 	private SimulationTestFixtures() {

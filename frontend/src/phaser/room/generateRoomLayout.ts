@@ -21,7 +21,8 @@ export const ROOM_TILE_SIZE = 40
 export const ROOM_COLS = 20
 export const ROOM_ROWS = 15
 export const MAX_LAYOUT_ATTEMPTS = 32
-export const PRACTICE_SLOT_COUNT = 2
+/** Optional adaptive practice doors removed — keep 0 slots in live layouts. */
+export const PRACTICE_SLOT_COUNT = 0
 
 const NON_SOLID: PropKind[] = ['security_camera', 'security_light']
 

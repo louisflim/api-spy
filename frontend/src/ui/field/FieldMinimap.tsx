@@ -4,7 +4,6 @@ import type { PlayerPosition } from '../GameCanvas'
 
 interface FieldMinimapProps {
   player: PlayerPosition
-  practiceDoorCount: number
   exitReady: boolean
   devicesComplete: boolean
   layout?: RoomLayoutPlan | null
@@ -17,7 +16,6 @@ type CellKind =
   | 'obstacle'
   | 'chest'
   | 'terminal'
-  | 'practice'
   | 'exit'
   | 'exit-open'
 
@@ -32,7 +30,6 @@ function propCellKind(prop: PlacedProp): CellKind {
  */
 export function FieldMinimap({
   player,
-  practiceDoorCount,
   exitReady,
   devicesComplete,
   layout = null,
@@ -67,13 +64,6 @@ export function FieldMinimap({
 
     for (const term of layout.interactives.filter((i) => i.kind === 'mandatory_terminal')) {
       cells[term.row]![term.col] = 'terminal'
-    }
-
-    for (let i = 0; i < practiceDoorCount; i += 1) {
-      const slot = layout.interactives.find(
-        (item) => item.kind === 'practice_terminal' && item.index === i,
-      )
-      if (slot) cells[slot.row]![slot.col] = 'practice'
     }
 
     const exit = layout.interactives.find((item) => item.kind === 'exit')
@@ -156,11 +146,6 @@ export function FieldMinimap({
         {hasChest ? (
           <li>
             <i className="field-minimap__swatch field-minimap__swatch--chest" /> Chest
-          </li>
-        ) : null}
-        {practiceDoorCount > 0 ? (
-          <li>
-            <i className="field-minimap__swatch field-minimap__swatch--practice" /> Practice
           </li>
         ) : null}
       </ul>

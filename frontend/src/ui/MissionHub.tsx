@@ -8,6 +8,7 @@ import {
   RANK_ORDER,
   type RankKey,
 } from '../content/moduleMeta'
+import { isCareerUnlocked, priorRecruitMissionId } from '../learning/careerProgression'
 import { conceptLabel } from '../learning/prerequisites'
 import { hasPracticeDrill } from '../content/practiceDrills'
 import { Module0Academy } from '../screens/Module0Academy'
@@ -34,6 +35,8 @@ interface MissionHubProps {
   /** Prefill difficulty track when returning from a briefing/mission. */
   initialRank?: RankKey
   onOrientationCompleted?: () => void
+  /** Return to the mission briefing that opened the Training Academy. */
+  onReturnToBriefing?: () => void
 }
 
 type MissionUiState = 'available' | 'locked' | 'in_progress' | 'completed'
@@ -63,6 +66,9 @@ function resolveMissionState(
   if (isMissionCompleted(playerId, mission.missionId)) {
     return 'completed'
   }
+  if (!isCareerUnlocked(mission, serverByMission)) {
+    return 'locked'
+  }
   if (
     server &&
     (server.unlockedDeviceIds.length > 0 || server.apiResetCount > 0 || server.status === 'IN_PROGRESS')
@@ -86,6 +92,7 @@ export function MissionHub({
   initialModule,
   initialRank,
   onOrientationCompleted,
+  onReturnToBriefing,
 }: MissionHubProps) {
   const missions = catalog?.missions ?? []
 
@@ -213,8 +220,12 @@ export function MissionHub({
     <div className="ops-board" role="region" aria-label="Operations board">
       <header className="ops-board__header">
         <div>
-          <h2>Operations Board</h2>
-          <p>{moduleHeading(selectedModule)}</p>
+          <h2>{showingAcademy ? 'Agent Training Academy' : 'Operations Board'}</h2>
+          <p>
+            {showingAcademy
+              ? 'Module 0 orientation · ungraded interactive briefing'
+              : moduleHeading(selectedModule)}
+          </p>
           {orientationCompleted === false ? (
             <p className="ops-side-note">
               Agent Training Academy incomplete — select Module 0 to finish orientation.
@@ -252,8 +263,11 @@ export function MissionHub({
           }
           onFinished={() => {
             onOrientationCompleted?.()
-            setSelectedModule(1)
+            if (!onReturnToBriefing) {
+              setSelectedModule(1)
+            }
           }}
+          onReturnToBriefing={onReturnToBriefing}
         />
       ) : (
         <div className="ops-board__layout">
@@ -424,9 +438,11 @@ export function MissionHub({
                 <div className="ops-stat-block">
                   <h3>Mission Brief</h3>
                   <p className="ops-side-note">
-                    {selected.playable
-                      ? 'Use the API terminal in the practice room to send the request described in the mission docs. Unlock the door to finish the room.'
-                      : 'This dossier is planned for a later build. Levels without authored contracts stay locked.'}
+                    {!selected.playable
+                      ? 'This dossier is planned for a later build. Levels without authored contracts stay locked.'
+                      : selectedState === 'locked' && priorRecruitMissionId(selected)
+                        ? `Complete ${priorRecruitMissionId(selected)} before launching this Recruit operation.`
+                        : 'Use the API terminal in the practice room to send the request described in the mission docs. Unlock the door to finish the room.'}
                   </p>
                 </div>
 
@@ -434,11 +450,11 @@ export function MissionHub({
                   <button
                     type="button"
                     className="ops-launch"
-                    disabled={!selected.playable}
+                    disabled={!selected.playable || selectedState === 'locked'}
                     onClick={() => onPlay(selected)}
                   >
                     <span aria-hidden="true">{'<<'}</span>
-                    {!selected.playable
+                    {!selected.playable || selectedState === 'locked'
                       ? 'Operation Locked'
                       : selectedState === 'completed'
                         ? 'Replay Operation'
@@ -449,7 +465,7 @@ export function MissionHub({
                     <button
                       type="button"
                       className="ops-practice"
-                      disabled={!selected.playable}
+                      disabled={!selected.playable || selectedState === 'locked'}
                       onClick={() => onPractice(selected)}
                     >
                       Practice

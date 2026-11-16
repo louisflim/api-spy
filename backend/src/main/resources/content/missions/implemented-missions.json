@@ -71,6 +71,36 @@
       "requiredLessonIds": ["http-delete", "path-parameters", "endpoints"],
       "conceptTags": ["http.method.delete", "http.endpoint", "http.path_parameter"],
       "scenarioFocus": "Deactivate a compromised fictional access badge with DELETE and the correct resource path"
+    },
+    {
+      "missionId": "m1-recruit-l7",
+      "module": 1,
+      "rank": "RECRUIT",
+      "level": 7,
+      "title": "Breach the command nexus",
+      "status": "IMPLEMENTED",
+      "primaryChallengeId": "chal-m1-boss-status-v1",
+      "requiredLessonIds": [
+        "rest-fundamentals",
+        "http-get",
+        "endpoints",
+        "simulated-responses",
+        "path-parameters",
+        "query-parameters",
+        "http-post",
+        "http-put-patch",
+        "http-delete"
+      ],
+      "conceptTags": [
+        "http.method.get",
+        "http.method.post",
+        "http.method.put",
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "scenarioFocus": "Boss finale: disable layered command-nexus security with GET, POST, PUT, DELETE, path parameters, and query filters, then purge the master vault seal"
     }
   ]
 }

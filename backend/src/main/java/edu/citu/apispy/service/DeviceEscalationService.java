@@ -14,7 +14,8 @@ import java.util.Optional;
 
 /**
  * Implements Proposal/SRS 1 → 3 → 5 mandatory API-device escalation.
- * Final lock appears only on API-driven retries and is not included in the 1/3/5 count.
+ * Final lock appears only on API-driven retries and is not included in the 1/3/5 count,
+ * except for boss finales that opt into full multi-device coverage from the first attempt.
  * Adaptive practice doors are never part of this pool.
  */
 @Service
@@ -24,6 +25,9 @@ public class DeviceEscalationService {
 	public static final int TIER_AFTER_FIRST_API_RESET = 3;
 	public static final int TIER_AFTER_SECOND_API_RESET = 5;
 	public static final int MAX_API_RESETS_FOR_TIER = 2;
+
+	/** Module 1 Recruit Level 7 boss — always full concept coverage + final lock. */
+	public static final String MODULE1_RECRUIT_BOSS_MISSION_ID = "m1-recruit-l7";
 
 	private final Map<String, MissionEscalationDefinition> byMissionId;
 	private final ContractCatalogService contractCatalogService;
@@ -42,7 +46,7 @@ public class DeviceEscalationService {
 		return Optional.ofNullable(byMissionId.get(missionId));
 	}
 
-	/** Required mandatory device count from API reset count (final lock excluded). */
+	/** Global 1 → 3 → 5 curve (final lock excluded). Unchanged for non-boss missions. */
 	public int mandatoryDeviceCount(int apiResetCount) {
 		int capped = Math.max(0, Math.min(apiResetCount, MAX_API_RESETS_FOR_TIER));
 		return switch (capped) {
@@ -52,8 +56,31 @@ public class DeviceEscalationService {
 		};
 	}
 
+	/**
+	 * Mission-aware mandatory count. Boss finales require full pool coverage on every attempt
+	 * without altering the global curve used by Levels 1–6.
+	 */
+	public int mandatoryDeviceCount(String missionId, int apiResetCount) {
+		if (isBossFinale(missionId)) {
+			return TIER_AFTER_SECOND_API_RESET;
+		}
+		return mandatoryDeviceCount(apiResetCount);
+	}
+
 	public boolean finalLockRequired(int apiResetCount) {
 		return apiResetCount >= 1;
+	}
+
+	/** Mission-aware final lock. Boss finales require the vault seal on the first attempt. */
+	public boolean finalLockRequired(String missionId, int apiResetCount) {
+		if (isBossFinale(missionId)) {
+			return true;
+		}
+		return finalLockRequired(apiResetCount);
+	}
+
+	public boolean isBossFinale(String missionId) {
+		return MODULE1_RECRUIT_BOSS_MISSION_ID.equals(missionId);
 	}
 
 	public List<ApiContract> requiredMandatoryContracts(String missionId, int apiResetCount) {
@@ -80,13 +107,13 @@ public class DeviceEscalationService {
 			ApiContract primary = fallbackPrimary(missionId);
 			return primary == null ? List.of() : List.of(primary);
 		}
-		int count = mandatoryDeviceCount(apiResetCount);
+		int count = mandatoryDeviceCount(missionId, apiResetCount);
 		List<String> ids = definition.mandatoryChallengeIds();
 		List<ApiContract> required = new ArrayList<>();
 		for (int i = 0; i < Math.min(count, ids.size()); i++) {
 			required.add(contractCatalogService.requireByChallengeId(ids.get(i)));
 		}
-		if (finalLockRequired(apiResetCount) && definition.finalLockChallengeId() != null) {
+		if (finalLockRequired(missionId, apiResetCount) && definition.finalLockChallengeId() != null) {
 			required.add(contractCatalogService.requireByChallengeId(definition.finalLockChallengeId()));
 		}
 		return List.copyOf(required);

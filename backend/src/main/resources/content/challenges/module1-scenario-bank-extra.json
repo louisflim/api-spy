@@ -610,6 +610,78 @@
       },
       "documentation": "PRACTICE MODE — educational review only.\n\nMethod: GET\nPath: /api/practice/badges\nRequired query parameter:\n- status = training\n\nExample: /api/practice/badges?status=training\n\nNot the graded zone filter contract.",
       "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-practice-m1-courier",
+      "variantId": "practice-courier-v1",
+      "missionId": "practice-m1-recruit-l4",
+      "deviceId": "practice-courier",
+      "conceptTags": [
+        "http.method.post",
+        "http.endpoint"
+      ],
+      "expectedMethod": "POST",
+      "pathTemplate": "/api/practice/couriers/dispatch",
+      "pathParameters": {},
+      "queryParameters": {},
+      "successStatus": 201,
+      "successBody": {
+        "id": "dispatch",
+        "status": "reviewed",
+        "message": "Practice courier dispatch acknowledged. No mission checkpoint was registered."
+      },
+      "documentation": "PRACTICE MODE — educational review only.\n\nA training courier desk needs a new dispatch ticket created.\n\nMethod: POST\nPath: /api/practice/couriers/dispatch\n\nInterpret the documentation and choose the method that creates a submission. Different from graded registration contracts. No RCA or mission unlocks.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-practice-m1-roster",
+      "variantId": "practice-roster-v1",
+      "missionId": "practice-m1-recruit-l5",
+      "deviceId": "practice-roster",
+      "conceptTags": [
+        "http.method.put",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "PUT",
+      "pathTemplate": "/api/practice/rosters/{rosterId}",
+      "pathParameters": {
+        "rosterId": "drill-shift"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "rosterId": "drill-shift",
+        "status": "reviewed",
+        "message": "Practice roster update acknowledged."
+      },
+      "documentation": "PRACTICE MODE — educational review only.\n\nReplace an existing training roster entry.\n\nMethod: PUT\nPath template: /api/practice/rosters/{rosterId}\nRequired path parameter:\n- rosterId = drill-shift\n\nExample: /api/practice/rosters/drill-shift\n\nNot the graded clearance contract.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-practice-m1-token",
+      "variantId": "practice-token-v1",
+      "missionId": "practice-m1-recruit-l6",
+      "deviceId": "practice-token",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/practice/access-tokens/{tokenId}",
+      "pathParameters": {
+        "tokenId": "drill-token"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "tokenId": "drill-token",
+        "status": "reviewed",
+        "message": "Practice access-token drill acknowledged."
+      },
+      "documentation": "PRACTICE MODE — educational review only.\n\nDeactivate a compromised training access token.\n\nMethod: DELETE\nPath template: /api/practice/access-tokens/{tokenId}\nRequired path parameter:\n- tokenId = drill-token\n\nExample: /api/practice/access-tokens/drill-token\n\nNot the graded access-badge contract.",
+      "deviceUnlockState": "OPEN"
     }
   ]
 }

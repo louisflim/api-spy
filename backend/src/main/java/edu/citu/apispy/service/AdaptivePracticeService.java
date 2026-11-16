@@ -6,22 +6,28 @@ import edu.citu.apispy.domain.learning.FirstAttemptRecord;
 import edu.citu.apispy.domain.mission.MissionDefinition;
 import edu.citu.apispy.domain.simulation.ApiContract;
 import edu.citu.apispy.dto.AdaptivePracticeDoorDto;
+import edu.citu.apispy.dto.LearningSupportOfferDto;
 import edu.citu.apispy.repository.AdaptiveTriggerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * Cross-room adaptive practice: threshold on distinct mandatory first failures,
- * max practice doors per room, server-side PRACTICE authorization.
+ * max practice doors per room, server-side PRACTICE authorization, and recovery
+ * state for CONTROL targeted teaching / voluntary practice rounds.
  */
 @Service
 public class AdaptivePracticeService {
@@ -99,19 +105,22 @@ public class AdaptivePracticeService {
 		}
 	}
 
+	/**
+	 * Recurring-difficulty signal after an eligible graded first-attempt miss.
+	 * Physical adaptive practice doors are retired: no room objects are spawned and no
+	 * adaptive-trigger rows are written. Concepts that meet the historical threshold are
+	 * queued for later authored review only. Ungraded PRACTICE/TRAINING never contribute.
+	 */
 	public List<AdaptivePracticeDoorDto> evaluateAfterMandatoryFirstAttempt(
 			String participantCode,
 			MissionDefinition roomMission,
-			ApiContract mandatoryContract,
+			ApiContract gradedContract,
 			FirstAttemptService.CaptureResult capture) {
 		if (!capture.newlyRecorded() || capture.record().isFirstAttemptCorrect()) {
-			return activeDoorsForRoom(participantCode, roomMission.getMissionId());
+			return List.of();
 		}
-		// Caller supplies the active-run primary (selected authored scenario). Catalog primary alone is not used.
 
-		Map<String, Integer> failureCounts = countDistinctMandatoryConceptFailures(participantCode);
-		List<AdaptivePracticeDoorDto> offered = new ArrayList<>();
-
+		Map<String, Integer> failureCounts = countDistinctEligibleGradedConceptFailures(participantCode);
 		for (Map.Entry<String, Boolean> entry : capture.record().getConceptFirstAttemptCorrect().entrySet()) {
 			if (!Boolean.FALSE.equals(entry.getValue())) {
 				continue;
@@ -121,63 +130,108 @@ public class AdaptivePracticeService {
 			if (count < properties.getIncorrectAttemptThreshold()) {
 				continue;
 			}
-
-			String evidenceKey = capture.record().getMissionId() + ":" + capture.record().getChallengeId()
-					+ ":" + conceptTag;
-			if (store.exists(participantCode, conceptTag, evidenceKey)) {
-				continue;
-			}
-
-			long roomDoors = store.countForRoom(participantCode, roomMission.getMissionId());
-			if (roomDoors >= properties.getMaxPracticeDoorsPerRoom()) {
-				conceptReviewService.enqueue(participantCode, conceptTag, roomMission.getMissionId());
-				continue;
-			}
-
-			ApiContract practice = resolvePracticeForConcept(conceptTag);
-			if (practice == null) {
-				conceptReviewService.enqueue(participantCode, conceptTag, roomMission.getMissionId());
-				continue;
-			}
-
-			store.insert(new AdaptiveTriggerStore.TriggerRow(
-					participantCode,
-					conceptTag,
-					roomMission.getMissionId(),
-					evidenceKey,
-					practice.getChallengeId()));
-
-			offered.add(toDoor(practice, conceptTag));
+			conceptReviewService.enqueue(participantCode, conceptTag, roomMission.getMissionId());
 		}
-
-		List<AdaptivePracticeDoorDto> active = activeDoorsForRoom(participantCode, roomMission.getMissionId());
-		if (!offered.isEmpty()) {
-			return active;
-		}
-		return active;
+		return List.of();
 	}
 
+	/** Always empty — optional physical adaptive practice doors are removed from gameplay. */
 	public List<AdaptivePracticeDoorDto> activeDoorsForRoom(String participantCode, String roomMissionId) {
-		List<AdaptivePracticeDoorDto> doors = new ArrayList<>();
-		for (AdaptiveTriggerStore.TriggerRow row : store.findForRoom(participantCode, roomMissionId)) {
-			try {
-				ApiContract practice = contractCatalogService.requireByChallengeId(row.practiceChallengeId());
-				doors.add(toDoor(practice, row.conceptTag()));
-			} catch (IllegalArgumentException ignored) {
-				// Skip stale catalog references.
-			}
-		}
-		return List.copyOf(doors);
+		return List.of();
 	}
 
-	private Map<String, Integer> countDistinctMandatoryConceptFailures(String participantCode) {
+	/** Always empty — mini-lesson / door recovery offers are retired with physical doors. */
+	public List<LearningSupportOfferDto> supportOffersForRoom(String participantCode, String roomMissionId) {
+		return List.of();
+	}
+
+	/** Retired with physical adaptive doors — kept for API compatibility. */
+	public LearningSupportOfferDto markLessonOpened(
+			String participantCode,
+			String roomMissionId,
+			String conceptTag) {
+		throw new IllegalStateException(
+				"Optional adaptive practice doors and mini-lesson recovery are retired. "
+						+ "Use graded mission scenarios and CONTROL concept consistency instead.");
+	}
+
+	/** Retired — graded wrong answers stay on the same scenario with CONTROL feedback only. */
+	public AdaptivePracticeDoorDto suggestInlinePractice(
+			String conceptTag,
+			Set<String> excludeChallengeIds) {
+		return null;
+	}
+
+	/**
+	 * Next authored ungraded practice variant from the catalog, excluding used challenge ids.
+	 * Works without a recurring-difficulty trigger (inline auto-practice loop).
+	 */
+	public AdaptivePracticeDoorDto nextAuthoredPractice(
+			String conceptTag,
+			List<String> usedChallengeIds) {
+		Set<String> used = usedChallengeIds == null ? Set.of() : Set.copyOf(usedChallengeIds);
+		ApiContract next = resolvePracticeForConcept(conceptTag, used);
+		if (next == null) {
+			return null;
+		}
+		List<String> nextUsed = new ArrayList<>(used);
+		nextUsed.add(next.getChallengeId());
+		return toDoor(
+				next,
+				conceptTag,
+				ConceptSupportCatalog.reviewLessonId(conceptTag),
+				remainingPracticeIds(conceptTag, nextUsed),
+				false);
+	}
+
+	/** Retired with physical adaptive practice doors. */
+	public AdaptivePracticeDoorDto advancePracticeRound(
+			String participantCode,
+			String roomMissionId,
+			String conceptTag) {
+		return advancePracticeRound(participantCode, roomMissionId, conceptTag, List.of());
+	}
+
+	public AdaptivePracticeDoorDto advancePracticeRound(
+			String participantCode,
+			String roomMissionId,
+			String conceptTag,
+			List<String> usedChallengeIds) {
+		throw new IllegalStateException(
+				"Optional adaptive practice doors are retired. "
+						+ "Continue graded mission scenarios; CONTROL tracks consistent improvement separately.");
+	}
+
+	private List<AdaptivePracticeDoorDto> activeDoorsForRoom(
+			String participantCode,
+			String roomMissionId,
+			Set<String> newlyTriggeredKeys) {
+		return List.of();
+	}
+
+	private AdaptiveTriggerStore.TriggerRow requireRoomConcept(
+			String participantCode,
+			String roomMissionId,
+			String conceptTag) {
+		return store.findForRoom(participantCode, roomMissionId).stream()
+				.filter(row -> row.conceptTag().equals(conceptTag))
+				.findFirst()
+				.orElseThrow(() -> new IllegalArgumentException(
+						"No adaptive support trigger for concept " + conceptTag + " in room " + roomMissionId));
+	}
+
+	/**
+	 * Distinct graded first-attempt concept misses across challenges/devices.
+	 * Includes automatic verification-sequence scenarios (e.g. door-v1 then door-v2).
+	 * Excludes PRACTICE/TRAINING. Does not rewrite RCA/SCR/HLCR or TVP eligibility.
+	 */
+	private Map<String, Integer> countDistinctEligibleGradedConceptFailures(String participantCode) {
 		Map<String, Integer> counts = new LinkedHashMap<>();
 		for (FirstAttemptRecord record : firstAttemptService.findAllForParticipant(participantCode)) {
 			if (contractCatalogService.isUngradedContextMission(record.getMissionId())) {
 				continue;
 			}
-			Optional<MissionDefinition> mission = missionCatalogService.findById(record.getMissionId());
-			if (mission.isEmpty() || !record.getChallengeId().equals(mission.get().getPrimaryChallengeId())) {
+			if (missionCatalogService.findById(record.getMissionId()).isEmpty()) {
 				continue;
 			}
 			for (Map.Entry<String, Boolean> entry : record.getConceptFirstAttemptCorrect().entrySet()) {
@@ -189,30 +243,28 @@ public class AdaptivePracticeService {
 		return counts;
 	}
 
-	private ApiContract resolvePracticeForConcept(String conceptTag) {
-		// Prefer alternate authored practice resources when available (anti-memorization).
-		return switch (conceptTag) {
-			case "http.method.get", "http.endpoint", "rest.fundamentals" ->
-					firstPresent("chal-practice-m1-camera", "chal-practice-m1-l1");
-			case "http.path_parameter" ->
-					firstPresent("chal-practice-m1-panel", "chal-practice-m1-l2");
-			case "http.query_parameter" ->
-					firstPresent("chal-practice-m1-badge-query", "chal-practice-m1-l3");
-			case "http.method.post" -> safeChallenge("chal-practice-m1-l4");
-			case "http.method.put", "http.method.patch" -> safeChallenge("chal-practice-m1-l5");
-			case "http.method.delete" -> safeChallenge("chal-practice-m1-l6");
-			default -> null;
-		};
-	}
-
-	private ApiContract firstPresent(String... challengeIds) {
-		for (String challengeId : challengeIds) {
+	private ApiContract resolvePracticeForConcept(String conceptTag, Set<String> excludeChallengeIds) {
+		for (String challengeId : ConceptSupportCatalog.practiceChallengeIds(conceptTag)) {
+			if (excludeChallengeIds.contains(challengeId)) {
+				continue;
+			}
 			ApiContract contract = safeChallenge(challengeId);
 			if (contract != null) {
 				return contract;
 			}
 		}
 		return null;
+	}
+
+	private List<String> remainingPracticeIds(String conceptTag, List<String> used) {
+		Set<String> usedSet = new LinkedHashSet<>(used);
+		List<String> remaining = new ArrayList<>();
+		for (String challengeId : ConceptSupportCatalog.practiceChallengeIds(conceptTag)) {
+			if (!usedSet.contains(challengeId) && safeChallenge(challengeId) != null) {
+				remaining.add(challengeId);
+			}
+		}
+		return List.copyOf(remaining);
 	}
 
 	private ApiContract safeChallenge(String challengeId) {
@@ -223,37 +275,36 @@ public class AdaptivePracticeService {
 		}
 	}
 
-	private static AdaptivePracticeDoorDto toDoor(ApiContract practice, String conceptTag) {
+	private static AdaptivePracticeDoorDto toDoor(
+			ApiContract practice,
+			String conceptTag,
+			String reviewLessonId,
+			List<String> alternateIds,
+			boolean newlyTriggered) {
 		return new AdaptivePracticeDoorDto(
 				conceptTag,
 				practice.getChallengeId(),
 				practice.getDeviceId(),
-				"Ungraded practice · " + friendlyConcept(conceptTag),
+				"Ungraded practice · " + ConceptSupportCatalog.friendlyConcept(conceptTag),
 				practice.getDocumentation(),
 				practice.getExpectedMethod(),
 				practice.getPathTemplate(),
-				practice.getMissionId());
+				practice.getMissionId(),
+				reviewLessonId,
+				alternateIds,
+				newlyTriggered);
 	}
 
-	private static String friendlyConcept(String conceptTag) {
-		return switch (conceptTag) {
-			case "http.method.get" -> "GET requests";
-			case "http.method.post" -> "POST requests";
-			case "http.method.put" -> "PUT requests";
-			case "http.method.patch" -> "PATCH requests";
-			case "http.method.delete" -> "DELETE requests";
-			case "http.endpoint" -> "API endpoints";
-			case "http.path_parameter" -> "path parameters";
-			case "http.query_parameter" -> "query parameters";
-			case "rest.fundamentals" -> "REST fundamentals";
-			default -> conceptTag;
-		};
+	private static String key(String participantCode, String conceptTag, String evidenceKey) {
+		return participantCode + "|" + conceptTag + "|" + evidenceKey;
 	}
 
 	interface AdaptiveTriggerStore {
 		boolean exists(String participantCode, String conceptTag, String evidenceKey);
 
 		void insert(TriggerRow row);
+
+		void update(TriggerRow row);
 
 		long countForRoom(String participantCode, String roomMissionId);
 
@@ -264,7 +315,34 @@ public class AdaptivePracticeService {
 				String conceptTag,
 				String roomMissionId,
 				String evidenceKey,
-				String practiceChallengeId) {
+				String practiceChallengeId,
+				String reviewLessonId,
+				boolean lessonOpened,
+				List<String> usedPracticeChallengeIds) {
+
+			TriggerRow withLessonOpened(boolean opened) {
+				return new TriggerRow(
+						participantCode,
+						conceptTag,
+						roomMissionId,
+						evidenceKey,
+						practiceChallengeId,
+						reviewLessonId,
+						opened,
+						usedPracticeChallengeIds);
+			}
+
+			TriggerRow withPractice(String challengeId, List<String> used) {
+				return new TriggerRow(
+						participantCode,
+						conceptTag,
+						roomMissionId,
+						evidenceKey,
+						challengeId,
+						reviewLessonId,
+						lessonOpened,
+						List.copyOf(used));
+			}
 		}
 	}
 
@@ -282,6 +360,11 @@ public class AdaptivePracticeService {
 		}
 
 		@Override
+		public void update(TriggerRow row) {
+			rows.put(key(row.participantCode(), row.conceptTag(), row.evidenceKey()), row);
+		}
+
+		@Override
 		public long countForRoom(String participantCode, String roomMissionId) {
 			return rows.values().stream()
 					.filter(row -> row.participantCode().equals(participantCode)
@@ -295,10 +378,6 @@ public class AdaptivePracticeService {
 					.filter(row -> row.participantCode().equals(participantCode)
 							&& row.roomMissionId().equals(roomMissionId))
 					.toList();
-		}
-
-		private static String key(String participantCode, String conceptTag, String evidenceKey) {
-			return participantCode + "|" + conceptTag + "|" + evidenceKey;
 		}
 	}
 
@@ -328,7 +407,24 @@ public class AdaptivePracticeService {
 					row.roomMissionId(),
 					row.evidenceKey(),
 					row.practiceChallengeId(),
+					row.reviewLessonId(),
+					row.lessonOpened(),
+					encodeUsed(row.usedPracticeChallengeIds()),
 					Instant.now()));
+		}
+
+		@Override
+		public void update(TriggerRow row) {
+			AdaptiveTriggerEntity entity = repository
+					.findByParticipantCodeAndConceptTagAndEvidenceKey(
+							row.participantCode(),
+							row.conceptTag(),
+							row.evidenceKey())
+					.orElseThrow();
+			entity.setLessonOpened(row.lessonOpened());
+			entity.setPracticeChallengeId(row.practiceChallengeId());
+			entity.setUsedPracticeChallengeIds(encodeUsed(row.usedPracticeChallengeIds()));
+			repository.save(entity);
 		}
 
 		@Override
@@ -344,7 +440,34 @@ public class AdaptivePracticeService {
 							entity.getConceptTag(),
 							entity.getRoomMissionId(),
 							entity.getEvidenceKey(),
-							entity.getPracticeChallengeId()))
+							entity.getPracticeChallengeId(),
+							entity.getReviewLessonId(),
+							entity.isLessonOpened(),
+							decodeUsed(entity.getUsedPracticeChallengeIds())))
+					.toList();
+		}
+
+		private static String encodeUsed(List<String> ids) {
+			if (ids == null || ids.isEmpty()) {
+				return "[]";
+			}
+			return ids.stream().map(id -> id.replace(",", "")).collect(Collectors.joining(",", "[", "]"));
+		}
+
+		private static List<String> decodeUsed(String raw) {
+			if (raw == null || raw.isBlank() || "[]".equals(raw.trim())) {
+				return List.of();
+			}
+			String trimmed = raw.trim();
+			if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+				trimmed = trimmed.substring(1, trimmed.length() - 1);
+			}
+			if (trimmed.isBlank()) {
+				return List.of();
+			}
+			return Arrays.stream(trimmed.split(","))
+					.map(String::trim)
+					.filter(s -> !s.isEmpty())
 					.toList();
 		}
 	}

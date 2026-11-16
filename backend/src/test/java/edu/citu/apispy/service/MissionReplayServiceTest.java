@@ -36,9 +36,7 @@ class MissionReplayServiceTest {
 				IllegalStateException.class,
 				() -> progress.startReplay("r1", "m1-recruit-l1"));
 
-		SimulateResponseDto unlock = simulate.simulate(
-				"r1",
-				request("GET", "/api/doors/alpha"));
+		SimulateResponseDto unlock = simulate.simulate("r1", correctSelectedPrimary("r1"));
 		String firstGen = unlock.missionProgress().roomGeneration();
 		MissionProgressDto cleared = progress.completeAfterExit("r1", "m1-recruit-l1", firstGen);
 		assertTrue(cleared.completed());
@@ -60,10 +58,10 @@ class MissionReplayServiceTest {
 
 	@Test
 	void replayCompletePreservesCareerClearAndFirstAttempt() {
-		simulate.simulate("r2", request("GET", "/api/doors/alpha"));
+		SimulateResponseDto unlockR2 = simulate.simulate("r2", correctSelectedPrimary("r2"));
 		MissionProgressDto first = progress.getOrCreate("r2", "m1-recruit-l1");
 		progress.completeAfterExit("r2", "m1-recruit-l1", first.roomGeneration());
-		assertTrue(firstAttempts.find("r2", "m1-recruit-l1", "door-alpha").isPresent());
+		assertTrue(firstAttempts.find("r2", "m1-recruit-l1", unlockR2.missionProgress().mandatoryDevices().getFirst().deviceId()).isPresent());
 		String originalCompletedAt = progress.getOrCreate("r2", "m1-recruit-l1").completedAt();
 
 		MissionProgressDto replay = progress.startReplay("r2", "m1-recruit-l1");
@@ -111,7 +109,7 @@ class MissionReplayServiceTest {
 
 	@Test
 	void forgedReplayCompleteWithoutDevicesIsRejected() {
-		simulate.simulate("r3", request("GET", "/api/doors/alpha"));
+		simulate.simulate("r3", correctSelectedPrimary("r3"));
 		MissionProgressDto first = progress.getOrCreate("r3", "m1-recruit-l1");
 		progress.completeAfterExit("r3", "m1-recruit-l1", first.roomGeneration());
 		MissionProgressDto replay = progress.startReplay("r3", "m1-recruit-l1");
@@ -122,7 +120,7 @@ class MissionReplayServiceTest {
 
 	@Test
 	void replayProgressIsIsolatedBetweenPlayers() {
-		simulate.simulate("iso-r-a", request("GET", "/api/doors/alpha"));
+		simulate.simulate("iso-r-a", correctSelectedPrimary("iso-r-a"));
 		MissionProgressDto a = progress.getOrCreate("iso-r-a", "m1-recruit-l1");
 		progress.completeAfterExit("iso-r-a", "m1-recruit-l1", a.roomGeneration());
 		progress.startReplay("iso-r-a", "m1-recruit-l1");
@@ -130,6 +128,38 @@ class MissionReplayServiceTest {
 		MissionProgressDto b = progress.getOrCreate("iso-r-b", "m1-recruit-l1");
 		assertFalse(b.completed());
 		assertFalse(b.replayActive());
+	}
+
+	private SimulateRequestDto correctSelectedPrimary(String participantCode) {
+		MissionProgressDto initial = progress.getOrCreate(participantCode, "m1-recruit-l1");
+		MissionProgressDto.MandatoryDeviceDto selected = initial.mandatoryDevices().getFirst();
+		var contract = contracts.requireByChallengeId(selected.challengeId());
+		String path = contract.getPathTemplate();
+		for (var entry : contract.getPathParameters().entrySet()) {
+			path = path.replace("{" + entry.getKey() + "}", entry.getValue());
+		}
+		if (!contract.getQueryParameters().isEmpty()) {
+			StringBuilder query = new StringBuilder("?");
+			boolean first = true;
+			for (var entry : contract.getQueryParameters().entrySet()) {
+				if (!first) {
+					query.append('&');
+				}
+				query.append(entry.getKey()).append('=').append(entry.getValue());
+				first = false;
+			}
+			path = path + query;
+		}
+		return new SimulateRequestDto(
+				"participant",
+				"m1-recruit-l1",
+				contract.getDeviceId(),
+				contract.getChallengeId(),
+				contract.getExpectedMethod(),
+				path,
+				Map.of(),
+				"",
+				"MISSION");
 	}
 
 	private static SimulateRequestDto request(String method, String path) {

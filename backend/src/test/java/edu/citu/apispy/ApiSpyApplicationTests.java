@@ -31,7 +31,7 @@ class ApiSpyApplicationTests {
 		assertEquals(2, adaptiveLearningProperties.getIncorrectAttemptThreshold());
 		assertEquals(2, adaptiveLearningProperties.getMaxPracticeDoorsPerRoom());
 		assertEquals(63, missionCatalogService.totalConfigured());
-		assertEquals(6, missionCatalogService.implementedCount());
+		assertEquals(7, missionCatalogService.implementedCount());
 		assertFalse(contractCatalogService.allContracts().isEmpty());
 		assertEquals(9, lessonContentProvider.byModule(1).size());
 	}

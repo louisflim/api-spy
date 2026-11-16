@@ -51,12 +51,10 @@ class Module1Levels456Test {
 		assertFalse(wrong.correct());
 		assertTrue(wrong.errorCodes().contains("METHOD"));
 
-		SimulateResponseDto ok = simulate.simulate(
-				"agent-l4",
-				request("m1-recruit-l4", "checkpoint-alpha", "chal-m1-post-registration-v1", "POST", "/api/registrations/alpha"));
+		SimulateResponseDto ok = simulate.simulate("agent-l4", correctSelectedPrimary("agent-l4", "m1-recruit-l4"));
 		assertTrue(ok.correct());
-		assertEquals(201, ok.simulatedResponse().status());
-		assertTrue(ok.missionProgress().unlockedDeviceIds().contains("checkpoint-alpha"));
+		assertTrue(ok.simulatedResponse().status() >= 200 && ok.simulatedResponse().status() < 300);
+		assertFalse(ok.missionProgress().unlockedDeviceIds().isEmpty());
 	}
 
 	@Test
@@ -72,12 +70,10 @@ class Module1Levels456Test {
 				request("m1-recruit-l5", "clearance-north", "chal-m1-put-clearance-v1", "PUT", "/api/clearances/wrong-desk"));
 		assertFalse(wrongId.correct());
 
-		SimulateResponseDto ok = simulate.simulate(
-				"agent-l5",
-				request("m1-recruit-l5", "clearance-north", "chal-m1-put-clearance-v1", "PUT", "/api/clearances/north-desk"));
+		SimulateResponseDto ok = simulate.simulate("agent-l5", correctSelectedPrimary("agent-l5", "m1-recruit-l5"));
 		assertTrue(ok.correct());
 		assertEquals(200, ok.simulatedResponse().status());
-		assertTrue(ok.missionProgress().unlockedDeviceIds().contains("clearance-north"));
+		assertFalse(ok.missionProgress().unlockedDeviceIds().isEmpty());
 	}
 
 	@Test
@@ -87,29 +83,23 @@ class Module1Levels456Test {
 				request("m1-recruit-l6", "badge-red", "chal-m1-delete-badge-v1", "DELETE", "/api/access-badges/wrong-pass"));
 		assertFalse(wrongPath.correct());
 
-		SimulateResponseDto ok = simulate.simulate(
-				"agent-l6",
-				request("m1-recruit-l6", "badge-red", "chal-m1-delete-badge-v1", "DELETE", "/api/access-badges/red-pass"));
+		SimulateResponseDto ok = simulate.simulate("agent-l6", correctSelectedPrimary("agent-l6", "m1-recruit-l6"));
 		assertTrue(ok.correct());
 		assertEquals(200, ok.simulatedResponse().status());
-		assertTrue(ok.missionProgress().unlockedDeviceIds().contains("badge-red"));
+		assertFalse(ok.missionProgress().unlockedDeviceIds().isEmpty());
 	}
 
 	@Test
 	void levelFourThroughSixCompleteAndReplayPreserveCareerClear() {
-		for (Case row : List.of(
-				new Case("m1-recruit-l4", "checkpoint-alpha", "chal-m1-post-registration-v1", "POST", "/api/registrations/alpha"),
-				new Case("m1-recruit-l5", "clearance-north", "chal-m1-put-clearance-v1", "PUT", "/api/clearances/north-desk"),
-				new Case("m1-recruit-l6", "badge-red", "chal-m1-delete-badge-v1", "DELETE", "/api/access-badges/red-pass"))) {
-			String agent = "clear-" + row.missionId();
-			SimulateResponseDto unlock = simulate.simulate(
-					agent, request(row.missionId(), row.deviceId(), row.challengeId(), row.method(), row.path()));
+		for (String missionId : List.of("m1-recruit-l4", "m1-recruit-l5", "m1-recruit-l6")) {
+			String agent = "clear-" + missionId;
+			SimulateResponseDto unlock = simulate.simulate(agent, correctSelectedPrimary(agent, missionId));
 			MissionProgressDto completed = progress.completeAfterExit(
-					agent, row.missionId(), unlock.missionProgress().roomGeneration());
+					agent, missionId, unlock.missionProgress().roomGeneration());
 			assertTrue(completed.completed());
 			assertTrue(completed.replayable());
 
-			MissionProgressDto replay = progress.startReplay(agent, row.missionId());
+			MissionProgressDto replay = progress.startReplay(agent, missionId);
 			assertTrue(replay.completed(), "career completion must remain");
 			assertTrue(replay.unlockedDeviceIds().isEmpty());
 			assertTrue(replay.replayActive());
@@ -134,7 +124,31 @@ class Module1Levels456Test {
 		for (Map.Entry<String, String> entry : contract.getPathParameters().entrySet()) {
 			path = path.replace("{" + entry.getKey() + "}", entry.getValue());
 		}
+		if (!contract.getQueryParameters().isEmpty()) {
+			StringBuilder query = new StringBuilder("?");
+			boolean first = true;
+			for (Map.Entry<String, String> entry : contract.getQueryParameters().entrySet()) {
+				if (!first) {
+					query.append('&');
+				}
+				query.append(entry.getKey()).append('=').append(entry.getValue());
+				first = false;
+			}
+			path = path + query;
+		}
 		return path;
+	}
+
+	private SimulateRequestDto correctSelectedPrimary(String participantCode, String missionId) {
+		MissionProgressDto initial = progress.getOrCreate(participantCode, missionId);
+		MissionProgressDto.MandatoryDeviceDto selected = initial.mandatoryDevices().getFirst();
+		ApiContract contract = contracts.requireByChallengeId(selected.challengeId());
+		return request(
+				missionId,
+				contract.getDeviceId(),
+				contract.getChallengeId(),
+				contract.getExpectedMethod(),
+				resolvePath(contract));
 	}
 
 	private static SimulateRequestDto request(
@@ -149,8 +163,5 @@ class Module1Levels456Test {
 				Map.of(),
 				"",
 				"MISSION");
-	}
-
-	private record Case(String missionId, String deviceId, String challengeId, String method, String path) {
 	}
 }

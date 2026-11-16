@@ -1,6 +1,7 @@
 package edu.citu.apispy.service;
 
 import edu.citu.apispy.domain.mission.RoomResetReason;
+import edu.citu.apispy.domain.simulation.ApiContract;
 import edu.citu.apispy.dto.MissionProgressDto;
 import edu.citu.apispy.dto.SimulateRequestDto;
 import edu.citu.apispy.dto.SimulateResponseDto;
@@ -20,6 +21,7 @@ class MissionProgressEscalationTest {
 	private RequestSimulationService simulate;
 	private MissionProgressService progress;
 	private DeviceEscalationService escalation;
+	private ContractCatalogService contracts;
 
 	@BeforeEach
 	void setUp() {
@@ -27,6 +29,7 @@ class MissionProgressEscalationTest {
 		simulate = bundle.service();
 		progress = bundle.missionProgress();
 		escalation = bundle.escalation();
+		contracts = bundle.contracts();
 	}
 
 	@Test
@@ -38,8 +41,7 @@ class MissionProgressEscalationTest {
 		assertTrue(escalation.finalLockRequired(1));
 
 		MissionProgressDto initial = progress.getOrCreate("p1", "m1-recruit-l1");
-		assertEquals(1, initial.requiredDeviceIds().size());
-		assertEquals("door-alpha", initial.requiredDeviceIds().getFirst());
+		assertEquals(1, initial.requiredDeviceIds().size()); // pool-selected primary (seeded by roomGeneration)
 
 		assertThrows(
 				IllegalStateException.class,
@@ -154,9 +156,7 @@ class MissionProgressEscalationTest {
 		assertEquals("PRIMARY", manual.activeRunKind());
 
 		// Career-complete then replay: PLAYER reset must stay REPLAY.
-		SimulateResponseDto unlock = simulate.simulate(
-				"replay-reset",
-				request("m1-recruit-l1", "door-alpha", "chal-m1-get-door-v1", "GET", "/api/doors/alpha"));
+		SimulateResponseDto unlock = simulate.simulate("replay-reset", correctSelectedPrimary("replay-reset"));
 		assertTrue(unlock.correct());
 		MissionProgressDto cleared = progress.completeAfterExit(
 				"replay-reset",
@@ -325,9 +325,7 @@ class MissionProgressEscalationTest {
 
 	@Test
 	void allMandatoryDevicesRequiredBeforeExitReadyAndPhysicalComplete() {
-		SimulateResponseDto unlock = simulate.simulate(
-				"exit-agent",
-				request("m1-recruit-l1", "door-alpha", "chal-m1-get-door-v1", "GET", "/api/doors/alpha"));
+		SimulateResponseDto unlock = simulate.simulate("exit-agent", correctSelectedPrimary("exit-agent"));
 		assertTrue(unlock.correct());
 		assertTrue(unlock.missionProgress().exitReady());
 		assertFalse(unlock.missionProgress().completed());
@@ -360,9 +358,7 @@ class MissionProgressEscalationTest {
 
 	@Test
 	void progressIsIsolatedBetweenPlayers() {
-		SimulateResponseDto unlock = simulate.simulate(
-				"iso-a",
-				request("m1-recruit-l1", "door-alpha", "chal-m1-get-door-v1", "GET", "/api/doors/alpha"));
+		SimulateResponseDto unlock = simulate.simulate("iso-a", correctSelectedPrimary("iso-a"));
 		progress.completeAfterExit("iso-a", "m1-recruit-l1", unlock.missionProgress().roomGeneration());
 		MissionProgressDto other = progress.getOrCreate("iso-b", "m1-recruit-l1");
 		assertFalse(other.completed());
@@ -380,9 +376,7 @@ class MissionProgressEscalationTest {
 
 	@Test
 	void completedProgressSurvivesServiceReloadAndAppearsOnOpsBoardList() {
-		SimulateResponseDto unlock = simulate.simulate(
-				"persist-agent",
-				request("m1-recruit-l1", "door-alpha", "chal-m1-get-door-v1", "GET", "/api/doors/alpha"));
+		SimulateResponseDto unlock = simulate.simulate("persist-agent", correctSelectedPrimary("persist-agent"));
 		progress.completeAfterExit("persist-agent", "m1-recruit-l1", unlock.missionProgress().roomGeneration());
 
 		MissionProgressDto reloaded = progress.getOrCreate("persist-agent", "m1-recruit-l1");
@@ -397,15 +391,52 @@ class MissionProgressEscalationTest {
 
 	@Test
 	void gradedProgressResponsesOmitAnswerKeys() {
+		MissionProgressDto initial = progress.getOrCreate("leak-check", "m1-recruit-l1");
+		MissionProgressDto.MandatoryDeviceDto selected = initial.mandatoryDevices().getFirst();
+		ApiContract contract = contracts.requireByChallengeId(selected.challengeId());
 		SimulateResponseDto unlock = simulate.simulate(
 				"leak-check",
-				request("m1-recruit-l1", "door-alpha", "chal-m1-get-door-v1", "GET", "/api/doors/alpha"));
+				request(
+						"m1-recruit-l1",
+						contract.getDeviceId(),
+						contract.getChallengeId(),
+						contract.getExpectedMethod(),
+						contract.getPathTemplate()));
 		MissionProgressDto.MandatoryDeviceDto device = unlock.missionProgress().mandatoryDevices().getFirst();
-		assertEquals("door-alpha", device.deviceId());
+		assertEquals(selected.deviceId(), device.deviceId());
 		assertTrue(device.documentation() != null && !device.documentation().isBlank());
+		assertFalse(device.documentation().contains(contract.getExpectedMethod() + " " + contract.getPathTemplate()));
 	}
 
 	private static final String UUID_OTHER = "00000000-0000-0000-0000-000000000099";
+
+	private SimulateRequestDto correctSelectedPrimary(String participantCode) {
+		MissionProgressDto initial = progress.getOrCreate(participantCode, "m1-recruit-l1");
+		MissionProgressDto.MandatoryDeviceDto selected = initial.mandatoryDevices().getFirst();
+		ApiContract contract = contracts.requireByChallengeId(selected.challengeId());
+		String path = contract.getPathTemplate();
+		for (var entry : contract.getPathParameters().entrySet()) {
+			path = path.replace("{" + entry.getKey() + "}", entry.getValue());
+		}
+		if (!contract.getQueryParameters().isEmpty()) {
+			StringBuilder query = new StringBuilder("?");
+			boolean first = true;
+			for (var entry : contract.getQueryParameters().entrySet()) {
+				if (!first) {
+					query.append('&');
+				}
+				query.append(entry.getKey()).append('=').append(entry.getValue());
+				first = false;
+			}
+			path = path + query;
+		}
+		return request(
+				"m1-recruit-l1",
+				contract.getDeviceId(),
+				contract.getChallengeId(),
+				contract.getExpectedMethod(),
+				path);
+	}
 
 	private static SimulateRequestDto request(
 			String missionId,

@@ -18,7 +18,7 @@ export function FieldObjectives({
   const deviceLabel =
     requiredCount <= 1
       ? 'Activate the mandatory API security device'
-      : `Activate all mandatory API security devices (${unlockedCount}/${requiredCount})`
+      : `Activate all mandatory API security devices (${unlockedCount}/${requiredCount}) — exit stays locked until every device and final lock (if required) are done`
 
   const items = [
     {

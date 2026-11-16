@@ -166,7 +166,7 @@ export function MissionTrainingScreen({
         </div>
         <div className="mission-training__header-actions">
           <button type="button" className="dash-btn" onClick={onReturnToBriefing}>
-            Mission Briefing
+            Return to Mission Briefing
           </button>
           <button type="button" className="dash-btn" onClick={onOpenOpsBoard}>
             Operations Board

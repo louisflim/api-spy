@@ -32,6 +32,9 @@ class MissionProgressPersistenceIntegrationTest {
 	@Autowired
 	private MissionProgressRepository missionProgressRepository;
 
+	@Autowired
+	private ContractCatalogService contractCatalogService;
+
 	@Test
 	void completionPersistsAcrossReloadAndRejectsForgery() {
 		String playerId = "mp-" + UUID.randomUUID();
@@ -46,15 +49,21 @@ class MissionProgressPersistenceIntegrationTest {
 				IllegalArgumentException.class,
 				() -> missionProgressService.completeAfterExit(playerId, "m1-recruit-l1", null));
 
+		MissionProgressDto.MandatoryDeviceDto selected = created.mandatoryDevices().getFirst();
+		var contract = contractCatalogService.requireByChallengeId(selected.challengeId());
+		String path = contract.getPathTemplate();
+		for (var entry : contract.getPathParameters().entrySet()) {
+			path = path.replace("{" + entry.getKey() + "}", entry.getValue());
+		}
 		requestSimulationService.simulate(
 				playerId,
 				new SimulateRequestDto(
 						"participant",
 						"m1-recruit-l1",
-						"door-alpha",
-						"chal-m1-get-door-v1",
-						"GET",
-						"/api/doors/alpha",
+						contract.getDeviceId(),
+						contract.getChallengeId(),
+						contract.getExpectedMethod(),
+						path,
 						Map.of(),
 						"",
 						"MISSION"));

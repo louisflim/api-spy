@@ -73,6 +73,12 @@ export interface AdaptivePracticeDoor {
   expectedMethod: string
   pathTemplate: string
   practiceMissionId: string
+  /** Authored mini-lesson for targeted re-teaching (optional support). */
+  reviewLessonId?: string | null
+  /** Remaining authored ungraded variants for voluntary further rounds. */
+  alternatePracticeChallengeIds?: string[]
+  /** True when this response newly unlocked targeted support. */
+  newlyTriggered?: boolean
 }
 
 export interface ConceptReviewItem {
@@ -80,6 +86,30 @@ export interface ConceptReviewItem {
   sourceMissionId: string
   status: string
   reviewChallengeId: string | null
+}
+
+export interface LearningSupportOffer {
+  conceptTag: string
+  reviewLessonId: string | null
+  lessonOpened: boolean
+  recurringDifficultyActive: boolean
+  activePracticeChallengeId: string
+  remainingPracticeChallengeIds: string[]
+  roomMissionId: string
+}
+
+export interface LearningSupportRecovery {
+  roomMissionId: string
+  supportOffers: LearningSupportOffer[]
+  adaptivePracticeDoors: AdaptivePracticeDoor[]
+  pendingLaterReview: ConceptReviewItem[]
+  practiceOutcomes: Array<{
+    conceptTag: string
+    challengeId: string
+    roomMissionId: string | null
+    correct: boolean
+    recordedAt: string
+  }>
 }
 
 export interface SimulateResponse {
@@ -96,10 +126,26 @@ export interface SimulateResponse {
   firstAttemptRecorded: boolean
   controlFeedback?: ControlFeedback | null
   terminalVerification?: TerminalVerification | null
+  /** Always empty — physical adaptive practice doors are retired. */
   adaptivePracticeDoors?: AdaptivePracticeDoor[]
+  /** Always null — automatic practice offers are retired. */
+  autoPracticeOffer?: AdaptivePracticeDoor | null
   optionalVerification?: boolean
   conceptReviewQueue?: ConceptReviewItem[]
+  /** Open consistent-improvement observation cycles (not TVP / mastery claims). */
+  conceptConsistency?: ConceptConsistencyObservation[]
   missionProgress?: MissionProgressState | null
+}
+
+export interface ConceptConsistencyObservation {
+  conceptTag: string
+  status: string
+  consecutiveSuccesses: number
+  requiredConsecutiveSuccesses: number
+  scenariosUsed: number
+  maxAdditionalScenarios: number
+  sourceChallengeId: string
+  plannedChallengeIds: string[]
 }
 
 export interface MandatoryDeviceState {
@@ -143,7 +189,7 @@ export interface MissionProgressState {
   /** Mandatory device count after the next escalating restart (capped at 5). */
   nextRequiredDeviceCount: number
   mandatoryDevices: MandatoryDeviceState[]
-  /** Active adaptive practice doors already triggered for this room (max 2). */
+  /** Always empty — physical adaptive practice doors are retired. */
   adaptivePracticeDoors?: AdaptivePracticeDoor[]
   /** Server-selected challenge currently active in the terminal verification sequence. */
   activeTerminalChallenge?: ActiveTerminalChallenge | null

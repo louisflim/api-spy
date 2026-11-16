@@ -8,6 +8,7 @@ export type FootprintId =
   | 'security_checkpoint'
   | 'security_clearance_hall'
   | 'security_purge_bay'
+  | 'security_command_nexus'
 
 export type FootprintCell = 'wall' | 'floor' | 'void'
 

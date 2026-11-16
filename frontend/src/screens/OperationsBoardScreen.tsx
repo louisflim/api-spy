@@ -13,6 +13,8 @@ interface OperationsBoardScreenProps {
   initialRank?: RankKey
   /** After Module 0 finishes, resume a pending mission briefing if App still holds one. */
   onOrientationCompleted?: () => void
+  /** When opened from a mission briefing, return without mutating mission progress. */
+  onReturnToBriefing?: () => void
 }
 
 /** Loads catalog and renders the existing Operations Board under the shared navbar. */
@@ -22,6 +24,7 @@ export function OperationsBoardScreen({
   initialModule,
   initialRank,
   onOrientationCompleted,
+  onReturnToBriefing,
 }: OperationsBoardScreenProps) {
   const { profile } = useAuth()
   const [catalog, setCatalog] = useState<CatalogResponse | null>(null)
@@ -71,6 +74,7 @@ export function OperationsBoardScreen({
         setOrientationCompleted(true)
         onOrientationCompleted?.()
       }}
+      onReturnToBriefing={onReturnToBriefing}
     />
   )
 }

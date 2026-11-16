@@ -35,6 +35,15 @@ public class AdaptiveTriggerEntity {
 	@Column(name = "practice_challenge_id", nullable = false, length = 64)
 	private String practiceChallengeId;
 
+	@Column(name = "review_lesson_id", length = 64)
+	private String reviewLessonId;
+
+	@Column(name = "lesson_opened", nullable = false)
+	private boolean lessonOpened;
+
+	@Column(name = "used_practice_challenge_ids", nullable = false, length = 1024)
+	private String usedPracticeChallengeIds;
+
 	@Column(name = "created_at", nullable = false)
 	private Instant createdAt;
 
@@ -48,6 +57,9 @@ public class AdaptiveTriggerEntity {
 			String roomMissionId,
 			String evidenceKey,
 			String practiceChallengeId,
+			String reviewLessonId,
+			boolean lessonOpened,
+			String usedPracticeChallengeIds,
 			Instant createdAt) {
 		this.id = id;
 		this.participantCode = participantCode;
@@ -55,6 +67,9 @@ public class AdaptiveTriggerEntity {
 		this.roomMissionId = roomMissionId;
 		this.evidenceKey = evidenceKey;
 		this.practiceChallengeId = practiceChallengeId;
+		this.reviewLessonId = reviewLessonId;
+		this.lessonOpened = lessonOpened;
+		this.usedPracticeChallengeIds = usedPracticeChallengeIds == null ? "[]" : usedPracticeChallengeIds;
 		this.createdAt = createdAt;
 	}
 
@@ -80,6 +95,30 @@ public class AdaptiveTriggerEntity {
 
 	public String getPracticeChallengeId() {
 		return practiceChallengeId;
+	}
+
+	public void setPracticeChallengeId(String practiceChallengeId) {
+		this.practiceChallengeId = practiceChallengeId;
+	}
+
+	public String getReviewLessonId() {
+		return reviewLessonId;
+	}
+
+	public boolean isLessonOpened() {
+		return lessonOpened;
+	}
+
+	public void setLessonOpened(boolean lessonOpened) {
+		this.lessonOpened = lessonOpened;
+	}
+
+	public String getUsedPracticeChallengeIds() {
+		return usedPracticeChallengeIds;
+	}
+
+	public void setUsedPracticeChallengeIds(String usedPracticeChallengeIds) {
+		this.usedPracticeChallengeIds = usedPracticeChallengeIds;
 	}
 
 	public Instant getCreatedAt() {

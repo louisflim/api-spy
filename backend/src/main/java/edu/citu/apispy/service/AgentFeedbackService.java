@@ -2,6 +2,7 @@ package edu.citu.apispy.service;
 
 import edu.citu.apispy.domain.learning.ConceptDecision;
 import edu.citu.apispy.domain.simulation.SimulationMode;
+import edu.citu.apispy.dto.AdaptivePracticeDoorDto;
 import edu.citu.apispy.dto.ControlFeedbackDto;
 import edu.citu.apispy.validation.ValidationResult;
 import org.springframework.stereotype.Service;
@@ -81,13 +82,83 @@ public class AgentFeedbackService {
 			if (messages.isEmpty()) {
 				messages.add("Agent, the request does not match the documented fictional contract. Review the terminal brief.");
 			}
-			if (mode == SimulationMode.PRACTICE || mode == SimulationMode.TRAINING) {
+			if (mode == SimulationMode.MISSION) {
+				messages.add("Revise this same challenge and resubmit. The complete correct request is never revealed.");
+			} else if (mode == SimulationMode.PRACTICE || mode == SimulationMode.TRAINING) {
 				messages.add(
 						"Training note: compare method, resource path, and required parameters with the drill documentation. "
 								+ "Exact live-mission answers are never revealed here.");
 			}
 		}
 
+		return new ControlFeedbackDto(tone, List.copyOf(messages), List.copyOf(tags));
+	}
+
+	/**
+	 * Appends CONTROL messaging for optional recurring-difficulty field doors only.
+	 * Wrong graded answers do not auto-assign practice or mini-lessons.
+	 */
+	public ControlFeedbackDto withTargetedSupport(
+			ControlFeedbackDto base,
+			List<AdaptivePracticeDoorDto> practiceDoors) {
+		return withPracticeSupport(base, practiceDoors, null, List.of());
+	}
+
+	public ControlFeedbackDto withPracticeSupport(
+			ControlFeedbackDto base,
+			List<AdaptivePracticeDoorDto> practiceDoors,
+			AdaptivePracticeDoorDto autoPracticeOffer) {
+		return withPracticeSupport(base, practiceDoors, autoPracticeOffer, List.of());
+	}
+
+	public ControlFeedbackDto withPracticeSupport(
+			ControlFeedbackDto base,
+			List<AdaptivePracticeDoorDto> practiceDoors,
+			AdaptivePracticeDoorDto autoPracticeOffer,
+			List<ConceptConsistencyService.ObservationOutcome> consistencyOutcomes) {
+		if (base == null) {
+			return null;
+		}
+		List<String> messages = new ArrayList<>(base.messages());
+		Set<String> tags = new LinkedHashSet<>(base.conceptTags());
+		// Physical adaptive practice doors are retired; practiceDoors / autoPracticeOffer ignored.
+		if (consistencyOutcomes != null) {
+			for (ConceptConsistencyService.ObservationOutcome outcome : consistencyOutcomes) {
+				if (outcome == null) {
+					continue;
+				}
+				tags.add(outcome.conceptTag());
+				String concept = ConceptSupportCatalog.friendlyConcept(outcome.conceptTag());
+				if (outcome.opened()) {
+					messages.add(
+							"CONTROL will observe " + concept
+									+ " on later distinct graded scenarios. Correcting this same challenge "
+									+ "does not count as independent improvement evidence.");
+				} else if (outcome.improved()) {
+					messages.add(
+							"Consistent improvement noted for " + concept
+									+ " after consecutive correct first attempts on distinct scenarios. "
+									+ "This is not a validated mastery claim.");
+				} else if (outcome.exhausted()) {
+					messages.add(
+							"Observation limit reached for " + concept
+									+ ". Queued for later review. Mandatory exit is not blocked.");
+				} else if (outcome.counted() && outcome.consecutiveSuccesses() > 0) {
+					messages.add(
+							"Independent correct observation for " + concept + ": "
+									+ outcome.consecutiveSuccesses() + "/"
+									+ ConceptConsistencyService.REQUIRED_CONSECUTIVE_SUCCESSES + ".");
+				} else if (outcome.counted()) {
+					messages.add(
+							"Observation streak for " + concept
+									+ " reset after an incorrect eligible first attempt.");
+				}
+			}
+		}
+		if (messages.size() == base.messages().size()) {
+			return base;
+		}
+		String tone = "warn".equals(base.tone()) ? "warn" : "brief";
 		return new ControlFeedbackDto(tone, List.copyOf(messages), List.copyOf(tags));
 	}
 

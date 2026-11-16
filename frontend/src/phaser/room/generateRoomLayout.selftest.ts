@@ -62,6 +62,7 @@ assert(footprintIdForMission('m1-recruit-l3') === 'security_server_wing', 'L3 �
 assert(footprintIdForMission('m1-recruit-l4') === 'security_checkpoint', 'L4 → checkpoint')
 assert(footprintIdForMission('m1-recruit-l5') === 'security_clearance_hall', 'L5 → clearance hall')
 assert(footprintIdForMission('m1-recruit-l6') === 'security_purge_bay', 'L6 → purge bay')
+assert(footprintIdForMission('m1-recruit-l7') === 'security_command_nexus', 'L7 → command nexus')
 
 const missions = [
   { missionId: 'm1-recruit-l1', footprintId: 'security_office' as const },
@@ -70,6 +71,7 @@ const missions = [
   { missionId: 'm1-recruit-l4', footprintId: 'security_checkpoint' as const },
   { missionId: 'm1-recruit-l5', footprintId: 'security_clearance_hall' as const },
   { missionId: 'm1-recruit-l6', footprintId: 'security_purge_bay' as const },
+  { missionId: 'm1-recruit-l7', footprintId: 'security_command_nexus' as const },
 ]
 
 const signatures = new Map<string, string>()
@@ -106,15 +108,16 @@ for (const { missionId, footprintId } of missions) {
         plan.mandatoryTerminals.length === mandatoryTerminalCount,
         `${missionId} tier ${mandatoryTerminalCount}: count`,
       )
-      assert(plan.practiceSlots.length === PRACTICE_SLOT_COUNT, `${missionId}: practice slots`)
+      assert(plan.practiceSlots.length === 0, `${missionId}: no optional practice slots`)
+      assert(PRACTICE_SLOT_COUNT === 0, 'practice slot count constant must stay 0')
       assert(plan.footprintId === footprintId, `${missionId} tier: footprint`)
       assertPlayable(plan, `${missionId}/m${mandatoryTerminalCount}/i${roomInstance}`)
       const projected = projectLayoutToMinimap(plan)
       assert(projected.voids > 0, `${missionId}: minimap voids`)
       assert(projected.walls > 0, `${missionId}: minimap walls`)
       assert(
-        projected.terminals === plan.mandatoryTerminals.length + plan.practiceSlots.length,
-        `${missionId}: minimap terminals`,
+        projected.terminals === plan.mandatoryTerminals.length,
+        `${missionId}: minimap terminals are mandatory only`,
       )
     }
   }
@@ -131,6 +134,14 @@ assert(
 assert(
   signatures.get('m1-recruit-l1') !== signatures.get('m1-recruit-l3'),
   'L1 and L3 wall geometry must differ',
+)
+assert(
+  signatures.get('m1-recruit-l7') !== signatures.get('m1-recruit-l6'),
+  'L7 command nexus must differ from L6 purge bay',
+)
+assert(
+  signatures.get('m1-recruit-l7') !== signatures.get('m1-recruit-l1'),
+  'L7 command nexus must differ from L1 office',
 )
 
 console.log('generateRoomLayout.selftest: OK', {

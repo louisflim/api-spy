@@ -170,6 +170,34 @@ export const PRACTICE_BY_MISSION: Record<string, MissionDetail> = {
     },
     conceptVariants: [],
   },
+  'm1-recruit-l7': {
+    mission: {
+      missionId: 'practice-m1-recruit-l7',
+      module: 1,
+      rank: 'RECRUIT',
+      level: 7,
+      title: 'Practice: nexus status drill',
+      status: 'PRACTICE',
+      playable: true,
+      primaryChallengeId: 'chal-practice-m1-l7',
+      requiredLessonIds: [],
+      conceptTags: ['http.method.get', 'http.endpoint'],
+      scenarioFocus: 'Ungraded practice drill',
+    },
+    challenge: {
+      challengeId: 'chal-practice-m1-l7',
+      variantId: 'practice-nexus-drill-v1',
+      deviceId: 'practice-nexus',
+      conceptTags: ['http.method.get', 'http.endpoint'],
+      documentation:
+        'PRACTICE MODE — educational review only.\n\nMethod: GET\nPath: /api/practice/nexus/status-drill',
+      expectedMethod: 'GET',
+      pathTemplate: '/api/practice/nexus/status-drill',
+      pathParameters: {},
+      queryParameters: {},
+    },
+    conceptVariants: [],
+  },
 }
 
 export const DRILL_LABELS: Record<string, string> = {
@@ -177,6 +205,7 @@ export const DRILL_LABELS: Record<string, string> = {
   'm1-recruit-l2': 'Path parameter lock drill',
   'm1-recruit-l3': 'Query parameter sensor drill',
   'm1-recruit-l4': 'POST registration drill',
+  'm1-recruit-l7': 'Command nexus status drill',
   'm1-recruit-l5': 'PUT clearance drill',
   'm1-recruit-l6': 'DELETE badge drill',
 }

@@ -10,6 +10,9 @@ export const paths = {
   dashboard: '/dashboard',
   operations: '/operations',
   trainingAcademy: '/training-academy',
+  /** Module 0 introductory Academy with optional return path (not mission level training). */
+  trainingAcademyFrom: (returnPath: string) =>
+    `/training-academy?returnTo=${encodeURIComponent(returnPath)}`,
   profile: '/profile',
   loadout: '/loadout',
   settings: '/settings',
@@ -27,6 +30,21 @@ export const paths = {
 export function parsePracticeFrom(raw: string | null): PracticeFrom {
   if (raw === 'briefing' || raw === 'training' || raw === 'ops') return raw
   return 'ops'
+}
+
+/** Same-origin SPA path only — rejects protocol-relative and external URLs. */
+export function safeInternalPath(raw: string | null | undefined): string | null {
+  if (!raw) return null
+  let decoded = raw
+  try {
+    decoded = decodeURIComponent(raw)
+  } catch {
+    return null
+  }
+  if (!decoded.startsWith('/') || decoded.startsWith('//') || decoded.includes('://')) {
+    return null
+  }
+  return decoded
 }
 
 /** Map legacy `/app/...` bookmarks from the pre-router history sync. */

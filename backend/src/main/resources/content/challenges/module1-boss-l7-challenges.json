@@ -1,0 +1,345 @@
+{
+  "challenges": [
+    {
+      "challengeId": "chal-m1-boss-status-v1",
+      "variantId": "nexus-status-v1",
+      "missionId": "m1-recruit-l7",
+      "deviceId": "nexus-status-board",
+      "conceptTags": ["http.method.get", "http.endpoint"],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/nexus/status",
+      "pathParameters": {},
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "facility": "command-nexus",
+        "alertLevel": "elevated",
+        "message": "Nexus status board synchronized."
+      },
+      "documentation": "FIELD BRIEF — Command Nexus Status API (fictional)\n\nObjective:\nRead the facility status board so CONTROL can confirm which security layers are still armed.\n\nResources:\n- Status documents live at /api/nexus/status.\n- This terminal binds to the primary status board only.\n\nMethod semantics:\n- GET retrieves the current status snapshot.\n- Write methods (POST/PUT/DELETE) change facility state and are wrong for a read.\n\nRules:\n- No path parameters, query string, or body.\n- Construct method and path yourself from these rules.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-boss-status-v2",
+      "variantId": "nexus-status-aux-v2",
+      "missionId": "m1-recruit-l7",
+      "deviceId": "nexus-status-aux",
+      "conceptTags": ["http.method.get", "http.endpoint"],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/nexus/status-aux",
+      "pathParameters": {},
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "facility": "command-nexus",
+        "board": "aux",
+        "message": "Auxiliary status board synchronized."
+      },
+      "documentation": "FIELD BRIEF — Auxiliary Nexus Status API (fictional)\n\nObjective:\nVerify GET against the auxiliary status board (distinct resource from the primary board).\n\nResources:\n- Auxiliary board: /api/nexus/status-aux\n\nMethod semantics:\n- GET reads the board. Write methods are inappropriate.\n\nRules:\n- No query or body. Construct method and path yourself.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-boss-status-v3",
+      "variantId": "nexus-status-ops-v3",
+      "missionId": "m1-recruit-l7",
+      "deviceId": "nexus-status-ops",
+      "conceptTags": ["http.method.get", "http.endpoint"],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/nexus/ops-status",
+      "pathParameters": {},
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "board": "ops",
+        "message": "Ops status board synchronized."
+      },
+      "documentation": "FIELD BRIEF — Ops Nexus Status API (fictional)\n\nObjective:\nRead the ops status board after escalation remaps this terminal.\n\nResources:\n- /api/nexus/ops-status\n\nMethod semantics:\n- GET only. Construct independently.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-boss-circuit-v1",
+      "variantId": "nexus-circuit-core-v1",
+      "missionId": "m1-recruit-l7",
+      "deviceId": "nexus-circuit-core",
+      "conceptTags": ["http.method.get", "http.endpoint", "http.path_parameter"],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/nexus/circuits/{circuitId}",
+      "pathParameters": {
+        "circuitId": "core-loop"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "circuitId": "core-loop",
+        "state": "isolated",
+        "message": "Core loop circuit state retrieved."
+      },
+      "documentation": "FIELD BRIEF — Nexus Circuit Override API (fictional)\n\nObjective:\nInspect the core-loop power circuit so the breach team can isolate it safely.\n\nResources:\n- Circuits live under /api/nexus/circuits/{circuitId}.\n- Substitute {circuitId} with this panel's circuit code: core-loop.\n\nMethod semantics:\n- GET retrieves circuit state.\n- POST/PUT/DELETE alter circuits and are wrong for inspection.\n\nRules:\n- No query string or body.\n- Construct method and path with the substituted circuit id yourself.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-boss-circuit-v2",
+      "variantId": "nexus-circuit-ring-v2",
+      "missionId": "m1-recruit-l7",
+      "deviceId": "nexus-circuit-ring",
+      "conceptTags": ["http.method.get", "http.endpoint", "http.path_parameter"],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/nexus/circuits/{circuitId}",
+      "pathParameters": {
+        "circuitId": "ring-b"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "circuitId": "ring-b",
+        "state": "isolated",
+        "message": "Ring-B circuit state retrieved."
+      },
+      "documentation": "FIELD BRIEF — Nexus Circuit Override API (fictional)\n\nObjective:\nVerify path-parameter GET on the ring-b circuit panel (distinct circuit id).\n\nResources:\n- /api/nexus/circuits/{circuitId}; this panel uses circuitId ring-b.\n\nMethod semantics:\n- GET inspects. Construct the substituted path yourself.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-boss-circuit-v3",
+      "variantId": "nexus-circuit-vault-v3",
+      "missionId": "m1-recruit-l7",
+      "deviceId": "nexus-circuit-vault",
+      "conceptTags": ["http.method.get", "http.endpoint", "http.path_parameter"],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/nexus/circuits/{circuitId}",
+      "pathParameters": {
+        "circuitId": "vault-feed"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "circuitId": "vault-feed",
+        "state": "isolated",
+        "message": "Vault-feed circuit state retrieved."
+      },
+      "documentation": "FIELD BRIEF — Nexus Circuit Override API (fictional)\n\nObjective:\nInspect the vault-feed circuit after escalation remaps this terminal.\n\nResources:\n- /api/nexus/circuits/{circuitId}; circuitId vault-feed.\n\nMethod semantics:\n- GET only. Construct independently.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-boss-alarms-v1",
+      "variantId": "nexus-alarms-core-v1",
+      "missionId": "m1-recruit-l7",
+      "deviceId": "nexus-alarm-console",
+      "conceptTags": ["http.method.get", "http.endpoint", "http.query_parameter"],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/nexus/alarms",
+      "pathParameters": {},
+      "queryParameters": {
+        "zone": "core"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "zone": "core",
+        "active": 2,
+        "message": "Core-zone alarms listed."
+      },
+      "documentation": "FIELD BRIEF — Nexus Alarm Filter API (fictional)\n\nObjective:\nList active alarms for the core security zone.\n\nResources:\n- Collection: /api/nexus/alarms\n- Required query parameter name: zone\n- This console is wired to zone core.\n- Illustrative shape only: /api/nexus/alarms?zone=<zoneCode>\n\nMethod semantics:\n- GET filters the alarm collection.\n- Write methods do not list alarms.\n\nRules:\n- Construct method and full path-plus-query yourself from this brief.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-boss-alarms-v2",
+      "variantId": "nexus-alarms-wing-v2",
+      "missionId": "m1-recruit-l7",
+      "deviceId": "nexus-alarm-wing",
+      "conceptTags": ["http.method.get", "http.endpoint", "http.query_parameter"],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/nexus/alarms",
+      "pathParameters": {},
+      "queryParameters": {
+        "zone": "wing-c"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "zone": "wing-c",
+        "active": 1,
+        "message": "Wing-C alarms listed."
+      },
+      "documentation": "FIELD BRIEF — Nexus Alarm Filter API (fictional)\n\nObjective:\nVerify query filtering for wing-c alarms (distinct zone value).\n\nResources:\n- /api/nexus/alarms with required query zone=wing-c for this console.\n\nMethod semantics:\n- GET filters. Construct path-plus-query yourself.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-boss-alarms-v3",
+      "variantId": "nexus-alarms-vault-v3",
+      "missionId": "m1-recruit-l7",
+      "deviceId": "nexus-alarm-vault",
+      "conceptTags": ["http.method.get", "http.endpoint", "http.query_parameter"],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/nexus/alarms",
+      "pathParameters": {},
+      "queryParameters": {
+        "zone": "vault"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "zone": "vault",
+        "active": 3,
+        "message": "Vault-zone alarms listed."
+      },
+      "documentation": "FIELD BRIEF — Nexus Alarm Filter API (fictional)\n\nObjective:\nList vault-zone alarms after escalation remaps this terminal.\n\nResources:\n- /api/nexus/alarms?zone=vault\n\nMethod semantics:\n- GET only. Construct independently.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-boss-breach-v1",
+      "variantId": "nexus-breach-core-v1",
+      "missionId": "m1-recruit-l7",
+      "deviceId": "nexus-breach-desk",
+      "conceptTags": ["http.method.post", "http.endpoint"],
+      "expectedMethod": "POST",
+      "pathTemplate": "/api/nexus/breach-reports/core",
+      "pathParameters": {},
+      "queryParameters": {},
+      "successStatus": 201,
+      "successBody": {
+        "reportId": "core",
+        "status": "sealed",
+        "message": "Core breach report filed."
+      },
+      "documentation": "FIELD BRIEF — Nexus Breach Report API (fictional)\n\nObjective:\nFile the core breach seal report so automated bulkheads close behind the team.\n\nResources:\n- Report submission endpoint: /api/nexus/breach-reports/core\n- This desk only accepts the core report id embedded in the path.\n\nMethod semantics:\n- POST creates/submits the breach report.\n- GET only reads prior reports. PUT/DELETE are wrong for first-time filing.\n\nRules:\n- No query string. Body may be empty for this fictional contract.\n- Construct method and path yourself.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-boss-breach-v2",
+      "variantId": "nexus-breach-ring-v2",
+      "missionId": "m1-recruit-l7",
+      "deviceId": "nexus-breach-ring",
+      "conceptTags": ["http.method.post", "http.endpoint"],
+      "expectedMethod": "POST",
+      "pathTemplate": "/api/nexus/breach-reports/ring",
+      "pathParameters": {},
+      "queryParameters": {},
+      "successStatus": 201,
+      "successBody": {
+        "reportId": "ring",
+        "status": "sealed",
+        "message": "Ring breach report filed."
+      },
+      "documentation": "FIELD BRIEF — Nexus Breach Report API (fictional)\n\nObjective:\nVerify POST filing for the ring breach report (distinct endpoint from core).\n\nResources:\n- /api/nexus/breach-reports/ring\n\nMethod semantics:\n- POST submits. Construct independently.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-boss-breach-v3",
+      "variantId": "nexus-breach-vault-v3",
+      "missionId": "m1-recruit-l7",
+      "deviceId": "nexus-breach-vault",
+      "conceptTags": ["http.method.post", "http.endpoint"],
+      "expectedMethod": "POST",
+      "pathTemplate": "/api/nexus/breach-reports/vault",
+      "pathParameters": {},
+      "queryParameters": {},
+      "successStatus": 201,
+      "successBody": {
+        "reportId": "vault",
+        "status": "sealed",
+        "message": "Vault breach report filed."
+      },
+      "documentation": "FIELD BRIEF — Nexus Breach Report API (fictional)\n\nObjective:\nFile the vault breach report after escalation remaps this terminal.\n\nResources:\n- /api/nexus/breach-reports/vault\n\nMethod semantics:\n- POST submits. Construct independently.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-boss-lockdown-v1",
+      "variantId": "nexus-lockdown-alpha-v1",
+      "missionId": "m1-recruit-l7",
+      "deviceId": "nexus-lockdown-alpha",
+      "conceptTags": ["http.method.put", "http.endpoint", "http.path_parameter"],
+      "expectedMethod": "PUT",
+      "pathTemplate": "/api/nexus/lockdowns/{sectorId}",
+      "pathParameters": {
+        "sectorId": "alpha-wing"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "sectorId": "alpha-wing",
+        "mode": "soft-lock",
+        "message": "Alpha-wing lockdown updated."
+      },
+      "documentation": "FIELD BRIEF — Nexus Lockdown Control API (fictional)\n\nObjective:\nUpdate the alpha-wing lockdown mode so patrols divert away from the vault corridor.\n\nResources:\n- Lockdown records live under /api/nexus/lockdowns/{sectorId}.\n- Substitute {sectorId} with this console's sector code: alpha-wing.\n\nMethod semantics:\n- PUT replaces/updates the existing lockdown record.\n- GET only reads. POST creates new sectors. DELETE removes records and is wrong here.\n\nRules:\n- No query string. Body may be empty for this fictional contract.\n- Construct method and path with the substituted sector id yourself.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-boss-lockdown-v2",
+      "variantId": "nexus-lockdown-beta-v2",
+      "missionId": "m1-recruit-l7",
+      "deviceId": "nexus-lockdown-beta",
+      "conceptTags": ["http.method.put", "http.endpoint", "http.path_parameter"],
+      "expectedMethod": "PUT",
+      "pathTemplate": "/api/nexus/lockdowns/{sectorId}",
+      "pathParameters": {
+        "sectorId": "beta-wing"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "sectorId": "beta-wing",
+        "mode": "soft-lock",
+        "message": "Beta-wing lockdown updated."
+      },
+      "documentation": "FIELD BRIEF — Nexus Lockdown Control API (fictional)\n\nObjective:\nVerify PUT update for beta-wing (distinct sector id).\n\nResources:\n- /api/nexus/lockdowns/{sectorId}; sectorId beta-wing.\n\nMethod semantics:\n- PUT updates. Construct the substituted path yourself.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-boss-lockdown-v3",
+      "variantId": "nexus-lockdown-gamma-v3",
+      "missionId": "m1-recruit-l7",
+      "deviceId": "nexus-lockdown-gamma",
+      "conceptTags": ["http.method.put", "http.endpoint", "http.path_parameter"],
+      "expectedMethod": "PUT",
+      "pathTemplate": "/api/nexus/lockdowns/{sectorId}",
+      "pathParameters": {
+        "sectorId": "gamma-wing"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "sectorId": "gamma-wing",
+        "mode": "soft-lock",
+        "message": "Gamma-wing lockdown updated."
+      },
+      "documentation": "FIELD BRIEF — Nexus Lockdown Control API (fictional)\n\nObjective:\nUpdate gamma-wing lockdown after escalation remaps this terminal.\n\nResources:\n- /api/nexus/lockdowns/{sectorId}; sectorId gamma-wing.\n\nMethod semantics:\n- PUT updates. Construct independently.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-final-lock-l7",
+      "variantId": "final-lock-l7-v1",
+      "missionId": "m1-recruit-l7",
+      "deviceId": "final-lock-l7",
+      "conceptTags": ["http.method.delete", "http.endpoint", "http.path_parameter"],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/final-locks/{lockId}",
+      "pathParameters": {
+        "lockId": "nexus"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "lockId": "nexus",
+        "status": "released",
+        "message": "Command nexus final lock released."
+      },
+      "documentation": "FIELD BRIEF — Final Lock API (fictional)\n\nObjective:\nPurge the master vault seal for the command nexus (required on every boss attempt).\n\nResources:\n- /api/final-locks/{lockId}; this room uses lockId nexus.\n\nMethod semantics:\n- DELETE deactivates the final lock record.\n\nRules:\n- Substitute {lockId}. Construct independently. Counted separately from the five mandatory nexus devices.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-practice-m1-l7",
+      "variantId": "practice-nexus-drill-v1",
+      "missionId": "practice-m1-recruit-l7",
+      "deviceId": "practice-nexus",
+      "conceptTags": ["http.method.get", "http.endpoint"],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/practice/nexus/status-drill",
+      "pathParameters": {},
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "mode": "practice",
+        "message": "Nexus status drill acknowledged."
+      },
+      "documentation": "PRACTICE MODE — educational review only.\n\nMethod: GET\nPath: /api/practice/nexus/status-drill",
+      "deviceUnlockState": "OPEN"
+    }
+  ]
+}

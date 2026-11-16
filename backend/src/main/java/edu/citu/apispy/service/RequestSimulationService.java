@@ -9,6 +9,7 @@ import edu.citu.apispy.domain.simulation.DeviceStateChange;
 import edu.citu.apispy.domain.simulation.SimulatedHttpResponse;
 import edu.citu.apispy.domain.simulation.SimulationMode;
 import edu.citu.apispy.dto.AdaptivePracticeDoorDto;
+import edu.citu.apispy.dto.ConceptConsistencyDto;
 import edu.citu.apispy.dto.ConceptReviewItemDto;
 import edu.citu.apispy.dto.ControlFeedbackDto;
 import edu.citu.apispy.dto.DeviceStateChangeDto;
@@ -23,6 +24,7 @@ import edu.citu.apispy.validation.ValidationResult;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -50,9 +52,11 @@ public class RequestSimulationService {
 	private final AgentFeedbackService agentFeedbackService;
 	private final AdaptivePracticeService adaptivePracticeService;
 	private final ConceptReviewService conceptReviewService;
+	private final PracticeOutcomeService practiceOutcomeService;
 	private final MissionProgressService missionProgressService;
 	private final DeviceEscalationService deviceEscalationService;
 	private final ScenarioSelectionService scenarioSelectionService;
+	private final ConceptConsistencyService conceptConsistencyService;
 
 	public RequestSimulationService(
 			ContractCatalogService contractCatalogService,
@@ -66,9 +70,11 @@ public class RequestSimulationService {
 			AgentFeedbackService agentFeedbackService,
 			AdaptivePracticeService adaptivePracticeService,
 			ConceptReviewService conceptReviewService,
+			PracticeOutcomeService practiceOutcomeService,
 			MissionProgressService missionProgressService,
 			DeviceEscalationService deviceEscalationService,
-			ScenarioSelectionService scenarioSelectionService) {
+			ScenarioSelectionService scenarioSelectionService,
+			ConceptConsistencyService conceptConsistencyService) {
 		this.contractCatalogService = contractCatalogService;
 		this.missionCatalogService = missionCatalogService;
 		this.simulatedRequestValidator = simulatedRequestValidator;
@@ -80,9 +86,11 @@ public class RequestSimulationService {
 		this.agentFeedbackService = agentFeedbackService;
 		this.adaptivePracticeService = adaptivePracticeService;
 		this.conceptReviewService = conceptReviewService;
+		this.practiceOutcomeService = practiceOutcomeService;
 		this.missionProgressService = missionProgressService;
 		this.deviceEscalationService = deviceEscalationService;
 		this.scenarioSelectionService = scenarioSelectionService;
+		this.conceptConsistencyService = conceptConsistencyService;
 	}
 
 	/**
@@ -111,7 +119,10 @@ public class RequestSimulationService {
 				terminalId,
 				primary,
 				mandatoryUnlocked,
-				scenarioSelectionService.verificationPlan(missionId, selectedIds));
+				scenarioSelectionService.verificationPlan(
+						missionId,
+						selectedIds,
+						parseRoomGeneration(progress.roomGeneration())));
 	}
 
 	public SimulateResponseDto simulate(String authenticatedPlayerId, SimulateRequestDto requestDto) {
@@ -146,11 +157,18 @@ public class RequestSimulationService {
 				: progressBefore.mandatoryDevices().stream()
 						.map(MissionProgressDto.MandatoryDeviceDto::challengeId)
 						.toList();
-		boolean optionalVerification = !deviceEscalationService.isMandatoryDevice(
-				mission.getMissionId(),
-				contract.getDeviceId(),
-				progressBefore.apiResetCount(),
-				selectedIds);
+		/*
+		 * Physical device unlock only for selected mandatory challenges.
+		 * TVP / consistency follow-ups marked optionalVerification must never unlock
+		 * another mandatory boss device (even when the follow-up contract reuses a
+		 * selected challenge id).
+		 */
+		boolean selectedMandatoryChallenge = selectedIds.contains(contract.getChallengeId());
+		boolean activeOptional = progressBefore.activeTerminalChallenge() != null
+				&& progressBefore.activeTerminalChallenge().optionalVerification()
+				&& contract.getChallengeId()
+						.equals(progressBefore.activeTerminalChallenge().challengeId());
+		boolean optionalVerification = !selectedMandatoryChallenge || activeOptional;
 		String terminalId = resolveTerminalId(mission, selectedIds);
 		if (!result.isCorrect()) {
 			missionProgressService.recordIncorrectGradedAttempt(authenticatedPlayerId, mission.getMissionId());
@@ -171,11 +189,25 @@ public class RequestSimulationService {
 				apiRequest.getMethod() + " " + apiRequest.getPath() + Instant.now(),
 				capture.newlyRecorded());
 
+		List<ConceptConsistencyService.ObservationOutcome> consistencyOutcomes = new ArrayList<>();
+		java.util.UUID roomGeneration = parseRoomGeneration(progressBefore.roomGeneration());
 		for (String conceptTag : contract.getConceptTags()) {
 			conceptProgressService.markPracticing(authenticatedPlayerId, conceptTag);
-			Boolean firstCorrect = capture.record().getConceptFirstAttemptCorrect().get(conceptTag);
-			if (!replayRun && Boolean.FALSE.equals(firstCorrect) && result.isCorrect()) {
-				conceptProgressService.markImproving(authenticatedPlayerId, conceptTag);
+			if (!replayRun && capture.newlyRecorded()) {
+				Boolean conceptOk = capture.record().getConceptFirstAttemptCorrect().get(conceptTag);
+				if (conceptOk != null) {
+					ConceptConsistencyService.ObservationOutcome outcome =
+							conceptConsistencyService.observeEligibleFirstAttempt(
+									authenticatedPlayerId,
+									mission.getMissionId(),
+									contract,
+									conceptTag,
+									conceptOk,
+									roomGeneration);
+					if (outcome != null) {
+						consistencyOutcomes.add(outcome);
+					}
+				}
 			}
 		}
 		conceptProgressService.markPracticing(authenticatedPlayerId, "http.response");
@@ -205,7 +237,16 @@ public class RequestSimulationService {
 				|| optionalVerification
 				|| !progressAfter.unlockedDeviceIds().isEmpty();
 
-		List<ApiContract> tvpPlan = scenarioSelectionService.verificationPlan(mission.getMissionId(), selectedIds);
+		// TVP required slots stay on the base authored plan (KPI definition unchanged).
+		// Consistency observation scenarios extend progression only, never TVP denominators.
+		List<ApiContract> tvpPlan = scenarioSelectionService.verificationPlan(
+				mission.getMissionId(),
+				selectedIds,
+				roomGeneration);
+		List<ApiContract> sequencePlan = conceptConsistencyService.augmentVerificationPlan(
+				authenticatedPlayerId,
+				mission.getMissionId(),
+				tvpPlan);
 		Set<String> completedIds = new LinkedHashSet<>(
 				missionProgressService.completedTerminalChallengeIds(
 						authenticatedPlayerId,
@@ -216,7 +257,7 @@ public class RequestSimulationService {
 					authenticatedPlayerId,
 					mission.getMissionId(),
 					contract.getChallengeId(),
-					tvpPlan);
+					sequencePlan);
 			completedIds = new LinkedHashSet<>(
 					missionProgressService.completedTerminalChallengeIds(
 							authenticatedPlayerId,
@@ -224,7 +265,8 @@ public class RequestSimulationService {
 		}
 
 		// Preserve earned TVP; do not award new evidence slots during replay.
-		TerminalVerificationDto tvp = replayRun
+		// Next-scenario pointer uses the extended sequence plan; requiredSlots stay on tvpPlan.
+		TerminalVerificationDto tvpBase = replayRun
 				? terminalVerificationService.summarize(
 						authenticatedPlayerId,
 						mission.getMissionId(),
@@ -243,35 +285,44 @@ public class RequestSimulationService {
 						mandatoryUnlocked,
 						tvpPlan,
 						completedIds);
+		var sequenceNext = mandatoryUnlocked
+				? terminalVerificationService.findNextVerification(sequencePlan, contract, completedIds)
+				: null;
+		TerminalVerificationDto tvp = new TerminalVerificationDto(
+				tvpBase.percent(),
+				tvpBase.earnedSlots(),
+				tvpBase.requiredSlots(),
+				tvpBase.terminalId(),
+				tvpBase.complete(),
+				sequenceNext);
 
 		List<AdaptivePracticeDoorDto> practiceDoors = List.of();
-		String selectedPrimary = selectedIds.isEmpty() ? mission.getPrimaryChallengeId() : selectedIds.getFirst();
-		boolean primaryMandatory = contract.getChallengeId().equals(selectedPrimary);
-		if (replayRun) {
-			// Do not mint duplicate adaptive triggers from previously counted evidence.
-			practiceDoors = adaptivePracticeService.activeDoorsForRoom(
-					authenticatedPlayerId,
-					mission.getMissionId());
-		} else if (primaryMandatory) {
+		if (!replayRun) {
+			// Recurring-difficulty may enqueue later review; physical practice doors stay empty.
 			practiceDoors = adaptivePracticeService.evaluateAfterMandatoryFirstAttempt(
 					authenticatedPlayerId,
 					mission,
 					contract,
 					capture);
-		} else {
-			practiceDoors = adaptivePracticeService.activeDoorsForRoom(
-					authenticatedPlayerId,
-					mission.getMissionId());
 		}
 
-		ControlFeedbackDto feedback = agentFeedbackService.build(
-				result,
-				decisions,
-				capture.newlyRecorded(),
-				capture.record().isFirstAttemptCorrect(),
-				mode);
+		// Wrong graded answers stay on the same scenario: CONTROL explains the concept error.
+		// No automatic practice assignment, mini-lesson, or optional physical practice doors.
+		ControlFeedbackDto feedback = agentFeedbackService.withPracticeSupport(
+				agentFeedbackService.build(
+						result,
+						decisions,
+						capture.newlyRecorded(),
+						capture.record().isFirstAttemptCorrect(),
+						mode),
+				practiceDoors,
+				null,
+				consistencyOutcomes);
 
 		List<ConceptReviewItemDto> reviews = conceptReviewService.pendingForParticipant(authenticatedPlayerId);
+		List<ConceptConsistencyDto> consistency = conceptConsistencyService.openForParticipant(
+				authenticatedPlayerId,
+				mission.getMissionId());
 
 		SimulatedHttpResponse response = result.isCorrect()
 				? SimulatedHttpResponse.success(contract)
@@ -290,8 +341,10 @@ public class RequestSimulationService {
 				feedback,
 				tvp,
 				practiceDoors,
+				null,
 				optionalVerification,
 				reviews,
+				consistency,
 				progressAfter);
 	}
 
@@ -321,6 +374,23 @@ public class RequestSimulationService {
 			conceptProgressService.markPracticing(playerId, conceptTag);
 		}
 		conceptProgressService.markPracticing(playerId, "http.response");
+
+		// PRACTICE outcomes are recorded separately and never award TVP / first-attempt evidence.
+		if (mode == SimulationMode.PRACTICE) {
+			String primaryConcept = contract.getConceptTags().isEmpty()
+					? contract.getPrimaryConceptTag()
+					: contract.getConceptTags().getFirst();
+			practiceOutcomeService.record(
+					playerId,
+					primaryConcept,
+					contract.getChallengeId(),
+					null,
+					result.isCorrect());
+			if (result.isCorrect()) {
+				// Queue later review; one correct practice does not declare Improving/mastery.
+				conceptReviewService.enqueue(playerId, primaryConcept, contract.getMissionId());
+			}
+		}
 
 		SimulatedHttpResponse response = result.isCorrect()
 				? SimulatedHttpResponse.success(contract)
@@ -353,6 +423,15 @@ public class RequestSimulationService {
 				false,
 				result.isCorrect(),
 				mode);
+		if (mode == SimulationMode.PRACTICE && result.isCorrect()) {
+			List<String> messages = new java.util.ArrayList<>(feedback.messages());
+			messages.add(
+					"Ungraded practice successful. Outcome recorded separately from research evidence. "
+							+ "One correct practice attempt does not mark this concept Improving.");
+			feedback = new ControlFeedbackDto(feedback.tone(), List.copyOf(messages), feedback.conceptTags());
+		}
+
+		List<ConceptReviewItemDto> reviews = conceptReviewService.pendingForParticipant(playerId);
 
 		return new SimulateResponseDto(
 				result.isCorrect(),
@@ -369,7 +448,9 @@ public class RequestSimulationService {
 				feedback,
 				null,
 				List.of(),
+				null,
 				false,
+				reviews,
 				List.of(),
 				null);
 	}
@@ -409,8 +490,10 @@ public class RequestSimulationService {
 			ControlFeedbackDto feedback,
 			TerminalVerificationDto tvp,
 			List<AdaptivePracticeDoorDto> practiceDoors,
+			AdaptivePracticeDoorDto autoPracticeOffer,
 			boolean optionalVerification,
 			List<ConceptReviewItemDto> reviews,
+			List<ConceptConsistencyDto> consistency,
 			MissionProgressDto missionProgress) {
 		return new SimulateResponseDto(
 				correct,
@@ -427,9 +510,22 @@ public class RequestSimulationService {
 				feedback,
 				tvp,
 				practiceDoors,
+				autoPracticeOffer,
 				optionalVerification,
 				reviews,
+				consistency == null ? List.of() : consistency,
 				missionProgress);
+	}
+
+	private static java.util.UUID parseRoomGeneration(String value) {
+		if (value == null || value.isBlank()) {
+			return null;
+		}
+		try {
+			return java.util.UUID.fromString(value);
+		} catch (IllegalArgumentException ex) {
+			return null;
+		}
 	}
 
 	private static List<String> toErrorNames(Set<? extends Enum<?>> errorCodes) {

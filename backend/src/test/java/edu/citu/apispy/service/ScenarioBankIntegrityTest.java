@@ -68,7 +68,8 @@ class ScenarioBankIntegrityTest {
 				"m1-recruit-l3",
 				"m1-recruit-l4",
 				"m1-recruit-l5",
-				"m1-recruit-l6")) {
+				"m1-recruit-l6",
+				"m1-recruit-l7")) {
 			MissionEscalationDefinition definition = escalation.find(missionId).orElseThrow();
 			for (String id : definition.mandatoryChallengeIds()) {
 				assertTrue(contracts.findByChallengeId(id).isPresent(), "Missing mandatory " + id);
@@ -91,20 +92,41 @@ class ScenarioBankIntegrityTest {
 	}
 
 	@Test
-	void selectionIsStableForSameRoomGenerationAndRotatesAfterPreviousSelection() {
+	void selectionIsStableForSameRoomGenerationAndVariesAcrossGenerations() {
 		UUID generation = UUID.fromString("11111111-1111-1111-1111-111111111111");
 		List<String> first = selection.selectMandatoryChallengeIds("m1-recruit-l1", 0, generation, List.of());
 		List<String> again = selection.selectMandatoryChallengeIds("m1-recruit-l1", 0, generation, List.of());
-		assertEquals(first, again);
-		assertEquals("chal-m1-get-door-v1", first.getFirst());
+		assertEquals(first, again, "refresh must preserve room-generation selection");
+		assertFalse(first.isEmpty());
+		assertTrue(contracts.findByChallengeId(first.getFirst()).isPresent());
 
-		List<String> rotated = selection.selectMandatoryChallengeIds(
-				"m1-recruit-l1",
-				0,
-				UUID.fromString("22222222-2222-2222-2222-222222222222"),
-				first);
+		UUID other = UUID.fromString("22222222-2222-2222-2222-222222222222");
+		List<String> otherGen = selection.selectMandatoryChallengeIds("m1-recruit-l1", 0, other, List.of());
+		assertFalse(otherGen.isEmpty());
+		assertTrue(contracts.findByChallengeId(otherGen.getFirst()).isPresent());
+
+		// Across enough seeds, pool selection should not collapse to a single fixed id.
+		Set<String> distinctPrimaries = new HashSet<>();
+		for (int i = 0; i < 24; i++) {
+			UUID seed = UUID.nameUUIDFromBytes(("seed-" + i).getBytes());
+			distinctPrimaries.add(
+					selection.selectMandatoryChallengeIds("m1-recruit-l1", 0, seed, List.of()).getFirst());
+		}
+		assertTrue(distinctPrimaries.size() >= 2, "controlled pool selection must vary by roomGeneration");
+
+		List<String> rotated = selection.selectMandatoryChallengeIds("m1-recruit-l1", 0, other, first);
 		assertFalse(rotated.isEmpty());
 		assertTrue(contracts.findByChallengeId(rotated.getFirst()).isPresent());
+	}
+
+	@Test
+	void verificationPlanSeedsDistinctSecondaryWhenPoolAllows() {
+		UUID generation = UUID.fromString("33333333-3333-3333-3333-333333333333");
+		List<String> selected = selection.selectMandatoryChallengeIds("m1-recruit-l1", 0, generation, List.of());
+		List<ApiContract> plan = selection.verificationPlan("m1-recruit-l1", selected, generation);
+		assertTrue(plan.size() >= 2);
+		assertEquals(selected.getFirst(), plan.getFirst().getChallengeId());
+		assertFalse(plan.get(0).getChallengeId().equals(plan.get(1).getChallengeId()));
 	}
 
 	@Test

@@ -136,8 +136,9 @@ export function PracticeWorkspace({
                 documentation={detail.challenge.documentation}
                 exitReady={cleared}
                 combatEnabled={false}
-                onOpenTerminal={() => setEditorOpen(true)}
-                onOpenPractice={() => setEditorOpen(true)}
+                onOpenTerminal={() => {
+                  setEditorOpen(true)
+                }}
                 onExitReached={() => undefined}
               />
             </GameErrorBoundary>

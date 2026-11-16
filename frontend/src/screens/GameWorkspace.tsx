@@ -17,8 +17,8 @@ import type { RoomLayoutPlan } from '../phaser/room/types'
 import { ROOM_LAYOUT } from '../phaser/roomLayout'
 import { loadMissionProgress, saveMissionProgress } from '../storage/attemptStorage'
 import type {
-  AdaptivePracticeDoor,
   Lesson,
+  MandatoryDeviceState,
   MissionDetail,
   MissionProgressState,
   MissionSummary,
@@ -28,7 +28,7 @@ import { FieldHud } from '../ui/field/FieldHud'
 import { FieldMinimap } from '../ui/field/FieldMinimap'
 import { FieldObjectives } from '../ui/field/FieldObjectives'
 import { FieldPauseMenu } from '../ui/field/FieldPauseMenu'
-import { GameCanvas, type PlayerPosition } from '../ui/GameCanvas'
+import { GameCanvas, type OpenTerminalPayload, type PlayerPosition } from '../ui/GameCanvas'
 import { GameErrorBoundary } from '../ui/GameErrorBoundary'
 import { MissionCompleteOverlay } from '../ui/MissionCompleteOverlay'
 
@@ -68,9 +68,11 @@ export function GameWorkspace({
   const [missionDetail, setMissionDetail] = useState<MissionDetail | null>(null)
   const [gateMessage, setGateMessage] = useState<string | null>(null)
   const [editorOpen, setEditorOpen] = useState(false)
-  const [practiceEditorDoor, setPracticeEditorDoor] = useState<AdaptivePracticeDoor | null>(null)
+  /** Physical terminal the agent opened — drives which challenge the editor shows. */
+  const [openedTerminal, setOpenedTerminal] = useState<
+    (MandatoryDeviceState & { terminalIndex: number }) | null
+  >(null)
   const [exitReady, setExitReady] = useState(false)
-  const [practiceDoors, setPracticeDoors] = useState<AdaptivePracticeDoor[]>([])
   const [roomProgress, setRoomProgress] = useState<MissionProgressState | null>(null)
   const [missionCompleteOpen, setMissionCompleteOpen] = useState(false)
   const [replayClear, setReplayClear] = useState(false)
@@ -95,11 +97,6 @@ export function GameWorkspace({
     setRoomProgress(server)
     const activeRun = server.replayActive || server.activeRunKind === 'PRIMARY'
     setExitReady(activeRun ? server.exitReady : false)
-    if (server.adaptivePracticeDoors && server.adaptivePracticeDoors.length > 0) {
-      setPracticeDoors(server.adaptivePracticeDoors.slice(0, 2))
-    } else if (server.replayActive) {
-      setPracticeDoors([])
-    }
   }, [])
 
   /** Ensures PRIMARY or REPLAY active run; restores mid-replay after refresh. */
@@ -137,7 +134,6 @@ export function GameWorkspace({
       setMissionDetail(detail)
       setMissionCompleteOpen(false)
       setReplayClear(false)
-      setPracticeEditorDoor(null)
       setPauseOpen(false)
       setTerminalLocated(false)
       setPlayerPos(ROOM_LAYOUT.playerStart)
@@ -158,7 +154,6 @@ export function GameWorkspace({
   const returnToOps = useCallback(() => {
     setPauseOpen(false)
     setEditorOpen(false)
-    setPracticeEditorDoor(null)
     if (onOpenOpsBoard) {
       onOpenOpsBoard()
     } else {
@@ -282,14 +277,13 @@ export function GameWorkspace({
     setResetLevelBusy(true)
     // Close terminal before remount so combat/input locks clear with the new generation.
     setEditorOpen(false)
-    setPracticeEditorDoor(null)
+    setOpenedTerminal(null)
     const missionId = missionDetail.mission.missionId
     const generation = roomProgress.roomGeneration
     void resetMissionRoom(missionId, 'PLAYER', generation)
       .then((server) => {
         setRoomProgress(server)
         setExitReady(false)
-        setPracticeDoors(server.adaptivePracticeDoors?.slice(0, 2) ?? [])
         setTerminalLocated(false)
         setPauseOpen(false)
         setPlayerPos(ROOM_LAYOUT.playerStart)
@@ -314,7 +308,6 @@ export function GameWorkspace({
       event.preventDefault()
       if (editorOpen) {
         setEditorOpen(false)
-        setPracticeEditorDoor(null)
         return
       }
       setPauseOpen((open) => !open)
@@ -327,7 +320,6 @@ export function GameWorkspace({
   useEffect(() => {
     if (!missionDetail) return
     const open = () => {
-      setPracticeEditorDoor(null)
       setTerminalLocated(true)
       setEditorOpen(true)
     }
@@ -410,7 +402,6 @@ export function GameWorkspace({
               />
               <FieldMinimap
                 player={playerPos}
-                practiceDoorCount={Math.min(2, practiceDoors.length)}
                 exitReady={exitReady}
                 devicesComplete={devicesComplete}
                 layout={roomLayout}
@@ -435,16 +426,17 @@ export function GameWorkspace({
                         missionDetail.challenge.documentation
                       }
                       exitReady={exitReady}
-                      practiceDoors={practiceDoors}
                       inputLocked={inputLocked}
                       rank={missionDetail.mission.rank}
                       roomInstance={roomProgress.apiResetCount}
                       mandatoryTerminalCount={Math.max(
                         1,
-                        roomProgress.requiredDeviceIds.length ||
+                        roomProgress.mandatoryDevices?.length ||
+                          roomProgress.requiredDeviceIds.length ||
                           roomProgress.requiredDeviceCount ||
                           1,
                       )}
+                      terminalBindings={roomProgress.mandatoryDevices ?? []}
                       combatEnabled
                       onPlayerMoved={setPlayerPos}
                       onRoomLayoutReady={(plan) => {
@@ -454,13 +446,23 @@ export function GameWorkspace({
                       }}
                       onHeartsChanged={(next) => setHearts(next)}
                       onCombatDeath={handleCombatDeath}
-                      onOpenTerminal={() => {
-                        setPracticeEditorDoor(null)
+                      onOpenTerminal={(payload: OpenTerminalPayload) => {
+                        const devices = roomProgress.mandatoryDevices ?? []
+                        const byIndex = devices[payload.terminalIndex]
+                        const byDevice = devices.find((d) => d.deviceId === payload.deviceId)
+                        const bound = byIndex ?? byDevice
+                        setOpenedTerminal({
+                          deviceId: bound?.deviceId ?? payload.deviceId,
+                          challengeId: bound?.challengeId ?? payload.challengeId ?? '',
+                          documentation:
+                            bound?.documentation ??
+                            payload.documentation ??
+                            missionDetail.challenge.documentation,
+                          unlocked: bound?.unlocked ?? false,
+                          finalLock: bound?.finalLock ?? Boolean(payload.finalLock),
+                          terminalIndex: payload.terminalIndex,
+                        })
                         setTerminalLocated(true)
-                        setEditorOpen(true)
-                      }}
-                      onOpenPractice={(door) => {
-                        setPracticeEditorDoor(door)
                         setEditorOpen(true)
                       }}
                       onExitReached={() => {
@@ -526,62 +528,60 @@ export function GameWorkspace({
         <ApiRequestEditor
           participantCode={playerId}
           mission={
-            practiceEditorDoor
+            openedTerminal?.challengeId
               ? {
                   ...missionDetail,
                   challenge: {
                     ...missionDetail.challenge,
-                    challengeId: practiceEditorDoor.challengeId,
-                    variantId: practiceEditorDoor.challengeId,
-                    deviceId: practiceEditorDoor.deviceId,
-                    conceptTags: [practiceEditorDoor.conceptTag],
-                    documentation: practiceEditorDoor.documentation,
-                    expectedMethod: practiceEditorDoor.expectedMethod,
-                    pathTemplate: practiceEditorDoor.pathTemplate,
-                    pathParameters: {},
-                    queryParameters: {},
+                    challengeId: openedTerminal.challengeId,
+                    deviceId: openedTerminal.deviceId,
+                    documentation: openedTerminal.documentation,
                   },
                 }
-              : roomProgress?.activeTerminalChallenge
+              : roomProgress?.mandatoryDevices?.[0]
                 ? {
                     ...missionDetail,
                     challenge: {
                       ...missionDetail.challenge,
-                      challengeId: roomProgress.activeTerminalChallenge.challengeId,
-                      variantId: roomProgress.activeTerminalChallenge.variantId,
-                      deviceId: roomProgress.activeTerminalChallenge.deviceId,
-                      documentation: roomProgress.activeTerminalChallenge.documentation,
+                      challengeId: roomProgress.mandatoryDevices[0].challengeId,
+                      deviceId: roomProgress.mandatoryDevices[0].deviceId,
+                      documentation: roomProgress.mandatoryDevices[0].documentation,
                     },
                   }
-                : roomProgress?.mandatoryDevices?.[0]
-                  ? {
-                      ...missionDetail,
-                      challenge: {
-                        ...missionDetail.challenge,
-                        challengeId: roomProgress.mandatoryDevices[0].challengeId,
-                        deviceId: roomProgress.mandatoryDevices[0].deviceId,
-                        documentation: roomProgress.mandatoryDevices[0].documentation,
-                      },
-                    }
-                  : missionDetail
+                : missionDetail
           }
-          resumeTerminal={practiceEditorDoor ? null : roomProgress?.activeTerminalChallenge ?? null}
-          mode={practiceEditorDoor ? 'PRACTICE' : 'MISSION'}
+          resumeTerminal={
+            // Only resume the global TVP cursor when it belongs to this physical device.
+            roomProgress?.activeTerminalChallenge &&
+            openedTerminal &&
+            roomProgress.activeTerminalChallenge.deviceId === openedTerminal.deviceId
+              ? roomProgress.activeTerminalChallenge
+              : null
+          }
+          mode="MISSION"
           onClose={() => {
             setEditorOpen(false)
-            setPracticeEditorDoor(null)
+            setOpenedTerminal(null)
           }}
           onSuccess={(payload) => {
+            // Exit readiness is server-authoritative — never infer from a single unlock.
             if (payload?.exitReady) {
               setExitReady(true)
             }
             refreshSavedAttempt(playerId, missionDetail.mission.missionId)
           }}
           onAttemptSaved={() => refreshSavedAttempt(playerId, missionDetail.mission.missionId)}
-          onAdaptivePracticeDoors={setPracticeDoors}
           onMissionProgress={(server) => {
             setRoomProgress(server)
-            if (server.exitReady) setExitReady(true)
+            setExitReady(Boolean(server.exitReady))
+            if (openedTerminal) {
+              const refreshed = server.mandatoryDevices?.find(
+                (d) => d.deviceId === openedTerminal.deviceId,
+              )
+              if (refreshed) {
+                setOpenedTerminal({ ...openedTerminal, ...refreshed })
+              }
+            }
           }}
         />
       ) : null}

@@ -3,7 +3,6 @@ import type { FormEvent } from 'react'
 import { fetchTerminalVerification, simulateRequest } from '../api/client'
 import type {
   ActiveTerminalChallenge,
-  AdaptivePracticeDoor,
   MissionDetail,
   MissionProgressState,
   SimulateResponse,
@@ -27,7 +26,6 @@ interface ApiRequestEditorProps {
   onClose: () => void
   onSuccess: (payload?: { optionalVerification?: boolean; exitReady?: boolean }) => void
   onAttemptSaved: () => void
-  onAdaptivePracticeDoors?: (doors: AdaptivePracticeDoor[]) => void
   /** Keeps Field pause-menu escalate hints in sync after wrong/right submits. */
   onMissionProgress?: (progress: MissionProgressState) => void
 }
@@ -116,23 +114,22 @@ export function ApiRequestEditor({
   onClose,
   onSuccess,
   onAttemptSaved,
-  onAdaptivePracticeDoors,
   onMissionProgress,
 }: ApiRequestEditorProps) {
   const primary = mission.challenge
-  const [active, setActive] = useState<ActiveChallenge>(() =>
-    resumeTerminal
-      ? toActiveChallenge(mission, {
-          challengeId: resumeTerminal.challengeId,
-          variantId: resumeTerminal.variantId,
-          deviceId: resumeTerminal.deviceId,
-          documentation: resumeTerminal.documentation,
-          optionalVerification: resumeTerminal.optionalVerification,
-        })
-      : toActiveChallenge(mission),
-  )
-  const [mandatoryCheckpoint, setMandatoryCheckpoint] = useState<ActiveChallenge | null>(null)
-  const [offeredPractice, setOfferedPractice] = useState<AdaptivePracticeDoor[]>([])
+  const [active, setActive] = useState<ActiveChallenge>(() => {
+    if (resumeTerminal) {
+      return toActiveChallenge(mission, {
+        challengeId: resumeTerminal.challengeId,
+        variantId: resumeTerminal.variantId,
+        deviceId: resumeTerminal.deviceId,
+        documentation: resumeTerminal.documentation,
+        optionalVerification: resumeTerminal.optionalVerification,
+      })
+    }
+    return toActiveChallenge(mission)
+  })
+  const [reviewQueueNotice, setReviewQueueNotice] = useState<string | null>(null)
   const effectiveMode: SimulationMode = active.practiceMode ? 'PRACTICE' : mode
   const graded = effectiveMode === 'MISSION' && !active.practiceMode
   const allowAnswerPrefill = !graded
@@ -161,8 +158,6 @@ export function ApiRequestEditor({
     active.optionalVerification ? 'verify' : active.practiceMode ? 'practice' : 'primary'
   }`
   const gradedMissionId = mission.mission.missionId
-  const practiceOfferList =
-    offeredPractice.length > 0 ? offeredPractice : (result?.adaptivePracticeDoors ?? []).slice(0, 2)
 
   const finishBoot = useCallback(() => setBootComplete(true), [])
 
@@ -268,10 +263,7 @@ export function ApiRequestEditor({
     resumeTerminal?.optionalVerification,
   ])
 
-  function startConceptVerification(scenario: VerifyAnotherScenario, fromCheckpoint = true) {
-    if (fromCheckpoint && !active.optionalVerification && !active.practiceMode) {
-      setMandatoryCheckpoint(active)
-    }
+  function startConceptVerification(scenario: VerifyAnotherScenario) {
     const variant = mission.conceptVariants.find((item) => item.challengeId === scenario.challengeId)
     setSequenceComplete(false)
     setProgressionNotice(null)
@@ -298,43 +290,16 @@ export function ApiRequestEditor({
     }, 1100)
   }
 
-  function markSequenceComplete(generation: number) {
+  function markSequenceComplete(generation: number, exitReady?: boolean) {
     if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current)
     if (submitGenerationRef.current !== generation) return
     setSequenceComplete(true)
     setProgressionNotice(
-      'Verification sequence complete. You can close this terminal and continue the mission — the exit stays unlocked.',
+      exitReady
+        ? 'All required devices are active. Close this terminal, reach the exit, and press E to complete.'
+        : 'This device is clear. Close the terminal and activate any remaining mandatory devices — the exit stays locked until all are done.',
     )
     applyEditorFields(active, false)
-  }
-
-  function startPracticeDoor(door: AdaptivePracticeDoor) {
-    // Keep the mandatory mission available: stash it, then open ungraded practice in-editor.
-    if (!active.practiceMode) {
-      setMandatoryCheckpoint(active)
-    }
-    loadChallenge(
-      {
-        challengeId: door.challengeId,
-        variantId: door.challengeId,
-        deviceId: door.deviceId,
-        conceptTags: [door.conceptTag],
-        documentation: door.documentation,
-        expectedMethod: door.expectedMethod,
-        pathTemplate: door.pathTemplate,
-        pathParameters: {},
-        queryParameters: {},
-        optionalVerification: false,
-        practiceMode: true,
-      },
-      true,
-    )
-  }
-
-  function returnToMandatoryChallenge() {
-    const checkpoint = mandatoryCheckpoint ?? toActiveChallenge(mission)
-    setMandatoryCheckpoint(null)
-    loadChallenge({ ...checkpoint, optionalVerification: false, practiceMode: false }, false)
   }
 
   async function handleSubmit(event: FormEvent) {
@@ -362,9 +327,7 @@ export function ApiRequestEditor({
 
       const response = await simulateRequest({
         participantCode,
-        missionId: active.practiceMode
-          ? doorMissionId(active.challengeId)
-          : mission.mission.missionId,
+        missionId: mission.mission.missionId,
         deviceId: active.deviceId,
         challengeId: active.challengeId,
         method,
@@ -425,11 +388,11 @@ export function ApiRequestEditor({
         })
       }
 
-      if (response.adaptivePracticeDoors) {
-        setOfferedPractice(response.adaptivePracticeDoors.slice(0, 2))
-        if (onAdaptivePracticeDoors) {
-          onAdaptivePracticeDoors(response.adaptivePracticeDoors)
-        }
+      if (response.conceptReviewQueue && response.conceptReviewQueue.length > 0 && mode !== 'MISSION') {
+        const tags = response.conceptReviewQueue.map((item) => conceptLabel(item.conceptTag)).join(', ')
+        setReviewQueueNotice(
+          `Later review queued for ${tags}. Continue this ungraded drill or return to the mission board.`,
+        )
       }
       if (response.missionProgress && onMissionProgress) {
         onMissionProgress(response.missionProgress)
@@ -440,6 +403,8 @@ export function ApiRequestEditor({
         setTvp(response.terminalVerification)
       }
       onAttemptSaved()
+
+      // Graded wrong: stay on the SAME scenario with CONTROL feedback (no auto practice / lesson).
       if (response.correct && !active.practiceMode) {
         onSuccess({
           optionalVerification: Boolean(response.optionalVerification),
@@ -447,10 +412,22 @@ export function ApiRequestEditor({
         })
         const nextScenario = response.terminalVerification?.verifyAnotherScenario ?? null
         const serverActive = response.missionProgress?.activeTerminalChallenge
-        if (nextScenario && nextScenario.challengeId !== active.challengeId) {
+        const mandatoryChallengeIds = new Set(
+          (response.missionProgress?.mandatoryDevices ?? []).map((d) => d.challengeId),
+        )
+        // Never auto-jump this physical terminal onto another mandatory device's challenge.
+        const nextIsOtherMandatory =
+          Boolean(nextScenario) &&
+          mandatoryChallengeIds.has(nextScenario!.challengeId) &&
+          nextScenario!.challengeId !== active.challengeId
+        if (
+          nextScenario &&
+          nextScenario.challengeId !== active.challengeId &&
+          !nextIsOtherMandatory
+        ) {
           scheduleAutoAdvance(nextScenario, generation)
-        } else if (serverActive?.sequenceComplete || (!nextScenario && response.correct)) {
-          markSequenceComplete(generation)
+        } else if (serverActive?.sequenceComplete || (!nextScenario && response.correct) || nextIsOtherMandatory) {
+          markSequenceComplete(generation, response.missionProgress?.exitReady)
         }
       }
     } catch (err) {
@@ -537,13 +514,13 @@ export function ApiRequestEditor({
         {progressionNotice ? (
           <ControlGuide message={progressionNotice} tone="success" />
         ) : null}
-        {active.practiceMode && mandatoryCheckpoint ? (
-          <p className="hint">
-            <button type="button" className="ghost" onClick={returnToMandatoryChallenge}>
-              Return to mandatory mission challenge
-            </button>
-          </p>
+        {mode !== 'MISSION' ? (
+          <ControlGuide
+            message="UNGRADED PRACTICE — different fictional resource. No hearts, TVP, or research first-attempt changes. Graded answers are never revealed."
+            tone="brief"
+          />
         ) : null}
+        {reviewQueueNotice ? <ControlGuide message={reviewQueueNotice} tone="brief" /> : null}
 
         {showTvpShell && tvp ? (
           <div className="tvp-bar" aria-label="Terminal Verification Progress">
@@ -664,7 +641,21 @@ export function ApiRequestEditor({
               <p className="hint">
                 First attempt immutable:{' '}
                 {result.firstAttemptRecord.firstAttemptCorrect ? 'correct' : 'incorrect'} (
-                {result.firstAttemptRecorded ? 'recorded now' : 'preserved from earlier'})
+                {result.firstAttemptRecorded ? 'recorded now' : 'preserved from earlier'}
+                {result.firstAttemptRecord.challengeId
+                  ? ` · ${result.firstAttemptRecord.challengeId}`
+                  : ''}
+                )
+              </p>
+            ) : null}
+            {!result.correct &&
+            !result.firstAttemptRecorded &&
+            result.firstAttemptRecord.firstAttemptCorrect &&
+            graded &&
+            !active.practiceMode ? (
+              <p className="hint">
+                This simulated error does not rewrite your earlier correct first-attempt record for this device, and
+                it does not count as a new eligible concept miss for CONTROL support.
               </p>
             ) : null}
             {Object.keys(result.firstAttemptRecord.conceptFirstAttemptCorrect).length > 0 && (
@@ -689,33 +680,6 @@ export function ApiRequestEditor({
                 scenario loads automatically when available.
               </p>
             ) : null}
-            {practiceOfferList.length > 0 && !active.practiceMode ? (
-              <div className="terminal-offer terminal-offer--practice" data-section="adaptive-practice">
-                <p className="terminal-offer__title">Recurring difficulty · ungraded practice</p>
-                <p className="hint">
-                  CONTROL detected repeated eligible first-attempt misses for{' '}
-                  {practiceOfferList.map((door) => conceptLabel(door.conceptTag)).join(', ')}. An authored practice
-                  drill is ready in this room (max 2). Practice is optional, ungraded, uses different fictional
-                  resources, and is not required to keep a correctly unlocked mandatory device.
-                </p>
-                <div className="terminal-offer__actions">
-                  {practiceOfferList.map((door) => (
-                    <button
-                      key={`${door.challengeId}-${door.conceptTag}`}
-                      type="button"
-                      className="ghost"
-                      onClick={() => startPracticeDoor(door)}
-                    >
-                      Practice {conceptLabel(door.conceptTag)} (optional)
-                    </button>
-                  ))}
-                </div>
-                <p className="hint">
-                  Prefer the field? Close this terminal and use the practice terminal that appeared in the room —
-                  your mandatory mission challenge stays available.
-                </p>
-              </div>
-            ) : null}
           </div>
         )}
         </form>
@@ -737,13 +701,4 @@ function emptyTvpSnapshot(terminalId: string): TerminalVerification {
 
 function gradedMissionIsUngraded(missionId: string): boolean {
   return missionId.startsWith('practice-') || missionId.startsWith('m0-')
-}
-
-function doorMissionId(challengeId: string): string {
-  if (challengeId.includes('l6')) return 'practice-m1-recruit-l6'
-  if (challengeId.includes('l5')) return 'practice-m1-recruit-l5'
-  if (challengeId.includes('l4')) return 'practice-m1-recruit-l4'
-  if (challengeId.includes('l3')) return 'practice-m1-recruit-l3'
-  if (challengeId.includes('l2')) return 'practice-m1-recruit-l2'
-  return 'practice-m1-recruit-l1'
 }

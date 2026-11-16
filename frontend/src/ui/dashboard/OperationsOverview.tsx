@@ -6,6 +6,7 @@ import {
   RANK_ORDER,
   type RankKey,
 } from '../../content/moduleMeta'
+import { isCareerUnlocked } from '../../learning/careerProgression'
 import {
   isMissionCompleted,
   isMissionInProgress,
@@ -32,6 +33,7 @@ function resolveMissionState(
   const server = serverByMission.get(mission.missionId)
   if (server?.completed || server?.status === 'COMPLETED') return 'completed'
   if (isMissionCompleted(playerId, mission.missionId)) return 'completed'
+  if (!isCareerUnlocked(mission, serverByMission)) return 'locked'
   if (
     server &&
     (server.unlockedDeviceIds.length > 0 || server.apiResetCount > 0 || server.status === 'IN_PROGRESS')

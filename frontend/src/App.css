@@ -285,7 +285,8 @@ button.ghost {
 }
 
 .terminal-offer--practice {
-  border-color: rgba(255, 176, 64, 0.35);
+  border-color: rgba(0, 229, 255, 0.35);
+  background: linear-gradient(160deg, rgba(8, 24, 42, 0.95), rgba(6, 16, 28, 0.92));
 }
 
 .terminal-offer__title {
@@ -297,7 +298,29 @@ button.ghost {
 }
 
 .terminal-offer--practice .terminal-offer__title {
-  color: #ffc46b;
+  color: var(--spy-cyan-bright, #7de2ff);
+}
+
+.concept-mini-lesson {
+  margin: 0.75rem 0;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid rgba(0, 229, 255, 0.28);
+  background: rgba(6, 18, 32, 0.92);
+}
+
+.concept-mini-lesson__title {
+  margin: 0 0 0.4rem;
+  font-size: 0.9rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--spy-cyan-bright, #7de2ff);
+}
+
+.concept-mini-lesson__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.65rem;
 }
 
 .terminal-offer__actions {

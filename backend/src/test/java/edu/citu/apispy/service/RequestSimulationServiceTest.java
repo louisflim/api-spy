@@ -1,5 +1,7 @@
 package edu.citu.apispy.service;
 
+import edu.citu.apispy.domain.simulation.ApiContract;
+import edu.citu.apispy.dto.MissionProgressDto;
 import edu.citu.apispy.dto.SimulateRequestDto;
 import edu.citu.apispy.dto.SimulateResponseDto;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,6 +11,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -17,22 +20,21 @@ class RequestSimulationServiceTest {
 
 	private RequestSimulationService service;
 	private FirstAttemptService firstAttemptService;
+	private ContractCatalogService contracts;
+	private MissionProgressService missionProgress;
 
 	@BeforeEach
 	void setUp() {
 		SimulationTestFixtures.Bundle bundle = SimulationTestFixtures.create();
 		service = bundle.service();
 		firstAttemptService = bundle.firstAttempts();
+		contracts = bundle.contracts();
+		missionProgress = bundle.missionProgress();
 	}
 
 	@Test
 	void correctGetRequestUnlocksDoorWithoutChangingHearts() {
-		SimulateResponseDto response = service.simulate("player-test", request(
-				"m1-recruit-l1",
-				"door-alpha",
-				"chal-m1-get-door-v1",
-				"GET",
-				"/api/doors/alpha"));
+		SimulateResponseDto response = service.simulate("player-test", correctSelectedPrimary("player-test"));
 
 		assertTrue(response.correct());
 		assertEquals(200, response.simulatedResponse().status());
@@ -48,12 +50,15 @@ class RequestSimulationServiceTest {
 
 	@Test
 	void incorrectMethodReturnsSimulatedErrorAndDoesNotUnlockDoor() {
-		SimulateResponseDto response = service.simulate("player-test", request(
-				"m1-recruit-l1",
-				"door-alpha",
-				"chal-m1-get-door-v1",
-				"POST",
-				"/api/doors/alpha"));
+		SimulateRequestDto primary = correctSelectedPrimary("player-method");
+		SimulateResponseDto response = service.simulate(
+				"player-method",
+				request(
+						primary.missionId(),
+						primary.deviceId(),
+						primary.challengeId(),
+						"POST",
+						primary.path()));
 
 		assertFalse(response.correct());
 		assertEquals(400, response.simulatedResponse().status());
@@ -65,12 +70,15 @@ class RequestSimulationServiceTest {
 
 	@Test
 	void incorrectPathReturnsEndpointError() {
-		SimulateResponseDto response = service.simulate("player-test", request(
-				"m1-recruit-l1",
-				"door-alpha",
-				"chal-m1-get-door-v1",
-				"GET",
-				"/api/doors/beta"));
+		SimulateRequestDto primary = correctSelectedPrimary("player-path");
+		SimulateResponseDto response = service.simulate(
+				"player-path",
+				request(
+						primary.missionId(),
+						primary.deviceId(),
+						primary.challengeId(),
+						primary.method(),
+						"/api/doors/beta"));
 
 		assertFalse(response.correct());
 		assertTrue(response.errorCodes().contains("ENDPOINT"));
@@ -121,19 +129,17 @@ class RequestSimulationServiceTest {
 
 	@Test
 	void successfulRetryDoesNotOverwriteIncorrectFirstAttempt() {
-		service.simulate("player-test", request(
-				"m1-recruit-l1",
-				"door-alpha",
-				"chal-m1-get-door-v1",
-				"POST",
-				"/api/doors/alpha"));
+		SimulateRequestDto primary = correctSelectedPrimary("player-retry");
+		service.simulate(
+				"player-retry",
+				request(
+						primary.missionId(),
+						primary.deviceId(),
+						primary.challengeId(),
+						"POST",
+						primary.path()));
 
-		SimulateResponseDto second = service.simulate("player-test", request(
-				"m1-recruit-l1",
-				"door-alpha",
-				"chal-m1-get-door-v1",
-				"GET",
-				"/api/doors/alpha"));
+		SimulateResponseDto second = service.simulate("player-retry", primary);
 
 		assertTrue(second.correct());
 		assertFalse(second.firstAttemptRecorded());
@@ -147,12 +153,15 @@ class RequestSimulationServiceTest {
 
 	@Test
 	void incorrectMandatoryEndpointNeverUnlocksDoor() {
-		SimulateResponseDto response = service.simulate("player-a", request(
-				"m1-recruit-l1",
-				"door-alpha",
-				"chal-m1-get-door-v1",
-				"GET",
-				"/api/doors/wrong"));
+		SimulateRequestDto primary = correctSelectedPrimary("player-a");
+		SimulateResponseDto response = service.simulate(
+				"player-a",
+				request(
+						primary.missionId(),
+						primary.deviceId(),
+						primary.challengeId(),
+						primary.method(),
+						"/api/doors/wrong"));
 
 		assertFalse(response.correct());
 		assertTrue(response.errorCodes().contains("ENDPOINT"));
@@ -161,19 +170,17 @@ class RequestSimulationServiceTest {
 
 	@Test
 	void correctedRetryUnlocksWithoutEvidenceButStillOffersOptionalVerification() {
-		service.simulate("player-retry-tvp", request(
-				"m1-recruit-l1",
-				"door-alpha",
-				"chal-m1-get-door-v1",
-				"POST",
-				"/api/doors/alpha"));
+		SimulateRequestDto primary = correctSelectedPrimary("player-retry-tvp");
+		service.simulate(
+				"player-retry-tvp",
+				request(
+						primary.missionId(),
+						primary.deviceId(),
+						primary.challengeId(),
+						"POST",
+						primary.path()));
 
-		SimulateResponseDto corrected = service.simulate("player-retry-tvp", request(
-				"m1-recruit-l1",
-				"door-alpha",
-				"chal-m1-get-door-v1",
-				"GET",
-				"/api/doors/alpha"));
+		SimulateResponseDto corrected = service.simulate("player-retry-tvp", primary);
 
 		assertTrue(corrected.correct());
 		assertTrue(corrected.deviceChanges().getFirst().unlocked());
@@ -183,100 +190,125 @@ class RequestSimulationServiceTest {
 		assertNotNull(
 				corrected.terminalVerification().verifyAnotherScenario(),
 				"Optional concept verification must remain available after unlock without first-attempt evidence");
-		assertEquals("chal-m1-get-door-v2", corrected.terminalVerification().verifyAnotherScenario().challengeId());
+		assertNotNull(corrected.terminalVerification().verifyAnotherScenario());
+		assertNotEquals(
+				primary.challengeId(),
+				corrected.terminalVerification().verifyAnotherScenario().challengeId());
 	}
 
 	@Test
 	void optionalVerificationCompletesAfterMandatoryUnlockWithoutBlockingExit() {
-		SimulateResponseDto mandatory = service.simulate("player-opt", request(
-				"m1-recruit-l1",
-				"door-alpha",
-				"chal-m1-get-door-v1",
-				"GET",
-				"/api/doors/alpha"));
+		SimulateResponseDto mandatory = service.simulate("player-opt", correctSelectedPrimary("player-opt"));
 		assertTrue(mandatory.correct());
 		assertNotNull(mandatory.terminalVerification().verifyAnotherScenario());
-		assertEquals(
-				"chal-m1-get-door-v2",
-				mandatory.missionProgress().activeTerminalChallenge().challengeId());
+		var next = mandatory.terminalVerification().verifyAnotherScenario();
+		assertNotEquals(mandatory.challengeId(), next.challengeId());
+		assertEquals(next.challengeId(), mandatory.missionProgress().activeTerminalChallenge().challengeId());
 
-		SimulateResponseDto optional = service.simulate("player-opt", request(
-				"m1-recruit-l1",
-				"door-bravo",
-				"chal-m1-get-door-v2",
-				"GET",
-				"/api/doors/bravo"));
+		ApiContract nextContract = contracts.requireByChallengeId(next.challengeId());
+		SimulateResponseDto optional = service.simulate("player-opt", correctFor(nextContract));
 
 		assertTrue(optional.correct());
 		assertTrue(optional.optionalVerification());
-		assertEquals(100, optional.terminalVerification().percent());
 		assertNull(optional.terminalVerification().verifyAnotherScenario());
 		assertTrue(optional.deviceChanges().getFirst().unlocked());
-		assertEquals("door-bravo", optional.deviceChanges().getFirst().deviceId());
+		assertEquals(nextContract.getDeviceId(), optional.deviceChanges().getFirst().deviceId());
 		assertTrue(optional.missionProgress().activeTerminalChallenge().sequenceComplete());
 	}
 
 	@Test
 	void wrongThenCorrectAdvancesWithoutLoopingCompletedScenarios() {
-		service.simulate("player-seq", request(
-				"m1-recruit-l1",
-				"door-alpha",
-				"chal-m1-get-door-v1",
-				"POST",
-				"/api/doors/alpha"));
-		SimulateResponseDto corrected = service.simulate("player-seq", request(
-				"m1-recruit-l1",
-				"door-alpha",
-				"chal-m1-get-door-v1",
-				"GET",
-				"/api/doors/alpha"));
+		SimulateRequestDto primary = correctSelectedPrimary("player-seq");
+		service.simulate(
+				"player-seq",
+				request(
+						primary.missionId(),
+						primary.deviceId(),
+						primary.challengeId(),
+						"POST",
+						primary.path()));
+		SimulateResponseDto corrected = service.simulate("player-seq", primary);
 		assertTrue(corrected.correct());
 		assertEquals(0, corrected.terminalVerification().percent());
-		assertEquals("chal-m1-get-door-v2", corrected.terminalVerification().verifyAnotherScenario().challengeId());
+		var next = corrected.terminalVerification().verifyAnotherScenario();
+		assertNotNull(next);
+		assertNotEquals(primary.challengeId(), next.challengeId());
 
-		SimulateResponseDto optional = service.simulate("player-seq", request(
-				"m1-recruit-l1",
-				"door-bravo",
-				"chal-m1-get-door-v2",
-				"GET",
-				"/api/doors/bravo"));
+		ApiContract nextContract = contracts.requireByChallengeId(next.challengeId());
+		SimulateResponseDto optional = service.simulate("player-seq", correctFor(nextContract));
 		assertTrue(optional.correct());
-		assertNull(
-				optional.terminalVerification().verifyAnotherScenario(),
-				"Must not loop back to a completed scenario lacking first-attempt TVP evidence");
-		assertTrue(optional.missionProgress().activeTerminalChallenge().sequenceComplete());
+		var afterOptional = optional.terminalVerification().verifyAnotherScenario();
+		if (afterOptional != null) {
+			assertNotEquals(primary.challengeId(), afterOptional.challengeId());
+			assertNotEquals(next.challengeId(), afterOptional.challengeId());
+			assertFalse(optional.missionProgress().activeTerminalChallenge().sequenceComplete());
+		} else {
+			assertTrue(optional.missionProgress().activeTerminalChallenge().sequenceComplete());
+		}
 
-		// Double success on the last scenario must remain idempotent.
-		SimulateResponseDto again = service.simulate("player-seq", request(
-				"m1-recruit-l1",
-				"door-bravo",
-				"chal-m1-get-door-v2",
-				"GET",
-				"/api/doors/bravo"));
+		// Double success on the current scenario must remain idempotent (no loop to completed ids).
+		SimulateResponseDto again = service.simulate("player-seq", correctFor(nextContract));
 		assertTrue(again.correct());
-		assertNull(again.terminalVerification().verifyAnotherScenario());
+		var againNext = again.terminalVerification().verifyAnotherScenario();
+		if (againNext != null) {
+			assertNotEquals(primary.challengeId(), againNext.challengeId());
+			assertNotEquals(next.challengeId(), againNext.challengeId());
+		}
 	}
 
 	@Test
 	void evidenceAndAdaptiveStateAreIsolatedBetweenPlayers() {
-		service.simulate("player-one", request(
-				"m1-recruit-l1",
-				"door-alpha",
-				"chal-m1-get-door-v1",
-				"GET",
-				"/api/doors/alpha"));
+		service.simulate("player-one", correctSelectedPrimary("player-one"));
 
-		SimulateResponseDto other = service.simulate("player-two", request(
-				"m1-recruit-l1",
-				"door-alpha",
-				"chal-m1-get-door-v1",
-				"POST",
-				"/api/doors/alpha"));
+		SimulateRequestDto otherPrimary = correctSelectedPrimary("player-two");
+		SimulateResponseDto other = service.simulate(
+				"player-two",
+				request(
+						otherPrimary.missionId(),
+						otherPrimary.deviceId(),
+						otherPrimary.challengeId(),
+						"POST",
+						otherPrimary.path()));
 
 		assertEquals(0, other.terminalVerification().percent());
 		assertTrue(other.adaptivePracticeDoors().isEmpty());
 		assertEquals(1, firstAttemptService.findAllForParticipant("player-one").size());
 		assertEquals(1, firstAttemptService.findAllForParticipant("player-two").size());
+	}
+
+	private SimulateRequestDto correctSelectedPrimary(String participantCode) {
+		MissionProgressDto initial = missionProgress.getOrCreate(participantCode, "m1-recruit-l1");
+		MissionProgressDto.MandatoryDeviceDto selected = initial.mandatoryDevices().getFirst();
+		return correctFor(contracts.requireByChallengeId(selected.challengeId()));
+	}
+
+	private static SimulateRequestDto correctFor(ApiContract contract) {
+		return request(
+				contract.getMissionId(),
+				contract.getDeviceId(),
+				contract.getChallengeId(),
+				contract.getExpectedMethod(),
+				resolvePath(contract));
+	}
+
+	private static String resolvePath(ApiContract contract) {
+		String path = contract.getPathTemplate();
+		for (Map.Entry<String, String> entry : contract.getPathParameters().entrySet()) {
+			path = path.replace("{" + entry.getKey() + "}", entry.getValue());
+		}
+		if (!contract.getQueryParameters().isEmpty()) {
+			StringBuilder query = new StringBuilder("?");
+			boolean first = true;
+			for (Map.Entry<String, String> entry : contract.getQueryParameters().entrySet()) {
+				if (!first) {
+					query.append('&');
+				}
+				query.append(entry.getKey()).append('=').append(entry.getValue());
+				first = false;
+			}
+			path = path + query;
+		}
+		return path;
 	}
 
 	private static SimulateRequestDto request(

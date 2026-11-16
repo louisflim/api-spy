@@ -7,6 +7,7 @@ import {
 import { useAuth } from '../auth/AuthContext'
 import { moduleHeading } from '../content/moduleMeta'
 import type { Module0Academy as AcademyData, Module0Progress, TopicStatus } from '../content/module0Types'
+import { TopicConceptVisual } from '../ui/module0/TopicConceptVisual'
 import { TopicInteraction } from '../ui/module0/TopicInteraction'
 import { ApiRequestEditor } from '../ui/ApiRequestEditor'
 import { GameCanvas } from '../ui/GameCanvas'
@@ -18,6 +19,8 @@ interface Module0AcademyProps {
   onFinished: () => void
   /** Shared MODULE dropdown from Operations Board. */
   moduleSelect: ReactNode
+  /** Return to the mission briefing that opened this academy (read-only review). */
+  onReturnToBriefing?: () => void
 }
 
 function topicStatus(
@@ -68,8 +71,8 @@ const TRAINING_DETAIL: MissionDetail = {
   conceptVariants: [],
 }
 
-/** Module 0 content in the same Operations Board 3-column shell as Modules 01–03. */
-export function Module0Academy({ onFinished, moduleSelect }: Module0AcademyProps) {
+/** Dedicated Module 0 Training Academy — spacious lesson workspace, not a narrow ops detail pane. */
+export function Module0Academy({ onFinished, moduleSelect, onReturnToBriefing }: Module0AcademyProps) {
   const { profile } = useAuth()
   const playerId = profile?.userId ?? ''
   const [academy, setAcademy] = useState<AcademyData | null>(null)
@@ -81,6 +84,7 @@ export function Module0Academy({ onFinished, moduleSelect }: Module0AcademyProps
   const [terminalDone, setTerminalDone] = useState(false)
   const [controlTone, setControlTone] = useState<'brief' | 'success' | 'warn'>('brief')
   const [controlMessage, setControlMessage] = useState('Stand by for briefing.')
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   const load = useCallback(async () => {
     const [academyData, progressData] = await Promise.all([
@@ -148,13 +152,6 @@ export function Module0Academy({ onFinished, moduleSelect }: Module0AcademyProps
 
   async function handleInteractionComplete() {
     if (!topic) return
-    await persist({ topicId: topic.id, stepId: 'interaction', lastTopicId: topic.id })
-    setControlTone('success')
-    setControlMessage(topic.interaction.successFeedback)
-  }
-
-  async function markTopicComplete() {
-    if (!topic) return
     try {
       await persist({
         topicId: topic.id,
@@ -163,10 +160,10 @@ export function Module0Academy({ onFinished, moduleSelect }: Module0AcademyProps
         lastTopicId: topic.id,
       })
       setControlTone('success')
-      setControlMessage(topic.completionMessage)
+      setControlMessage(topic.completionMessage || topic.interaction.successFeedback)
     } catch (err) {
       setControlTone('warn')
-      setControlMessage(err instanceof Error ? err.message : 'Complete the interaction first.')
+      setControlMessage(err instanceof Error ? err.message : 'Unable to complete this topic.')
     }
   }
 
@@ -175,8 +172,13 @@ export function Module0Academy({ onFinished, moduleSelect }: Module0AcademyProps
     setTopicIndex(index)
     setShowTrainingRoom(false)
     setEditorOpen(false)
+    setSidebarOpen(false)
     setControlTone('brief')
     setControlMessage(topics[index].controlIntro)
+    setTerminalDone(
+      Boolean(progress?.completedSteps[topics[index].id]?.includes('interaction')) ||
+        Boolean(progress?.completedTopicIds.includes(topics[index].id)),
+    )
     void persist({ topicId: topics[index].id, lastTopicId: topics[index].id })
   }
 
@@ -184,214 +186,190 @@ export function Module0Academy({ onFinished, moduleSelect }: Module0AcademyProps
     ? topicStatus(topic.id, progress, topic.id)
     : 'not_started'
 
-  function nodeStateClass(status: TopicStatus): string {
-    if (status === 'completed') return 'completed'
-    if (status === 'in_progress') return 'in_progress'
-    return 'available'
-  }
-
   return (
     <>
-      <div className="ops-board__layout" role="main" aria-label="Agent Training Academy">
-        <aside className="ops-side" aria-label="Module briefing">
-          <h3>Module Briefing</h3>
-          <p>{moduleHeading(0)}</p>
-
-          {moduleSelect}
-
-          <div className="ops-stat-block">
-            <h3>Available Topics</h3>
-            <p className="ops-side-note">
-              {topics.length > 0
-                ? `${topics.length} orientation topics on this track. Ungraded — outside the 3×7×3 catalog.`
-                : 'Loading orientation topics…'}
+      <div className="m0-academy" role="main" aria-label="Agent Training Academy">
+        <header className="m0-academy__top">
+          <div className="m0-academy__top-copy">
+            <p className="m0-academy__eyebrow">Module 0 · Orientation</p>
+            <h2>{academy?.title ?? 'Agent Training Academy'}</h2>
+            <p>
+              {moduleHeading(0)} — ungraded briefing track. Outside RCA, SCR, HLCR, and TVP.
             </p>
           </div>
-
-          <div className="ops-stat-block">
-            <h3>Your Progress</h3>
-            <p className="ops-side-note">
-              {error
-                ? error
-                : `${completedCount} of ${topics.length || 6} topics complete (${percent}%).`}
-            </p>
-            <div className="m0-progress" aria-hidden="true">
+          <div className="m0-academy__top-tools">
+            {moduleSelect}
+            <div className="m0-progress" aria-label="Orientation progress">
               <div className="m0-progress__bar">
                 <span style={{ width: `${percent}%` }} />
               </div>
-            </div>
-          </div>
-        </aside>
-
-        <section className="ops-path-shell" aria-label="Training topics">
-          {!academy ? (
-            <p className="ops-side-note">Loading topics…</p>
-          ) : (
-            <ol className="ops-path">
-              {topics.map((item, index) => {
-                const status = topicStatus(item.id, progress, topic?.id ?? '')
-                const isSelected = index === topicIndex
-                const className = [
-                  'ops-node',
-                  `ops-node--${nodeStateClass(status)}`,
-                  isSelected ? 'is-selected' : '',
-                ]
-                  .filter(Boolean)
-                  .join(' ')
-
-                return (
-                  <li key={item.id} className={className}>
-                    <button
-                      type="button"
-                      className="ops-node__hit"
-                      onClick={() => goTo(index)}
-                      aria-pressed={isSelected}
-                      aria-label={`${item.title}, ${STATUS_LABEL[status]}`}
-                    >
-                      <span className="ops-node__rail" aria-hidden="true">
-                        <span className="ops-node__hex">{item.order}</span>
-                        {index < topics.length - 1 ? <span className="ops-node__connector" /> : null}
-                      </span>
-                      <span className="ops-node__meta">
-                        <span className="ops-node__label">{item.title}</span>
-                        <span className="ops-node__status">{STATUS_LABEL[status]}</span>
-                      </span>
-                    </button>
-                  </li>
-                )
-              })}
-            </ol>
-          )}
-        </section>
-
-        <aside className="ops-side ops-side--detail" aria-label="Topic detail">
-          <h3>Operation Detail</h3>
-          {!topic ? (
-            <p className="ops-side-note">Select a topic node to review the briefing.</p>
-          ) : (
-            <>
-              <p className="ops-detail-title">
-                Topic {topic.order} — {topic.title}
+              <p>
+                {error
+                  ? error
+                  : topic
+                    ? `Topic ${topic.order} of ${topics.length} · ${completedCount} complete (${percent}%)`
+                    : 'Loading orientation…'}
               </p>
-              <p className="ops-brief">{topic.objective}</p>
+            </div>
+            <button
+              type="button"
+              className="m0-topics-toggle dash-btn"
+              onClick={() => setSidebarOpen((open) => !open)}
+              aria-expanded={sidebarOpen}
+            >
+              {sidebarOpen ? 'Hide topics' : 'Topics'}
+            </button>
+            {onReturnToBriefing ? (
+              <button type="button" className="ops-practice" onClick={onReturnToBriefing}>
+                Return to Mission Briefing
+              </button>
+            ) : null}
+          </div>
+        </header>
 
-              <div className="ops-meta-grid">
-                <div className="ops-meta-card">
-                  <span>Track</span>
-                  <strong>Orientation</strong>
+        <div className={`m0-academy__layout ${sidebarOpen ? 'is-sidebar-open' : ''}`.trim()}>
+          <aside className="m0-topics" aria-label="Orientation topics">
+            <h3>Training topics</h3>
+            <p className="m0-visual__lead">
+              Six authored briefings. Revisit anytime. Progress survives refresh.
+            </p>
+            {!academy ? (
+              <p className="ops-side-note">Loading topics…</p>
+            ) : (
+              <ol>
+                {topics.map((item, index) => {
+                  const status = topicStatus(item.id, progress, topic?.id ?? '')
+                  const isSelected = index === topicIndex
+                  return (
+                    <li key={item.id}>
+                      <button
+                        type="button"
+                        className={`m0-topic-btn m0-topic-btn--${status} ${
+                          isSelected ? 'is-active' : ''
+                        }`.trim()}
+                        onClick={() => goTo(index)}
+                        aria-pressed={isSelected}
+                        aria-label={`${item.title}, ${STATUS_LABEL[status]}`}
+                      >
+                        <span className="m0-topic-btn__order">{item.order}</span>
+                        <span className="m0-topic-btn__title">{item.title}</span>
+                        <span className="m0-topic-btn__status">{STATUS_LABEL[status]}</span>
+                      </button>
+                    </li>
+                  )
+                })}
+              </ol>
+            )}
+          </aside>
+
+          <section className="m0-lesson" aria-label="Lesson workspace">
+            {!topic ? (
+              <p className="ops-side-note">Select a topic to begin orientation.</p>
+            ) : (
+              <>
+                <div className="m0-lesson__hero">
+                  <p className="m0-academy__eyebrow">
+                    Topic {topic.order} of {topics.length} · {STATUS_LABEL[currentStatus]} · Ungraded
+                  </p>
+                  <h1>{topic.title}</h1>
+                  <p className="m0-lesson__objective">
+                    <strong>Objective.</strong> {topic.objective}
+                  </p>
                 </div>
-                <div className="ops-meta-card">
-                  <span>Topic</span>
-                  <strong>
-                    {topic.order} of {topics.length}
-                  </strong>
-                </div>
-                <div className="ops-meta-card">
-                  <span>Status</span>
-                  <strong>{STATUS_LABEL[currentStatus]}</strong>
-                </div>
-                <div className="ops-meta-card">
-                  <span>Graded</span>
-                  <strong>No</strong>
-                </div>
-              </div>
 
-              <ControlGuide tone={controlTone} message={controlMessage} />
+                <ControlGuide tone={controlTone} message={controlMessage} />
 
-              <div className="ops-stat-block">
-                <h3>Briefing</h3>
-                <p className="ops-side-note">{topic.explanation}</p>
-              </div>
+                <article className="m0-lesson__section">
+                  <h3>CONTROL briefing</h3>
+                  <p>{topic.explanation}</p>
+                </article>
 
-              <div className="ops-stat-block">
-                <h3>Worked Example</h3>
-                <p className="ops-side-note">{topic.workedExample.title}</p>
-                <p className="ops-side-note">{topic.workedExample.notes}</p>
-                <pre className="m0-example-pre">{topic.workedExample.body}</pre>
-              </div>
+                <TopicConceptVisual topic={topic} />
 
-              {!showTrainingRoom ? (
-                <TopicInteraction
-                  topic={topic}
-                  alreadyComplete={interactionDone}
-                  onInteractionComplete={() => void handleInteractionComplete()}
-                  onLaunchTerminalTraining={() => setShowTrainingRoom(true)}
-                  terminalTrainingDone={terminalDone}
-                />
-              ) : (
-                <div className="m0-training-room">
-                  <h3>Training room</h3>
-                  <p className="ops-side-note">No enemies. Unlimited retries. Mode: TRAINING.</p>
-                  <GameErrorBoundary>
-                    <GameCanvas
-                      missionId={TRAINING_DETAIL.mission.missionId}
-                      deviceId={TRAINING_DETAIL.challenge.deviceId}
-                      documentation={TRAINING_DETAIL.challenge.documentation}
-                      exitReady={terminalDone}
-                      combatEnabled={false}
-                      onOpenTerminal={() => setEditorOpen(true)}
-                      onOpenPractice={() => setEditorOpen(true)}
-                      onExitReached={() => undefined}
-                    />
-                  </GameErrorBoundary>
-                  <button type="button" className="dash-btn" onClick={() => setEditorOpen(true)}>
-                    Open training terminal
+                <article className="m0-lesson__section">
+                  <h3>Worked example</h3>
+                  <p className="m0-lesson__example-title">{topic.workedExample.title}</p>
+                  <p>{topic.workedExample.notes}</p>
+                  <pre className="m0-example-pre">{topic.workedExample.body}</pre>
+                </article>
+
+                {!showTrainingRoom ? (
+                  <TopicInteraction
+                    topic={topic}
+                    alreadyComplete={interactionDone}
+                    onInteractionComplete={() => void handleInteractionComplete()}
+                    onLaunchTerminalTraining={() => setShowTrainingRoom(true)}
+                    terminalTrainingDone={terminalDone}
+                  />
+                ) : (
+                  <div className="m0-training-room">
+                    <h3>Training room</h3>
+                    <p className="m0-visual__lead">
+                      No enemies. Unlimited retries. Mode: TRAINING. Does not award TVP or rewrite research
+                      evidence.
+                    </p>
+                    <GameErrorBoundary>
+                      <GameCanvas
+                        missionId={TRAINING_DETAIL.mission.missionId}
+                        deviceId={TRAINING_DETAIL.challenge.deviceId}
+                        documentation={TRAINING_DETAIL.challenge.documentation}
+                        exitReady={terminalDone}
+                        combatEnabled={false}
+                        onOpenTerminal={() => {
+                          setEditorOpen(true)
+                        }}
+                        onExitReached={() => undefined}
+                      />
+                    </GameErrorBoundary>
+                    <div className="m0-nav-row">
+                      <button type="button" className="dash-btn dash-btn--primary" onClick={() => setEditorOpen(true)}>
+                        Open training terminal
+                      </button>
+                      <button type="button" className="dash-btn" onClick={() => setShowTrainingRoom(false)}>
+                        Back to topic briefing
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                <div className="m0-nav-row m0-nav-row--footer">
+                  <button
+                    type="button"
+                    className="ops-practice"
+                    disabled={topicIndex === 0}
+                    onClick={() => goTo(topicIndex - 1)}
+                  >
+                    Previous topic
                   </button>
                   <button
                     type="button"
-                    className="dash-btn"
-                    onClick={() => setShowTrainingRoom(false)}
+                    className="ops-practice"
+                    disabled={topicIndex >= topics.length - 1}
+                    onClick={() => goTo(topicIndex + 1)}
                   >
-                    Back to topic briefing
+                    Next topic
                   </button>
                 </div>
-              )}
 
-              <div className="ops-launch-row">
-                <button
-                  type="button"
-                  className="ops-practice"
-                  disabled={topicIndex === 0}
-                  onClick={() => goTo(topicIndex - 1)}
-                >
-                  Previous
-                </button>
-                <button
-                  type="button"
-                  className="ops-launch"
-                  disabled={!interactionDone}
-                  onClick={() => void markTopicComplete()}
-                >
-                  <span aria-hidden="true">{'<<'}</span>
-                  Mark Topic Complete
-                  <span aria-hidden="true">{'>>'}</span>
-                </button>
-                <button
-                  type="button"
-                  className="ops-practice"
-                  disabled={topicIndex >= topics.length - 1}
-                  onClick={() => goTo(topicIndex + 1)}
-                >
-                  Next
-                </button>
-              </div>
-
-              {progress?.orientationCompleted ? (
-                <div className="ops-stat-block">
-                  <h3>Orientation complete</h3>
-                  <p className="ops-side-note">
-                    You may revisit Module 0 anytime from the MODULE dropdown.
-                  </p>
-                  <button type="button" className="ops-launch" onClick={onFinished}>
-                    <span aria-hidden="true">{'<<'}</span>
-                    Continue to Module 01
-                    <span aria-hidden="true">{'>>'}</span>
-                  </button>
-                </div>
-              ) : null}
-            </>
-          )}
-        </aside>
+                {progress?.orientationCompleted ? (
+                  <div className="m0-lesson__section m0-lesson__section--complete">
+                    <h3>Orientation complete</h3>
+                    <p>
+                      {onReturnToBriefing
+                        ? 'Review complete. Return to your mission briefing when ready — mission progress is unchanged.'
+                        : 'You may revisit Module 0 anytime from the MODULE dropdown. Continue when ready for independent missions.'}
+                    </p>
+                    <button type="button" className="ops-launch" onClick={onFinished}>
+                      <span aria-hidden="true">{'<<'}</span>
+                      {onReturnToBriefing ? 'Return to Mission Briefing' : 'Continue to Module 01'}
+                      <span aria-hidden="true">{'>>'}</span>
+                    </button>
+                  </div>
+                ) : null}
+              </>
+            )}
+          </section>
+        </div>
       </div>
 
       {editorOpen && playerId && topic ? (

@@ -51,10 +51,23 @@ public class ConceptReviewService {
 	public void enqueue(String participantCode, String conceptTag, String sourceMissionId) {
 		String reviewChallengeId = suggestReviewChallenge(conceptTag);
 		if (memoryMode) {
+			boolean already = memoryRows.values().stream().anyMatch(row ->
+					row.participantCode().equals(participantCode)
+							&& row.conceptTag().equals(conceptTag)
+							&& (STATUS_QUEUED.equals(row.status()) || STATUS_SCHEDULED.equals(row.status())));
+			if (already) {
+				return;
+			}
 			String key = participantCode + "|" + conceptTag + "|" + sourceMissionId;
 			memoryRows.putIfAbsent(
 					key,
 					new ReviewRow(participantCode, conceptTag, sourceMissionId, STATUS_QUEUED, reviewChallengeId));
+			return;
+		}
+		boolean already = repository.findByParticipantCode(participantCode).stream().anyMatch(entity ->
+				entity.getConceptTag().equals(conceptTag)
+						&& (STATUS_QUEUED.equals(entity.getStatus()) || STATUS_SCHEDULED.equals(entity.getStatus())));
+		if (already) {
 			return;
 		}
 		Instant now = Instant.now();
@@ -100,21 +113,15 @@ public class ConceptReviewService {
 	}
 
 	private String suggestReviewChallenge(String conceptTag) {
-		return switch (conceptTag) {
-			case "http.method.get", "http.endpoint", "rest.fundamentals" -> "chal-practice-m1-l1";
-			case "http.path_parameter" -> "chal-practice-m1-l2";
-			case "http.query_parameter" -> "chal-practice-m1-l3";
-			case "http.method.post" -> "chal-practice-m1-l4";
-			case "http.method.put", "http.method.patch" -> "chal-practice-m1-l5";
-			case "http.method.delete" -> "chal-practice-m1-l6";
-			default -> {
-				try {
-					yield contractCatalogService.requireByChallengeId("chal-practice-m1-l1").getChallengeId();
-				} catch (IllegalArgumentException ex) {
-					yield null;
-				}
-			}
-		};
+		List<String> authored = ConceptSupportCatalog.practiceChallengeIds(conceptTag);
+		if (!authored.isEmpty()) {
+			return authored.getLast();
+		}
+		try {
+			return contractCatalogService.requireByChallengeId("chal-practice-m1-l1").getChallengeId();
+		} catch (IllegalArgumentException ex) {
+			return null;
+		}
 	}
 
 	private record ReviewRow(

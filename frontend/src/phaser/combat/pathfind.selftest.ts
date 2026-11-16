@@ -268,6 +268,7 @@ function assertPathWalkable(nav: NavigationGrid, path: GridCell[], label: string
     { missionId: 'm1-recruit-l4', footprint: 'security_checkpoint' },
     { missionId: 'm1-recruit-l5', footprint: 'security_clearance_hall' },
     { missionId: 'm1-recruit-l6', footprint: 'security_purge_bay' },
+    { missionId: 'm1-recruit-l7', footprint: 'security_command_nexus' },
   ]
   for (const { missionId, footprint } of footprintMissions) {
     const plan = generateRoomLayout({

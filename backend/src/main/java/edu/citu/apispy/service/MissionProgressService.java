@@ -4,6 +4,7 @@ import edu.citu.apispy.domain.mission.ActiveRunKind;
 import edu.citu.apispy.domain.mission.MissionDefinition;
 import edu.citu.apispy.domain.mission.MissionProgressEntity;
 import edu.citu.apispy.domain.mission.MissionProgressStatus;
+import edu.citu.apispy.domain.mission.Rank;
 import edu.citu.apispy.domain.mission.RoomResetReason;
 import edu.citu.apispy.domain.simulation.ApiContract;
 import edu.citu.apispy.dto.ActiveTerminalChallengeDto;
@@ -12,6 +13,7 @@ import edu.citu.apispy.dto.MissionProgressDto;
 import edu.citu.apispy.dto.VerifyAnotherScenarioDto;
 import edu.citu.apispy.repository.MissionProgressRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.ObjectMapper;
@@ -51,9 +53,15 @@ public class MissionProgressService {
 	private final ScenarioSelectionService scenarioSelectionService;
 	private final ContractCatalogService contractCatalogService;
 	private final TerminalVerificationService terminalVerificationService;
+	private final ConceptConsistencyService conceptConsistencyService;
 	private final ObjectMapper objectMapper;
 	private final ConcurrentHashMap<String, MissionProgressEntity> memory;
 	private final boolean memoryMode;
+	/**
+	 * When true (default in production), Module 1 Recruit levels unlock sequentially.
+	 * Unit fixtures and the Maven test profile disable this so isolated mission tests stay focused.
+	 */
+	private final boolean sequentialCareerUnlockEnabled;
 
 	@Autowired
 	public MissionProgressService(
@@ -64,7 +72,9 @@ public class MissionProgressService {
 			ScenarioSelectionService scenarioSelectionService,
 			ContractCatalogService contractCatalogService,
 			TerminalVerificationService terminalVerificationService,
-			ObjectMapper objectMapper) {
+			ConceptConsistencyService conceptConsistencyService,
+			ObjectMapper objectMapper,
+			@Value("${apispy.career.sequential-unlock:true}") boolean sequentialCareerUnlockEnabled) {
 		this.repository = repository;
 		this.missionCatalogService = missionCatalogService;
 		this.deviceEscalationService = deviceEscalationService;
@@ -72,9 +82,11 @@ public class MissionProgressService {
 		this.scenarioSelectionService = scenarioSelectionService;
 		this.contractCatalogService = contractCatalogService;
 		this.terminalVerificationService = terminalVerificationService;
+		this.conceptConsistencyService = conceptConsistencyService;
 		this.objectMapper = objectMapper;
 		this.memory = null;
 		this.memoryMode = false;
+		this.sequentialCareerUnlockEnabled = sequentialCareerUnlockEnabled;
 	}
 
 	private MissionProgressService(
@@ -84,7 +96,9 @@ public class MissionProgressService {
 			ScenarioSelectionService scenarioSelectionService,
 			ContractCatalogService contractCatalogService,
 			TerminalVerificationService terminalVerificationService,
-			ObjectMapper objectMapper) {
+			ConceptConsistencyService conceptConsistencyService,
+			ObjectMapper objectMapper,
+			boolean sequentialCareerUnlockEnabled) {
 		this.repository = null;
 		this.missionCatalogService = missionCatalogService;
 		this.deviceEscalationService = deviceEscalationService;
@@ -92,9 +106,11 @@ public class MissionProgressService {
 		this.scenarioSelectionService = scenarioSelectionService;
 		this.contractCatalogService = contractCatalogService;
 		this.terminalVerificationService = terminalVerificationService;
+		this.conceptConsistencyService = conceptConsistencyService;
 		this.objectMapper = objectMapper;
 		this.memory = new ConcurrentHashMap<>();
 		this.memoryMode = true;
+		this.sequentialCareerUnlockEnabled = sequentialCareerUnlockEnabled;
 	}
 
 	public static MissionProgressService inMemory(
@@ -104,7 +120,30 @@ public class MissionProgressService {
 			ScenarioSelectionService scenarioSelection,
 			ContractCatalogService contracts,
 			TerminalVerificationService terminalVerification,
+			ConceptConsistencyService conceptConsistency,
 			ObjectMapper objectMapper) {
+		return inMemory(
+				missions,
+				escalation,
+				adaptivePractice,
+				scenarioSelection,
+				contracts,
+				terminalVerification,
+				conceptConsistency,
+				objectMapper,
+				false);
+	}
+
+	public static MissionProgressService inMemory(
+			MissionCatalogService missions,
+			DeviceEscalationService escalation,
+			AdaptivePracticeService adaptivePractice,
+			ScenarioSelectionService scenarioSelection,
+			ContractCatalogService contracts,
+			TerminalVerificationService terminalVerification,
+			ConceptConsistencyService conceptConsistency,
+			ObjectMapper objectMapper,
+			boolean sequentialCareerUnlockEnabled) {
 		return new MissionProgressService(
 				missions,
 				escalation,
@@ -112,12 +151,15 @@ public class MissionProgressService {
 				scenarioSelection,
 				contracts,
 				terminalVerification,
-				objectMapper);
+				conceptConsistency,
+				objectMapper,
+				sequentialCareerUnlockEnabled);
 	}
 
 	@Transactional
 	public MissionProgressDto getOrCreate(String participantCode, String missionId) {
 		MissionDefinition mission = missionCatalogService.requirePlayable(missionId);
+		assertSequentialCareerAccess(participantCode, mission);
 		MissionProgressEntity entity = findEntity(participantCode, missionId)
 				.orElseGet(() -> createNew(participantCode, mission));
 		return toDto(entity);
@@ -143,6 +185,7 @@ public class MissionProgressService {
 	@Transactional
 	public MissionProgressDto startReplay(String participantCode, String missionId) {
 		MissionDefinition mission = missionCatalogService.requirePlayable(missionId);
+		assertSequentialCareerAccess(participantCode, mission);
 		MissionProgressEntity entity = findEntity(participantCode, missionId)
 				.orElseThrow(() -> new IllegalStateException("No completed mission progress to replay"));
 		assertLessonGateClear(entity);
@@ -315,8 +358,10 @@ public class MissionProgressService {
 		entity.setRoomGeneration(UUID.randomUUID());
 		entity.setGradedAttemptCountSinceReset(0);
 		entity.setIncorrectGradedAttemptsSinceReset(0);
-		entity.setRequiredDeviceCount(deviceEscalationService.mandatoryDeviceCount(entity.getApiResetCount()));
-		entity.setFinalLockRequired(deviceEscalationService.finalLockRequired(entity.getApiResetCount()));
+		entity.setRequiredDeviceCount(deviceEscalationService.mandatoryDeviceCount(
+				entity.getMissionId(), entity.getApiResetCount()));
+		entity.setFinalLockRequired(deviceEscalationService.finalLockRequired(
+				entity.getMissionId(), entity.getApiResetCount()));
 		entity.setUnlockedDevicesJson(writeUnlocked(Set.of()));
 		// Combat / idle PLAYER keep authored selection (no graded evidence reroll).
 		// API-driven abandonment may pick another authored variant for the new generation.
@@ -516,8 +561,10 @@ public class MissionProgressService {
 		entity.setActiveRunKind(kind);
 		entity.setApiResetCount(apiResetCount);
 		entity.setRoomGeneration(UUID.randomUUID());
-		entity.setRequiredDeviceCount(deviceEscalationService.mandatoryDeviceCount(apiResetCount));
-		entity.setFinalLockRequired(deviceEscalationService.finalLockRequired(apiResetCount));
+		entity.setRequiredDeviceCount(deviceEscalationService.mandatoryDeviceCount(
+				entity.getMissionId(), apiResetCount));
+		entity.setFinalLockRequired(deviceEscalationService.finalLockRequired(
+				entity.getMissionId(), apiResetCount));
 		entity.setUnlockedDevicesJson(writeUnlocked(Set.of()));
 		entity.setGradedAttemptCountSinceReset(0);
 		entity.setIncorrectGradedAttemptsSinceReset(0);
@@ -622,8 +669,48 @@ public class MissionProgressService {
 		}
 	}
 
+	/**
+	 * Module 1 Recruit only: Level N requires career completion of Level N-1.
+	 * Field/Special Agent and other modules are unchanged.
+	 */
+	void assertSequentialCareerAccess(String participantCode, MissionDefinition mission) {
+		if (!sequentialCareerUnlockEnabled) {
+			return;
+		}
+		if (mission.getModule() != 1 || mission.getRank() != Rank.RECRUIT || mission.getLevel() <= 1) {
+			return;
+		}
+		String priorMissionId = "m1-recruit-l" + (mission.getLevel() - 1);
+		boolean priorCleared = findEntity(participantCode, priorMissionId)
+				.map(entity -> entity.getStatus() == MissionProgressStatus.COMPLETED
+						&& entity.getCompletedAt() != null)
+				.orElse(false);
+		if (!priorCleared) {
+			throw new IllegalStateException(
+					"Complete " + priorMissionId + " before accessing " + mission.getMissionId());
+		}
+	}
+
+	/** Whether Module 1 Recruit Level {@code level} is career-unlocked for this player. */
+	public boolean isRecruitLevelUnlocked(String participantCode, int level) {
+		if (level <= 1) {
+			return true;
+		}
+		if (!sequentialCareerUnlockEnabled) {
+			return true;
+		}
+		String priorMissionId = "m1-recruit-l" + (level - 1);
+		return findEntity(participantCode, priorMissionId)
+				.map(entity -> entity.getStatus() == MissionProgressStatus.COMPLETED
+						&& entity.getCompletedAt() != null)
+				.orElse(false);
+	}
+
 	private MissionProgressEntity createNew(String participantCode, MissionDefinition mission) {
+		assertSequentialCareerAccess(participantCode, mission);
 		Instant now = Instant.now();
+		int initialCount = deviceEscalationService.mandatoryDeviceCount(mission.getMissionId(), 0);
+		boolean initialFinalLock = deviceEscalationService.finalLockRequired(mission.getMissionId(), 0);
 		MissionProgressEntity entity = new MissionProgressEntity(
 				UUID.randomUUID(),
 				participantCode,
@@ -633,9 +720,9 @@ public class MissionProgressService {
 				MissionProgressStatus.IN_PROGRESS,
 				0,
 				UUID.randomUUID(),
-				DeviceEscalationService.TIER_INITIAL,
+				initialCount,
 				writeUnlocked(Set.of()),
-				false,
+				initialFinalLock,
 				0,
 				false,
 				ActiveRunKind.PRIMARY,
@@ -709,6 +796,7 @@ public class MissionProgressService {
 		boolean replayable = careerCompleted && !entity.hasActiveRoomRun();
 		boolean manualRestartWouldEscalate = entity.hasActiveRoomRun() && hasUnresolvedApiActivity(entity);
 		int nextRequiredDeviceCount = deviceEscalationService.mandatoryDeviceCount(
+				entity.getMissionId(),
 				Math.min(
 						DeviceEscalationService.MAX_API_RESETS_FOR_TIER,
 						entity.getApiResetCount() + (manualRestartWouldEscalate ? 1 : 0)));
@@ -755,7 +843,13 @@ public class MissionProgressService {
 			return null;
 		}
 		List<String> completed = readIdList(entity.getCompletedTerminalChallengeIdsJson());
-		List<ApiContract> plan = scenarioSelectionService.verificationPlan(entity.getMissionId(), selected);
+		List<ApiContract> plan = conceptConsistencyService.augmentVerificationPlan(
+				entity.getParticipantCode(),
+				entity.getMissionId(),
+				scenarioSelectionService.verificationPlan(
+						entity.getMissionId(),
+						selected,
+						entity.getRoomGeneration()));
 		String activeId = entity.getActiveTerminalChallengeId();
 		if (activeId == null || activeId.isBlank()) {
 			activeId = selected.stream()

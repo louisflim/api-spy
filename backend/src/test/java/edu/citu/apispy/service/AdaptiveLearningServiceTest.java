@@ -1,18 +1,18 @@
 package edu.citu.apispy.service;
 
 import edu.citu.apispy.config.AdaptiveLearningProperties;
-import edu.citu.apispy.dto.AdaptivePracticeDoorDto;
 import edu.citu.apispy.dto.SimulateRequestDto;
 import edu.citu.apispy.dto.SimulateResponseDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -29,13 +29,13 @@ class AdaptiveLearningServiceTest {
 	}
 
 	@Test
-	void incorrectAttemptThresholdRemainsTwo() {
+	void incorrectAttemptThresholdRemainsTwoForHistoricalReviewEnqueue() {
 		assertEquals(2, properties.getIncorrectAttemptThreshold());
 		assertEquals(2, properties.getMaxPracticeDoorsPerRoom());
 	}
 
 	@Test
-	void singleEligibleFailureDoesNotOpenAdaptivePracticeDoor() {
+	void singleEligibleFailureDoesNotSpawnAdaptivePracticeDoor() {
 		SimulateResponseDto onlyOne = service.simulate("agent-one", mission(
 				"m1-recruit-l3",
 				"sensor-panel",
@@ -44,13 +44,12 @@ class AdaptiveLearningServiceTest {
 				"/api/sensors"));
 		assertFalse(onlyOne.correct());
 		assertTrue(onlyOne.firstAttemptRecorded());
-		assertTrue(
-				onlyOne.adaptivePracticeDoors().isEmpty(),
-				"threshold is 2 distinct eligible failures; one miss must not open a door");
+		assertTrue(onlyOne.adaptivePracticeDoors().isEmpty());
+		assertNull(onlyOne.autoPracticeOffer());
 	}
 
 	@Test
-	void twoDistinctMandatoryFailuresAcrossRoomsTriggerAdaptivePractice() {
+	void repeatedConceptMissesNeverSpawnPhysicalPracticeDoors() {
 		SimulateResponseDto room1 = service.simulate("agent-cross", mission(
 				"m1-recruit-l1",
 				"door-alpha",
@@ -68,48 +67,56 @@ class AdaptiveLearningServiceTest {
 				"/api/doors/alpha"));
 		assertFalse(room2.correct());
 		assertTrue(room2.errorCodes().contains("ENDPOINT"));
-		assertFalse(room2.adaptivePracticeDoors().isEmpty());
-		assertTrue(room2.adaptivePracticeDoors().stream()
-				.anyMatch(door -> "http.endpoint".equals(door.conceptTag())));
-		assertTrue(room2.adaptivePracticeDoors().stream()
-				.anyMatch(door -> door.challengeId().startsWith("chal-practice-m1-")));
-		assertTrue(room2.adaptivePracticeDoors().size() <= 2);
+		assertTrue(
+				room2.adaptivePracticeDoors().isEmpty(),
+				"physical adaptive practice doors are retired even after recurring difficulty");
+		assertNull(room2.autoPracticeOffer());
 	}
 
 	@Test
-	void previousPracticeTriggerEvidenceDoesNotGenerateDuplicateDoors() {
-		service.simulate("agent-dup", mission(
+	void sameRoomVerificationSequenceKeepsDoorsEmptyAndStaysOnWrongScenario() {
+		SimulateResponseDto scenario1Wrong = service.simulate("agent-seq", mission(
+				"m1-recruit-l1",
+				"door-alpha",
+				"chal-m1-get-door-v1",
+				"POST",
+				"/api/doors/alpha"));
+		assertFalse(scenario1Wrong.correct());
+		assertTrue(scenario1Wrong.firstAttemptRecorded());
+		assertEquals("chal-m1-get-door-v1", scenario1Wrong.challengeId());
+		assertTrue(scenario1Wrong.adaptivePracticeDoors().isEmpty());
+		assertTrue(Boolean.FALSE.equals(
+				scenario1Wrong.firstAttemptRecord().conceptFirstAttemptCorrect().get("http.method.get")));
+
+		SimulateResponseDto scenario1Fix = service.simulate("agent-seq", mission(
 				"m1-recruit-l1",
 				"door-alpha",
 				"chal-m1-get-door-v1",
 				"GET",
-				"/api/doors/wrong"));
-		SimulateResponseDto firstTrigger = service.simulate("agent-dup", mission(
-				"m1-recruit-l2",
-				"lock-north",
-				"chal-m1-path-lock-v1",
-				"GET",
 				"/api/doors/alpha"));
-		assertFalse(firstTrigger.adaptivePracticeDoors().isEmpty());
-		Set<String> firstKeys = firstTrigger.adaptivePracticeDoors().stream()
-				.map(door -> door.conceptTag() + "|" + door.challengeId())
-				.collect(Collectors.toSet());
+		assertTrue(scenario1Fix.correct());
+		assertFalse(scenario1Fix.firstAttemptRecorded());
+		assertNotNull(scenario1Fix.terminalVerification());
+		assertNotNull(scenario1Fix.terminalVerification().verifyAnotherScenario());
+		var next = scenario1Fix.terminalVerification().verifyAnotherScenario();
+		assertNotEquals("chal-m1-get-door-v1", next.challengeId());
 
-		SimulateResponseDto again = service.simulate("agent-dup", mission(
-				"m1-recruit-l2",
-				"lock-north",
-				"chal-m1-path-lock-v1",
-				"POST",
-				"/api/locks/north-gate"));
-		assertFalse(again.firstAttemptRecorded());
-		Set<String> againKeys = again.adaptivePracticeDoors().stream()
-				.map(door -> door.conceptTag() + "|" + door.challengeId())
-				.collect(Collectors.toSet());
-		assertEquals(firstKeys, againKeys);
+		SimulateResponseDto scenario2Wrong = service.simulate("agent-seq", mission(
+				"m1-recruit-l1",
+				next.deviceId(),
+				next.challengeId(),
+				"DELETE",
+				"/api/doors/bravo"));
+		assertFalse(scenario2Wrong.correct());
+		assertTrue(scenario2Wrong.firstAttemptRecorded());
+		assertTrue(scenario2Wrong.errorCodes().contains("METHOD"));
+		assertEquals(next.challengeId(), scenario2Wrong.challengeId());
+		assertTrue(scenario2Wrong.adaptivePracticeDoors().isEmpty());
+		assertNull(scenario2Wrong.autoPracticeOffer());
 	}
 
 	@Test
-	void progressEndpointSurfacesActivePracticeDoorsForRoom() {
+	void progressEndpointNeverSurfacesActivePracticeDoors() {
 		SimulationTestFixtures.Bundle bundle = SimulationTestFixtures.create();
 		RequestSimulationService sim = bundle.service();
 		MissionProgressService progress = bundle.missionProgress();
@@ -128,45 +135,7 @@ class AdaptiveLearningServiceTest {
 				"/api/doors/alpha"));
 
 		var roomProgress = progress.getOrCreate("agent-reload", "m1-recruit-l2");
-		assertFalse(roomProgress.adaptivePracticeDoors().isEmpty());
-		assertTrue(roomProgress.adaptivePracticeDoors().stream()
-				.anyMatch(door -> "http.endpoint".equals(door.conceptTag())));
-		assertTrue(roomProgress.adaptivePracticeDoors().size() <= 2);
-	}
-
-	@Test
-	void adaptivePracticeDoesNotUnlockMandatoryExit() {
-		service.simulate("agent-practice-exit", mission(
-				"m1-recruit-l1",
-				"door-alpha",
-				"chal-m1-get-door-v1",
-				"GET",
-				"/api/doors/wrong"));
-		SimulateResponseDto triggered = service.simulate("agent-practice-exit", mission(
-				"m1-recruit-l2",
-				"lock-north",
-				"chal-m1-path-lock-v1",
-				"GET",
-				"/api/doors/alpha"));
-		AdaptivePracticeDoorDto door = triggered.adaptivePracticeDoors().getFirst();
-
-		SimulateResponseDto practiceOk = service.simulate(
-				"agent-practice-exit",
-				new SimulateRequestDto(
-						"agent-practice-exit",
-						door.practiceMissionId(),
-						door.deviceId(),
-						door.challengeId(),
-						door.expectedMethod(),
-						door.pathTemplate().contains("{")
-								? "/api/practice/locks/drill-bay"
-								: door.pathTemplate(),
-						Map.of(),
-						"",
-						"PRACTICE"));
-		assertTrue(practiceOk.correct());
-		assertTrue(practiceOk.deviceChanges().isEmpty());
-		assertFalse(practiceOk.missionProgress() != null && practiceOk.missionProgress().exitReady());
+		assertTrue(roomProgress.adaptivePracticeDoors().isEmpty());
 	}
 
 	@Test
@@ -188,6 +157,67 @@ class AdaptiveLearningServiceTest {
 	}
 
 	@Test
+	void wrongGradedSubmissionStaysOnScenarioWithControlFeedbackAndNoAutoPractice() {
+		SimulateResponseDto miss = service.simulate("agent-inline", mission(
+				"m1-recruit-l1",
+				"door-alpha",
+				"chal-m1-get-door-v1",
+				"POST",
+				"/api/doors/alpha"));
+		assertFalse(miss.correct());
+		assertTrue(miss.firstAttemptRecorded());
+		assertEquals("chal-m1-get-door-v1", miss.challengeId());
+		assertTrue(miss.adaptivePracticeDoors().isEmpty());
+		assertNull(miss.autoPracticeOffer());
+		assertTrue(miss.controlFeedback().messages().stream()
+				.anyMatch(m -> m.toLowerCase().contains("http method")));
+		assertTrue(miss.controlFeedback().messages().stream()
+				.anyMatch(m -> m.toLowerCase().contains("same challenge")));
+		assertTrue(miss.controlFeedback().messages().stream()
+				.noneMatch(m -> m.toLowerCase().contains("ungraded practice")));
+		assertTrue(miss.controlFeedback().messages().stream()
+				.noneMatch(m -> m.toLowerCase().contains("practice terminal")));
+	}
+
+	@Test
+	void priorCorrectFirstAttemptIsPreservedAndDoesNotMintDoorsOnLaterWrongRetry() {
+		SimulateResponseDto priorS1 = service.simulate("agent-history", mission(
+				"m1-recruit-l1",
+				"door-alpha",
+				"chal-m1-get-door-v1",
+				"GET",
+				"/api/doors/alpha"));
+		assertTrue(priorS1.correct());
+		assertTrue(priorS1.firstAttemptRecorded());
+
+		SimulateResponseDto priorS2 = service.simulate("agent-history", mission(
+				"m1-recruit-l1",
+				"door-bravo",
+				"chal-m1-get-door-v2",
+				"GET",
+				"/api/doors/bravo"));
+		assertTrue(priorS2.correct());
+		assertTrue(priorS2.firstAttemptRecorded());
+		assertTrue(priorS2.firstAttemptRecord().firstAttemptCorrect());
+		assertEquals("chal-m1-get-door-v2", priorS2.firstAttemptRecord().challengeId());
+
+		SimulateResponseDto laterWrong = service.simulate("agent-history", mission(
+				"m1-recruit-l1",
+				"door-bravo",
+				"chal-m1-get-door-v2",
+				"POST",
+				"/api/doors/bravo"));
+		assertFalse(laterWrong.correct());
+		assertTrue(laterWrong.errorCodes().contains("METHOD"));
+		assertFalse(laterWrong.firstAttemptRecorded());
+		assertTrue(laterWrong.firstAttemptRecord().firstAttemptCorrect());
+		assertEquals("GET", laterWrong.firstAttemptRecord().method());
+		assertTrue(Boolean.TRUE.equals(
+				laterWrong.firstAttemptRecord().conceptFirstAttemptCorrect().get("http.method.get")));
+		assertTrue(laterWrong.adaptivePracticeDoors().isEmpty());
+	}
+
+	@Test
 	void forgedPracticeModeCannotBypassMandatoryMissionEvaluation() {
 		assertThrows(IllegalArgumentException.class, () -> service.simulate(
 				"forger",
@@ -204,7 +234,7 @@ class AdaptiveLearningServiceTest {
 	}
 
 	@Test
-	void authorizedPracticeDoesNotRecordFirstAttemptOrUnlockMissionDevices() {
+	void authorizedMissionTrainingPracticeDoesNotRecordFirstAttemptOrUnlockMissionDevices() {
 		SimulateResponseDto response = service.simulate(
 				"practice-player",
 				new SimulateRequestDto(
@@ -222,6 +252,49 @@ class AdaptiveLearningServiceTest {
 		assertFalse(response.firstAttemptRecorded());
 		assertTrue(response.deviceChanges().isEmpty());
 		assertFalse(response.heartsChanged());
+		assertTrue(response.terminalVerification() == null);
+		assertTrue(response.adaptivePracticeDoors().isEmpty());
+	}
+
+	@Test
+	void advancePracticeRoundAndMarkLessonOpenedAreRetired() {
+		SimulationTestFixtures.Bundle bundle = SimulationTestFixtures.create();
+		AdaptivePracticeService adaptive = bundle.adaptivePractice();
+
+		assertThrows(
+				IllegalStateException.class,
+				() -> adaptive.advancePracticeRound("agent-round", "m1-recruit-l2", "http.endpoint"));
+		assertThrows(
+				IllegalStateException.class,
+				() -> adaptive.markLessonOpened("agent-lesson", "m1-recruit-l2", "http.endpoint"));
+		assertTrue(adaptive.activeDoorsForRoom("agent-round", "m1-recruit-l2").isEmpty());
+		assertTrue(adaptive.supportOffersForRoom("agent-round", "m1-recruit-l2").isEmpty());
+	}
+
+	@Test
+	void recurringDifficultyEnqueuesLaterReviewWithoutDoors() {
+		SimulationTestFixtures.Bundle bundle = SimulationTestFixtures.create();
+		RequestSimulationService sim = bundle.service();
+		AdaptivePracticeService adaptive = bundle.adaptivePractice();
+
+		sim.simulate("agent-support", mission(
+				"m1-recruit-l1",
+				"door-alpha",
+				"chal-m1-get-door-v1",
+				"GET",
+				"/api/doors/wrong"));
+		SimulateResponseDto triggered = sim.simulate("agent-support", mission(
+				"m1-recruit-l2",
+				"lock-north",
+				"chal-m1-path-lock-v1",
+				"GET",
+				"/api/doors/alpha"));
+		assertTrue(triggered.adaptivePracticeDoors().isEmpty());
+		assertNull(triggered.autoPracticeOffer());
+		assertTrue(adaptive.activeDoorsForRoom("agent-support", "m1-recruit-l2").isEmpty());
+		assertNotNull(triggered.conceptReviewQueue());
+		assertTrue(triggered.conceptReviewQueue().stream()
+				.anyMatch(item -> "http.endpoint".equals(item.conceptTag())));
 	}
 
 	private static SimulateRequestDto mission(

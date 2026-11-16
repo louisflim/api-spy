@@ -64,7 +64,8 @@ class SimulateRequestControllerTest {
 		mockMvc.perform(get("/api/catalog").session(session))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.totalMissions").value(63))
-				.andExpect(jsonPath("$.implementedMissions").value(6));
+				.andExpect(jsonPath("$.implementedMissions").value(7))
+				.andExpect(jsonPath("$.missions[?(@.missionId=='m1-recruit-l7')].playable").value(true));
 	}
 
 	@Test

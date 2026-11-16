@@ -2,6 +2,7 @@ import type { FootprintId, RoomFootprint } from '../types'
 import { SECURITY_ANNEX_FOOTPRINT } from './securityAnnex'
 import { SECURITY_CHECKPOINT_FOOTPRINT } from './securityCheckpoint'
 import { SECURITY_CLEARANCE_HALL_FOOTPRINT } from './securityClearanceHall'
+import { SECURITY_COMMAND_NEXUS_FOOTPRINT } from './securityCommandNexus'
 import { SECURITY_OFFICE_FOOTPRINT } from './securityOffice'
 import { SECURITY_PURGE_BAY_FOOTPRINT } from './securityPurgeBay'
 import { SECURITY_SERVER_WING_FOOTPRINT } from './securityServerWing'
@@ -13,6 +14,7 @@ const REGISTRY: Record<FootprintId, RoomFootprint> = {
   security_checkpoint: SECURITY_CHECKPOINT_FOOTPRINT,
   security_clearance_hall: SECURITY_CLEARANCE_HALL_FOOTPRINT,
   security_purge_bay: SECURITY_PURGE_BAY_FOOTPRINT,
+  security_command_nexus: SECURITY_COMMAND_NEXUS_FOOTPRINT,
 }
 
 export function getFootprint(id: FootprintId = 'security_office'): RoomFootprint {
@@ -30,4 +32,5 @@ export {
   SECURITY_CHECKPOINT_FOOTPRINT,
   SECURITY_CLEARANCE_HALL_FOOTPRINT,
   SECURITY_PURGE_BAY_FOOTPRINT,
+  SECURITY_COMMAND_NEXUS_FOOTPRINT,
 }

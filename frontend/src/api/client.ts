@@ -1,4 +1,5 @@
 import type { Module0Academy, Module0Progress } from '../content/module0Types'
+import { stripGradedAnswerKeys } from '../security/stripAnswerKeys'
 import type {
   CatalogResponse,
   Lesson,
@@ -199,7 +200,7 @@ export async function fetchMissionDetail(
   if (!response.ok) {
     throw new Error(await readError(response, 'Mission detail failed'))
   }
-  return response.json()
+  return stripGradedAnswerKeys(await response.json())
 }
 
 export async function simulateRequest(
@@ -212,7 +213,7 @@ export async function simulateRequest(
   if (!response.ok) {
     throw new Error(await readError(response, 'Simulate failed'))
   }
-  return response.json()
+  return stripGradedAnswerKeys(await response.json())
 }
 
 export async function fetchAllMissionProgress(): Promise<MissionProgressState[]> {
@@ -220,7 +221,7 @@ export async function fetchAllMissionProgress(): Promise<MissionProgressState[]>
   if (!response.ok) {
     throw new Error(await readError(response, 'Mission progress list failed'))
   }
-  return response.json()
+  return stripGradedAnswerKeys(await response.json())
 }
 
 export async function fetchTerminalVerification(missionId: string): Promise<TerminalVerification> {
@@ -228,7 +229,7 @@ export async function fetchTerminalVerification(missionId: string): Promise<Term
   if (!response.ok) {
     throw new Error(await readError(response, 'Terminal verification failed'))
   }
-  return response.json()
+  return stripGradedAnswerKeys(await response.json())
 }
 
 export async function fetchMissionProgress(missionId: string): Promise<MissionProgressState> {
@@ -236,7 +237,7 @@ export async function fetchMissionProgress(missionId: string): Promise<MissionPr
   if (!response.ok) {
     throw new Error(await readError(response, 'Mission progress failed'))
   }
-  return response.json()
+  return stripGradedAnswerKeys(await response.json())
 }
 
 export async function resetMissionRoom(
@@ -254,7 +255,7 @@ export async function resetMissionRoom(
   if (!response.ok) {
     throw new Error(await readError(response, 'Mission room reset failed'))
   }
-  return response.json()
+  return stripGradedAnswerKeys(await response.json())
 }
 
 /** Clears the SRS v1.3 forced ungraded-lesson gate after revisiting the required lesson. */
@@ -269,7 +270,7 @@ export async function acknowledgeLessonReview(
   if (!response.ok) {
     throw new Error(await readError(response, 'Lesson review acknowledgement failed'))
   }
-  return response.json()
+  return stripGradedAnswerKeys(await response.json())
 }
 
 /**
@@ -287,7 +288,7 @@ export async function reportCombatDeath(
   if (!response.ok) {
     throw new Error(await readError(response, 'Combat death report failed'))
   }
-  return response.json()
+  return stripGradedAnswerKeys(await response.json())
 }
 
 export async function completeMissionAtExit(
@@ -305,7 +306,7 @@ export async function completeMissionAtExit(
   if (!response.ok) {
     throw new Error(await readError(response, 'Mission completion failed'))
   }
-  return response.json()
+  return stripGradedAnswerKeys(await response.json())
 }
 
 /** Server-authorized temporary replay run for a career-cleared mission. */
@@ -317,7 +318,7 @@ export async function startMissionReplay(missionId: string): Promise<MissionProg
   if (!response.ok) {
     throw new Error(await readError(response, 'Mission replay failed'))
   }
-  return response.json()
+  return stripGradedAnswerKeys(await response.json())
 }
 
 export async function fetchModule0Academy(): Promise<Module0Academy> {

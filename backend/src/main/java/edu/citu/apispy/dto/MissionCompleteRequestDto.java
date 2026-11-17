@@ -1,5 +1,9 @@
 package edu.citu.apispy.dto;
 
+import edu.citu.apispy.web.InputLimits;
+import edu.citu.apispy.web.InputSanitizer;
+import jakarta.validation.constraints.Size;
+
 /**
  * Completion request bound to the active room instance.
  * <p>
@@ -11,7 +15,10 @@ package edu.citu.apispy.dto;
  * client gameplay; the server cannot yet verify sprite coordinates.
  */
 public record MissionCompleteRequestDto(
-		String roomGeneration,
+		@Size(max = InputLimits.ROOM_GENERATION) String roomGeneration,
 		Boolean exitInteracted
 ) {
+	public MissionCompleteRequestDto {
+		roomGeneration = InputSanitizer.optionalText(roomGeneration);
+	}
 }

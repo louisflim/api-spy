@@ -11,6 +11,7 @@ import type {
   VerifyAnotherScenario,
 } from '../types/api'
 import { conceptLabel } from '../learning/prerequisites'
+import { publicErrorMessage } from '../security/publicErrors'
 import { recordDeviceUnlock, saveConceptStage, saveFirstAttempt } from '../storage/attemptStorage'
 import { ControlGuide } from './spy/ControlGuide'
 import { TerminalBootSequence } from './terminal/TerminalBootSequence'
@@ -432,7 +433,7 @@ export function ApiRequestEditor({
       }
     } catch (err) {
       if (submitGenerationRef.current === generation) {
-        setError(err instanceof Error ? err.message : 'Request failed')
+        setError(publicErrorMessage(err, 'Request failed. Try again.'))
       }
     } finally {
       if (submitGenerationRef.current === generation) {

@@ -10,8 +10,11 @@ import edu.citu.apispy.dto.TerminalVerificationDto;
 import edu.citu.apispy.security.AuthenticatedPlayer;
 import edu.citu.apispy.service.MissionProgressService;
 import edu.citu.apispy.service.RequestSimulationService;
+import edu.citu.apispy.web.InputLimits;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Size;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,6 +26,7 @@ import java.util.List;
 import java.util.Locale;
 
 @RestController
+@Validated
 @RequestMapping("/api/missions")
 public class MissionProgressController {
 
@@ -42,13 +46,14 @@ public class MissionProgressController {
 	}
 
 	@GetMapping("/{missionId}/progress")
-	public MissionProgressDto progress(@PathVariable String missionId) {
+	public MissionProgressDto progress(@PathVariable @Size(max = InputLimits.ID) String missionId) {
 		return missionProgressService.getOrCreate(AuthenticatedPlayer.requireUserIdString(), missionId);
 	}
 
 	/** Read-only Terminal Verification Progress for a graded mission terminal. */
 	@GetMapping("/{missionId}/terminal-verification")
-	public TerminalVerificationDto terminalVerification(@PathVariable String missionId) {
+	public TerminalVerificationDto terminalVerification(
+			@PathVariable @Size(max = InputLimits.ID) String missionId) {
 		return requestSimulationService.terminalVerificationSnapshot(
 				AuthenticatedPlayer.requireUserIdString(),
 				missionId);
@@ -56,7 +61,7 @@ public class MissionProgressController {
 
 	@PostMapping("/{missionId}/reset")
 	public ResponseEntity<MissionProgressDto> reset(
-			@PathVariable String missionId,
+			@PathVariable @Size(max = InputLimits.ID) String missionId,
 			@Valid @RequestBody RoomResetRequestDto request) {
 		RoomResetReason reason = parseReason(request.reason());
 		return ResponseEntity.ok(missionProgressService.resetRoom(
@@ -72,7 +77,7 @@ public class MissionProgressController {
 	 */
 	@PostMapping("/{missionId}/acknowledge-lesson-review")
 	public ResponseEntity<MissionProgressDto> acknowledgeLessonReview(
-			@PathVariable String missionId,
+			@PathVariable @Size(max = InputLimits.ID) String missionId,
 			@Valid @RequestBody AcknowledgeLessonReviewDto request) {
 		return ResponseEntity.ok(missionProgressService.acknowledgeLessonReview(
 				AuthenticatedPlayer.requireUserIdString(),
@@ -82,7 +87,8 @@ public class MissionProgressController {
 
 	/** Starts a server-authorized temporary replay run for a career-cleared mission. */
 	@PostMapping("/{missionId}/replay")
-	public ResponseEntity<MissionProgressDto> replay(@PathVariable String missionId) {
+	public ResponseEntity<MissionProgressDto> replay(
+			@PathVariable @Size(max = InputLimits.ID) String missionId) {
 		return ResponseEntity.ok(missionProgressService.startReplay(
 				AuthenticatedPlayer.requireUserIdString(),
 				missionId));
@@ -94,8 +100,8 @@ public class MissionProgressController {
 	 */
 	@PostMapping("/{missionId}/combat-death")
 	public ResponseEntity<MissionProgressDto> combatDeath(
-			@PathVariable String missionId,
-			@RequestBody CombatDeathRequestDto request) {
+			@PathVariable @Size(max = InputLimits.ID) String missionId,
+			@Valid @RequestBody CombatDeathRequestDto request) {
 		return ResponseEntity.ok(missionProgressService.reportCombatDeath(
 				AuthenticatedPlayer.requireUserIdString(),
 				missionId,
@@ -104,8 +110,8 @@ public class MissionProgressController {
 
 	@PostMapping("/{missionId}/complete")
 	public ResponseEntity<MissionProgressDto> complete(
-			@PathVariable String missionId,
-			@RequestBody(required = false) MissionCompleteRequestDto request) {
+			@PathVariable @Size(max = InputLimits.ID) String missionId,
+			@Valid @RequestBody(required = false) MissionCompleteRequestDto request) {
 		String roomGeneration = request == null ? null : request.roomGeneration();
 		return ResponseEntity.ok(missionProgressService.completeAfterExit(
 				AuthenticatedPlayer.requireUserIdString(),

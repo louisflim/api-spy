@@ -5,6 +5,11 @@ import edu.citu.apispy.dto.LessonDto;
 import edu.citu.apispy.security.AuthenticatedPlayer;
 import edu.citu.apispy.service.ConceptProgressService;
 import edu.citu.apispy.service.LessonContentProvider;
+import edu.citu.apispy.web.InputLimits;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Size;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
+@Validated
 @RequestMapping("/api/lessons")
 public class LessonController {
 
@@ -30,7 +36,8 @@ public class LessonController {
 	}
 
 	@GetMapping
-	public List<LessonDto> list(@RequestParam(required = false) Integer module) {
+	public List<LessonDto> list(
+			@RequestParam(required = false) @Min(0) @Max(9) Integer module) {
 		List<Lesson> lessons = module == null
 				? lessonContentProvider.allLessons()
 				: lessonContentProvider.byModule(module);
@@ -38,12 +45,12 @@ public class LessonController {
 	}
 
 	@GetMapping("/{lessonId}")
-	public LessonDto get(@PathVariable String lessonId) {
+	public LessonDto get(@PathVariable @Size(max = InputLimits.ID) String lessonId) {
 		return toDto(lessonContentProvider.requireById(lessonId));
 	}
 
 	@PostMapping("/{lessonId}/introduce")
-	public Map<String, Object> introduce(@PathVariable String lessonId) {
+	public Map<String, Object> introduce(@PathVariable @Size(max = InputLimits.ID) String lessonId) {
 		String playerId = AuthenticatedPlayer.requireUserIdString();
 		Lesson lesson = lessonContentProvider.requireById(lessonId);
 		// Lesson-scoped marker — Module 0 / practice PRACTICING must not clear the pre-mission gate.

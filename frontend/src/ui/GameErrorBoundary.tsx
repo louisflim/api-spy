@@ -13,7 +13,11 @@ export class GameErrorBoundary extends Component<Props, State> {
   state: State = { message: null }
 
   static getDerivedStateFromError(error: Error): State {
-    return { message: error.message }
+    // Never surface raw exception text in production builds.
+    const message = import.meta.env.DEV
+      ? error.message
+      : 'Something went wrong. Reload and try again.'
+    return { message }
   }
 
   render() {

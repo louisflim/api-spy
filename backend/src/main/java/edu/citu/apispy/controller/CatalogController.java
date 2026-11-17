@@ -12,6 +12,11 @@ import edu.citu.apispy.service.ConceptReviewService;
 import edu.citu.apispy.service.ContractCatalogService;
 import edu.citu.apispy.service.MissionCatalogService;
 import edu.citu.apispy.service.MissionProgressService;
+import edu.citu.apispy.web.InputLimits;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Size;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,6 +26,7 @@ import java.util.List;
 import java.util.Locale;
 
 @RestController
+@Validated
 @RequestMapping("/api")
 public class CatalogController {
 
@@ -55,9 +61,9 @@ public class CatalogController {
 
 	@GetMapping("/missions/{module}/{rank}/{level}")
 	public MissionDetailDto missionDetail(
-			@PathVariable int module,
-			@PathVariable String rank,
-			@PathVariable int level) {
+			@PathVariable @Min(0) @Max(9) int module,
+			@PathVariable @Size(max = InputLimits.ID) String rank,
+			@PathVariable @Min(1) @Max(21) int level) {
 		Rank parsedRank = Rank.valueOf(rank.trim().toUpperCase(Locale.ROOT).replace('-', '_').replace(' ', '_'));
 		String missionId = MissionCatalogService.missionId(module, parsedRank, level);
 		MissionDefinition mission = missionCatalogService.requirePlayable(missionId);

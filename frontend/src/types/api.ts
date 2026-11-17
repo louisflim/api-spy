@@ -70,8 +70,9 @@ export interface AdaptivePracticeDoor {
   deviceId: string
   label: string
   documentation: string
-  expectedMethod: string
-  pathTemplate: string
+  /** Retired physical practice doors — answer keys must never appear on graded APIs. */
+  expectedMethod?: string
+  pathTemplate?: string
   practiceMissionId: string
   /** Authored mini-lesson for targeted re-teaching (optional support). */
   reviewLessonId?: string | null

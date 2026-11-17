@@ -12,6 +12,7 @@ import {
   type ConceptProgressRow,
 } from '../api/client'
 import { useAuth } from '../auth/AuthContext'
+import { publicErrorMessage } from '../security/publicErrors'
 import { lessonTitle, missingRequiredLessons } from '../learning/prerequisites'
 import type { RoomLayoutPlan } from '../phaser/room/types'
 import { ROOM_LAYOUT } from '../phaser/roomLayout'
@@ -144,7 +145,7 @@ export function GameWorkspace({
           setPlayerPos(ROOM_LAYOUT.playerStart)
         })
         .catch((err) => {
-          setGateMessage(err instanceof Error ? err.message : 'Could not start room run')
+          setGateMessage(publicErrorMessage(err, 'Could not start room run'))
           refreshSavedAttempt(playerId, detail.mission.missionId)
         })
     },
@@ -209,7 +210,7 @@ export function GameWorkspace({
         enterMissionRoom(detail)
       } catch (err) {
         setOpeningFieldRoom(false)
-        setGateMessage(err instanceof Error ? err.message : 'Failed to open mission')
+        setGateMessage(publicErrorMessage(err, 'Failed to open mission'))
         leaveForTraining()
       }
     },
@@ -293,7 +294,7 @@ export function GameWorkspace({
         refreshSavedAttempt(playerId, missionId)
       })
       .catch((err) => {
-        setGateMessage(err instanceof Error ? err.message : 'Level reset rejected')
+        setGateMessage(publicErrorMessage(err, 'Level reset rejected'))
       })
       .finally(() => {
         setResetLevelBusy(false)
@@ -316,9 +317,9 @@ export function GameWorkspace({
     return () => window.removeEventListener('keydown', onKey)
   }, [missionDetail, openingFieldRoom, missionCompleteOpen, editorOpen])
 
-  // QA helper: `window.dispatchEvent(new Event('apispy:open-terminal'))` opens the graded terminal.
+  // Dev-only QA helper — never registered in production builds.
   useEffect(() => {
-    if (!missionDetail) return
+    if (!import.meta.env.DEV || !missionDetail) return
     const open = () => {
       setTerminalLocated(true)
       setEditorOpen(true)
@@ -348,7 +349,7 @@ export function GameWorkspace({
     void resetMissionRoom(missionDetail.mission.missionId, 'COMBAT')
       .then(applyCombatRoomReset)
       .catch((err) => {
-        setGateMessage(err instanceof Error ? err.message : 'Combat reset rejected')
+        setGateMessage(publicErrorMessage(err, 'Combat reset rejected'))
       })
   }, [applyCombatRoomReset, missionDetail, roomProgress?.combatRestartAuthorized])
 
@@ -362,7 +363,7 @@ export function GameWorkspace({
       .then(applyCombatRoomReset)
       .catch((err) => {
         setCombatDeathPending(false)
-        setGateMessage(err instanceof Error ? err.message : 'Combat restart rejected')
+        setGateMessage(publicErrorMessage(err, 'Combat restart rejected'))
       })
   }, [
     applyCombatRoomReset,
@@ -490,7 +491,7 @@ export function GameWorkspace({
                           })
                           .catch((err) => {
                             setGateMessage(
-                              err instanceof Error ? err.message : 'Exit completion failed',
+                              publicErrorMessage(err, 'Exit completion failed'),
                             )
                           })
                       }}

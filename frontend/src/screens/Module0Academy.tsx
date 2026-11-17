@@ -5,6 +5,7 @@ import {
   updateModule0Progress,
 } from '../api/client'
 import { useAuth } from '../auth/AuthContext'
+import { publicErrorMessage } from '../security/publicErrors'
 import { moduleHeading } from '../content/moduleMeta'
 import type { Module0Academy as AcademyData, Module0Progress, TopicStatus } from '../content/module0Types'
 import { TopicConceptVisual } from '../ui/module0/TopicConceptVisual'
@@ -103,7 +104,7 @@ export function Module0Academy({ onFinished, moduleSelect, onReturnToBriefing }:
   }, [])
 
   useEffect(() => {
-    void load().catch((err) => setError(err instanceof Error ? err.message : 'Failed to load Module 0'))
+    void load().catch((err) => setError(publicErrorMessage(err, 'Failed to load Module 0')))
   }, [load])
 
   useEffect(() => {
@@ -163,7 +164,7 @@ export function Module0Academy({ onFinished, moduleSelect, onReturnToBriefing }:
       setControlMessage(topic.completionMessage || topic.interaction.successFeedback)
     } catch (err) {
       setControlTone('warn')
-      setControlMessage(err instanceof Error ? err.message : 'Unable to complete this topic.')
+      setControlMessage(publicErrorMessage(err, 'Unable to complete this topic.'))
     }
   }
 

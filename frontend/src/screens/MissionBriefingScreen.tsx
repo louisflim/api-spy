@@ -12,6 +12,7 @@ import {
 } from '../learning/prerequisites'
 import { hasPracticeDrill } from '../content/practiceDrills'
 import { moduleLabel, normalizeRank, RANK_LABELS } from '../content/moduleMeta'
+import { publicErrorMessage } from '../security/publicErrors'
 import type { Lesson, MissionSummary } from '../types/api'
 
 interface MissionBriefingScreenProps {
@@ -61,7 +62,7 @@ export function MissionBriefingScreen({
         setLoadState('ready')
       } catch (err) {
         if (cancelled) return
-        setError(err instanceof Error ? err.message : 'Unable to load mission briefing.')
+        setError(publicErrorMessage(err, 'Unable to load mission briefing.'))
         setLoadState('error')
       }
     }

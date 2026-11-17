@@ -17,6 +17,7 @@ import {
 } from '../learning/prerequisites'
 import { saveConceptStage } from '../storage/attemptStorage'
 import { useAuth } from '../auth/AuthContext'
+import { publicErrorMessage } from '../security/publicErrors'
 import type { Lesson, MissionSummary } from '../types/api'
 
 interface MissionTrainingScreenProps {
@@ -86,7 +87,7 @@ export function MissionTrainingScreen({
         setLoadState('ready')
       } catch (err) {
         if (cancelled) return
-        setError(err instanceof Error ? err.message : 'Unable to load mission training.')
+        setError(publicErrorMessage(err, 'Unable to load mission training.'))
         setLoadState('error')
       }
     }

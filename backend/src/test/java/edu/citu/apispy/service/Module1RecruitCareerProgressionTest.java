@@ -89,6 +89,9 @@ class Module1RecruitCareerProgressionTest {
 			assertTrue(next.correct(), "failed to unlock " + device.deviceId());
 			current = next.missionProgress();
 		}
+		if (current.boss() != null) {
+			current = progress.reportBossDefeated(participantCode, missionId, current.roomGeneration());
+		}
 		MissionProgressDto completed = progress.completeAfterExit(
 				participantCode, missionId, current.roomGeneration());
 		assertTrue(completed.completed());

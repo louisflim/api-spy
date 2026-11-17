@@ -59,6 +59,10 @@ public class MissionProgressEntity {
 	@Column(name = "combat_restart_authorized", nullable = false)
 	private boolean combatRestartAuthorized;
 
+	/** Level 7 boss defeated in the current room generation (reset with every new run / reset). */
+	@Column(name = "boss_defeated", nullable = false)
+	private boolean bossDefeated;
+
 	@Enumerated(EnumType.STRING)
 	@Column(name = "active_run_kind", nullable = false, length = 16)
 	private ActiveRunKind activeRunKind;
@@ -235,6 +239,14 @@ public class MissionProgressEntity {
 
 	public void setCombatRestartAuthorized(boolean combatRestartAuthorized) {
 		this.combatRestartAuthorized = combatRestartAuthorized;
+	}
+
+	public boolean isBossDefeated() {
+		return bossDefeated;
+	}
+
+	public void setBossDefeated(boolean bossDefeated) {
+		this.bossDefeated = bossDefeated;
 	}
 
 	public ActiveRunKind getActiveRunKind() {

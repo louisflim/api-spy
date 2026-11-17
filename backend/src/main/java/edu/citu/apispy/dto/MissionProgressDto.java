@@ -42,8 +42,18 @@ public record MissionProgressDto(
 		List<MandatoryDeviceDto> mandatoryDevices,
 		List<AdaptivePracticeDoorDto> adaptivePracticeDoors,
 		/** Current terminal scenario in the automatic verification sequence. */
-		ActiveTerminalChallengeDto activeTerminalChallenge
+		ActiveTerminalChallengeDto activeTerminalChallenge,
+		/** Level 7 boss state; null for missions without a boss. */
+		BossStateDto boss
 ) {
+	/**
+	 * Boss encounter state. {@code shieldDown} is true once every mandatory API device is
+	 * activated; only then can the boss take damage and its defeat be recorded. The exit
+	 * ({@code exitReady}) stays closed until {@code defeated}.
+	 */
+	public record BossStateDto(boolean shieldDown, boolean defeated) {
+	}
+
 	/** Public mandatory-device brief — no expected method/path answer keys. */
 	public record MandatoryDeviceDto(
 			String deviceId,

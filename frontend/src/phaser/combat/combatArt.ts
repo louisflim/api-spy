@@ -77,6 +77,8 @@ export const COMBAT_TEXTURE_KEYS = {
   hitFlash: 'spy-hit-flash',
   impact: 'spy-impact-spark',
   alert: 'spy-alert-bang',
+  bossOrb: 'spy-boss-orb',
+  shieldSpark: 'spy-shield-spark',
 } as const
 
 /** Dedicated original guard spritesheet (generated, not a Rookie palette-swap). */
@@ -177,4 +179,39 @@ export function ensureGuardAnimations(scene: Phaser.Scene): void {
   mk('guard-attack-up', [GUARD_FRAMES.attackUp], 8, 0)
   mk('guard-hit', [GUARD_FRAMES.hit], 8, 0)
   mk('guard-defeat', [...GUARD_FRAMES.defeat], 6, 0)
+}
+
+function makeBossOrb(): HTMLCanvasElement {
+  const c = document.createElement('canvas')
+  c.width = 10
+  c.height = 10
+  const ctx = c.getContext('2d')!
+  ctx.imageSmoothingEnabled = false
+  ctx.clearRect(0, 0, 10, 10)
+  px(ctx, 3, 0, 4, 10, '#ff3d6e')
+  px(ctx, 0, 3, 10, 4, '#ff3d6e')
+  px(ctx, 1, 1, 8, 8, '#ff3d6e')
+  px(ctx, 2, 2, 6, 6, '#ff9db5')
+  px(ctx, 4, 3, 2, 3, '#fff0f4')
+  return c
+}
+
+function makeShieldSpark(): HTMLCanvasElement {
+  const c = document.createElement('canvas')
+  c.width = 14
+  c.height = 14
+  const ctx = c.getContext('2d')!
+  ctx.imageSmoothingEnabled = false
+  ctx.clearRect(0, 0, 14, 14)
+  px(ctx, 6, 0, 2, 14, '#7af5ff')
+  px(ctx, 0, 6, 14, 2, '#7af5ff')
+  px(ctx, 3, 3, 8, 8, '#2ad4ff')
+  px(ctx, 5, 5, 4, 4, '#e8ffff')
+  return c
+}
+
+/** Level 7 boss textures: enemy orb projectile and shield-deflect spark. */
+export function ensureBossTextures(scene: Phaser.Scene): void {
+  registerCanvas(scene, COMBAT_TEXTURE_KEYS.bossOrb, makeBossOrb())
+  registerCanvas(scene, COMBAT_TEXTURE_KEYS.shieldSpark, makeShieldSpark())
 }

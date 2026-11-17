@@ -2,7 +2,7 @@
  * Deterministic spawn plan self-test — npx tsx src/phaser/combat/spawnPlan.selftest.ts
  */
 import { generateRoomLayout } from '../room/generateRoomLayout'
-import { patrolGuardCountForRank } from './enemyTypes'
+import { patrolGuardConfigForRank, patrolGuardCountForRank } from './enemyTypes'
 import { planPatrolGuardSpawns } from './spawnPlan'
 import { buildCombatExclusionSet } from './patrolZones'
 import { ROOM_TILE_SIZE } from '../room/generateRoomLayout'
@@ -14,6 +14,10 @@ function assert(cond: unknown, msg: string): asserts cond {
 assert(patrolGuardCountForRank('RECRUIT') === 1, 'recruit → 1 guard')
 assert(patrolGuardCountForRank('FIELD_AGENT') === 2, 'field → 2 guards')
 assert(patrolGuardCountForRank('SPECIAL_AGENT') === 2, 'special → 2 guards')
+// Guards must never die to a single sidearm bolt (damage 1), and get tougher by rank.
+const hp = ['RECRUIT', 'FIELD_AGENT', 'SPECIAL_AGENT'].map((r) => patrolGuardConfigForRank(r).maxHealth)
+assert(hp[0]! >= 3, 'recruit guard survives several hits')
+assert(hp[0]! < hp[1]! && hp[1]! < hp[2]!, 'guard health rises with rank')
 
 const plan = generateRoomLayout({
   missionId: 'm1-recruit-l1',

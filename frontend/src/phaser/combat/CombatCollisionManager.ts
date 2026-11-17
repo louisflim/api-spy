@@ -1,17 +1,20 @@
 import Phaser from 'phaser'
 import { COMBAT_TEXTURE_KEYS } from './combatArt'
-import type { PatrolGuard } from './PatrolGuard'
+import type { DamageableEnemy } from './types'
 import type { ProjectileManager } from './ProjectileManager'
 
 /**
- * Projectile ↔ wall/prop solids and projectile ↔ enemy hits.
+ * Projectile ↔ wall/prop solids (physics) and projectile ↔ enemy hits (hurtboxes).
  * Terminals/doors are solids: bolts despawn on contact without enemy damage.
+ * Enemy hits test the bolt against each enemy's body-sized hurtbox every frame,
+ * not the small feet-level physics body used for walking.
  */
 export class CombatCollisionManager {
   private readonly scene: Phaser.Scene
   private readonly projectiles: ProjectileManager
   private wallCollider: Phaser.Physics.Arcade.Collider | null = null
-  private enemyOverlaps: Phaser.Physics.Arcade.Collider[] = []
+  private enemies: DamageableEnemy[] = []
+  private readonly scratch = new Phaser.Geom.Rectangle()
 
   constructor(scene: Phaser.Scene, projectiles: ProjectileManager) {
     this.scene = scene
@@ -23,31 +26,35 @@ export class CombatCollisionManager {
     this.wallCollider = this.scene.physics.add.collider(
       this.projectiles.getGroup(),
       solids,
-      (proj) => {
-        const bolt = proj as Phaser.Physics.Arcade.Image
+      (a, b) => {
+        const group = this.projectiles.getGroup()
+        const bolt = (group.contains(a as Phaser.GameObjects.GameObject) ? a : b) as Phaser.Physics.Arcade.Image
+        if (!bolt.active) return
         this.spawnImpact(bolt.x, bolt.y)
         this.projectiles.despawn(bolt)
       },
     )
   }
 
-  bindEnemies(guards: PatrolGuard[]): void {
-    for (const overlap of this.enemyOverlaps) overlap.destroy()
-    this.enemyOverlaps = []
-    for (const guard of guards) {
-      const overlap = this.scene.physics.add.overlap(
-        this.projectiles.getGroup(),
-        guard.sprite,
-        (proj) => {
-          if (guard.isDefeated()) return
-          const bolt = proj as Phaser.Physics.Arcade.Image
-          const damage = Number(bolt.getData('damage') ?? 1)
-          this.spawnImpact(bolt.x, bolt.y)
-          this.projectiles.despawn(bolt)
-          guard.applyDamage(damage)
-        },
-      )
-      this.enemyOverlaps.push(overlap)
+  bindEnemies(guards: DamageableEnemy[]): void {
+    this.enemies = [...guards]
+  }
+
+  /** Call once per (unpaused) frame after projectiles move. */
+  update(): void {
+    if (this.enemies.length === 0) return
+    for (const child of this.projectiles.getGroup().getChildren()) {
+      const bolt = child as Phaser.Physics.Arcade.Image
+      if (!bolt.active) continue
+      for (const enemy of this.enemies) {
+        if (enemy.isDefeated() || !enemy.sprite.active || !enemy.sprite.visible) continue
+        if (!enemy.hurtbox(this.scratch).contains(bolt.x, bolt.y)) continue
+        const damage = Number(bolt.getData('damage') ?? 1)
+        this.spawnImpact(bolt.x, bolt.y)
+        this.projectiles.despawn(bolt)
+        enemy.applyDamage(damage, bolt.x, bolt.y)
+        break
+      }
     }
   }
 
@@ -68,7 +75,6 @@ export class CombatCollisionManager {
   destroy(): void {
     this.wallCollider?.destroy()
     this.wallCollider = null
-    for (const overlap of this.enemyOverlaps) overlap.destroy()
-    this.enemyOverlaps = []
+    this.enemies = []
   }
 }

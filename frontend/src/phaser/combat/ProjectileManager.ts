@@ -78,6 +78,9 @@ export class ProjectileManager {
     sprite.setData('pid', Phaser.Math.RND.integer())
     sprite.setData('expiresAt', this.scene.time.now + req.weapon.projectileLifespanMs)
     const body = sprite.body as Phaser.Physics.Arcade.Body
+    // Pooled sprites are disabled on despawn; re-enable so the new shot can collide.
+    body.enable = true
+    body.reset(req.x, req.y)
     body.setAllowGravity(false)
     body.setSize(8, 4)
     if (this.paused) {
@@ -108,6 +111,9 @@ export class ProjectileManager {
     sprite.setVisible(false)
     const body = sprite.body as Phaser.Physics.Arcade.Body | null
     body?.setVelocity(0, 0)
+    // A hidden-but-enabled body keeps overlapping whatever it hit and re-applies
+    // damage every frame; take it out of the physics step until it is reused.
+    if (body) body.enable = false
   }
 
   clearAll(): void {

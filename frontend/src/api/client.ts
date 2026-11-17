@@ -277,6 +277,21 @@ export async function acknowledgeLessonReview(
  * Report a combat death bound to the active roomGeneration.
  * Authorizes COMBAT reset; does not send client health as proof.
  */
+/** Level 7: records the boss defeat for the active room generation (rejected while the shield is up). */
+export async function reportBossDefeated(
+  missionId: string,
+  roomGeneration: string,
+): Promise<MissionProgressState> {
+  const response = await apiFetch(`/api/missions/${missionId}/boss-defeated`, {
+    method: 'POST',
+    body: JSON.stringify({ roomGeneration }),
+  })
+  if (!response.ok) {
+    throw new Error(await readError(response, 'Boss defeat report failed'))
+  }
+  return stripGradedAnswerKeys(await response.json())
+}
+
 export async function reportCombatDeath(
   missionId: string,
   roomGeneration: string,

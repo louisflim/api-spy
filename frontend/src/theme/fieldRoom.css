@@ -104,6 +104,62 @@
   }
 }
 
+/* Level 7 boss bar — full-width second row of the HUD */
+.field-hud__boss {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: var(--spy-font-mono, "Share Tech Mono", monospace);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #ffb3c4;
+}
+
+.field-hud__boss-name {
+  white-space: nowrap;
+}
+
+.field-hud__boss-track {
+  flex: 1;
+  height: 8px;
+  border: 1px solid rgba(255, 90, 122, 0.45);
+  border-radius: 2px;
+  background: rgba(26, 6, 16, 0.85);
+  overflow: hidden;
+}
+
+.field-hud__boss-fill {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #ff3d6e, #ff7a9a);
+  transition: width 120ms linear;
+}
+
+.field-hud__boss.is-shielded {
+  color: #9ef6ff;
+}
+
+.field-hud__boss.is-shielded .field-hud__boss-track {
+  border-color: rgba(122, 245, 255, 0.55);
+}
+
+.field-hud__boss.is-shielded .field-hud__boss-fill {
+  background: repeating-linear-gradient(135deg, #37e0ff 0 6px, #1aa7c4 6px 12px);
+}
+
+.field-hud__boss.is-defeated {
+  color: var(--spy-muted, #8fa8bf);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .field-hud__boss-fill {
+    transition: none;
+  }
+}
+
 .field-hud__actions {
   display: flex;
   align-items: center;
@@ -541,6 +597,10 @@
 
   .field-hud__actions {
     grid-area: actions;
+  }
+
+  .field-hud__boss {
+    grid-row: 3;
   }
 
   .field-hud__mission {

@@ -194,6 +194,11 @@ export interface MissionProgressState {
   adaptivePracticeDoors?: AdaptivePracticeDoor[]
   /** Server-selected challenge currently active in the terminal verification sequence. */
   activeTerminalChallenge?: ActiveTerminalChallenge | null
+  /**
+   * Level 7 boss state (null/absent on missions without a boss). The shield drops only
+   * after every mandatory API device is activated; the exit opens after the defeat.
+   */
+  boss?: { shieldDown: boolean; defeated: boolean } | null
 }
 
 export interface ActiveTerminalChallenge {

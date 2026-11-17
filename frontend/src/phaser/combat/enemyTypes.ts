@@ -38,7 +38,8 @@ export interface EnemyTypeConfig {
 export const PATROL_GUARD_CONFIG: EnemyTypeConfig = {
   typeId: 'PATROL_GUARD',
   displayName: 'Security Patrol Guard',
-  maxHealth: 3,
+  // Recruit baseline: 5 sidearm hits. Higher ranks scale via patrolGuardConfigForRank.
+  maxHealth: 5,
   patrolSpeed: 55,
   chaseSpeed: 105,
   detectRangePx: 130,
@@ -70,6 +71,14 @@ export function requireEnemyType(typeId: EnemyTypeId): EnemyTypeConfig {
     throw new Error(`Enemy type not implemented yet: ${typeId}`)
   }
   return cfg
+}
+
+/** Guard durability by rank (sidearm deals 1 per hit): Recruit 5, Field Agent 6, Special Agent 8. */
+export function patrolGuardConfigForRank(rank: string): EnemyTypeConfig {
+  const normalized = rank.trim().toUpperCase()
+  if (normalized === 'SPECIAL_AGENT') return { ...PATROL_GUARD_CONFIG, maxHealth: 8 }
+  if (normalized === 'FIELD_AGENT') return { ...PATROL_GUARD_CONFIG, maxHealth: 6 }
+  return PATROL_GUARD_CONFIG
 }
 
 /** Rank → how many PATROL_GUARD instances to place (Phase 1). */

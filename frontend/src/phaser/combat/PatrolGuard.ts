@@ -5,6 +5,7 @@ import { EnemyStateMachine } from './EnemyStateMachine'
 import type { EnemyTypeConfig } from './enemyTypes'
 import type { NavigationGrid } from './navigationGrid'
 import { findPath, pathFromCurrent } from './pathfind'
+import { GUARD_HURTBOX, spriteHurtbox } from './hurtbox'
 import { cellToWorld } from './patrolZones'
 import type { EnemyAiState, GridCell } from './types'
 
@@ -29,6 +30,8 @@ export class PatrolGuard {
   private readonly nav: NavigationGrid
   private readonly config: EnemyTypeConfig
   private readonly alertIcon: Phaser.GameObjects.Image
+  /** Health bar drawn above the guard's head (hidden once defeated). */
+  private readonly hpBar: Phaser.GameObjects.Graphics
   private hp: number
   private waypointIndex = 0
   private alertUntil = 0
@@ -99,6 +102,8 @@ export class PatrolGuard {
       .image(start.x, start.y - this.alertOffsetY(), COMBAT_TEXTURE_KEYS.alert)
       .setDepth(60)
       .setVisible(false)
+    this.hpBar = scene.add.graphics().setDepth(61)
+    this.drawHealthBar()
     // Initial path is requested on first update so HMR/partial reloads cannot
     // call requestPath before the nav grid reference is fully wired.
   }
@@ -109,6 +114,10 @@ export class PatrolGuard {
 
   isDefeated(): boolean {
     return this.defeated
+  }
+
+  hurtbox(out?: Phaser.Geom.Rectangle): Phaser.Geom.Rectangle {
+    return spriteHurtbox(this.sprite, GUARD_HURTBOX, out)
   }
 
   setPaused(paused: boolean): void {
@@ -124,6 +133,7 @@ export class PatrolGuard {
   applyDamage(amount: number): boolean {
     if (this.defeated || amount <= 0) return false
     this.hp -= amount
+    this.drawHealthBar()
     this.sprite.anims.play('guard-hit', true)
     this.sprite.setTint(0xff6666)
     this.sprite.scene.time.delayedCall(140, () => {
@@ -141,6 +151,7 @@ export class PatrolGuard {
     this.stop()
     this.clearPath()
     this.alertIcon.setVisible(false)
+    this.hpBar.clear()
     this.sprite.anims.play('guard-defeat', true)
     this.sprite.scene.tweens.add({
       targets: this.sprite,
@@ -277,6 +288,7 @@ export class PatrolGuard {
   }
 
   destroy(): void {
+    this.hpBar.destroy()
     this.alertIcon.destroy()
     this.sprite.destroy()
   }
@@ -285,7 +297,21 @@ export class PatrolGuard {
     return this.config.frameHeight * this.config.displayScale * 0.75
   }
 
+  /** Bar width 32px; green → amber → red as health drops. */
+  private drawHealthBar(): void {
+    this.hpBar.clear()
+    if (this.defeated || this.hp <= 0) return
+    const frac = Math.max(0, Math.min(1, this.hp / this.config.maxHealth))
+    const w = 32
+    const x = this.sprite.x - w / 2
+    const y = this.sprite.y - this.config.frameHeight * this.config.displayScale * 0.95
+    const color = frac > 0.6 ? 0x4ade80 : frac > 0.3 ? 0xfacc15 : 0xf87171
+    this.hpBar.fillStyle(0x050b16, 0.85).fillRect(x - 1, y - 1, w + 2, 6)
+    this.hpBar.fillStyle(color, 1).fillRect(x, y, Math.max(1, w * frac), 4)
+  }
+
   private syncAlertIcon(): void {
+    this.drawHealthBar()
     if (!this.alertIcon.active) return
     this.alertIcon.setPosition(this.sprite.x, this.sprite.y - this.alertOffsetY())
   }

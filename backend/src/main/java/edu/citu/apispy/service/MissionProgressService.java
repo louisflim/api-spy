@@ -45,6 +45,8 @@ public class MissionProgressService {
 
 	/** SRS v1.3 — consecutive unresolved API-driven room attempts (not wrong submissions). */
 	public static final int CONSECUTIVE_UNRESOLVED_API_RESET_THRESHOLD = 15;
+	/** Level 7 is the boss-only final room in every module and rank. */
+	public static final int BOSS_LEVEL = 7;
 
 	private final MissionProgressRepository repository;
 	private final MissionCatalogService missionCatalogService;
@@ -314,7 +316,8 @@ public class MissionProgressService {
 	 * Escalation is server-classified: {@link RoomResetReason#API_STALLED} and
 	 * {@link RoomResetReason#PLAYER} with unresolved graded API activity increment
 	 * {@code apiResetCount}. {@link RoomResetReason#COMBAT} and idle {@code PLAYER}
-	 * restarts keep the current mandatory-device tier.
+	 * restarts keep the current mandatory-device tier. A {@link RoomResetReason#COMBAT}
+	 * restart in a Level 7 boss room also keeps the operated devices (only the boss resets).
 	 */
 	@Transactional
 	public MissionProgressDto resetRoom(String participantCode, String missionId, RoomResetReason reason) {
@@ -338,6 +341,18 @@ public class MissionProgressService {
 
 		RoomResetReason effective = classifyResetReason(entity, reason);
 
+		if (reason == RoomResetReason.COMBAT && isBossMission(entity.getMissionId())) {
+			// Level 7: losing to the boss only restarts the fight. Operated devices, the
+			// terminal sequence and graded counters are kept, so the shield stays down and
+			// the agent never has to redo API work because of combat skill. Tier unchanged.
+			entity.setCombatRestartAuthorized(false);
+			entity.setRoomGeneration(UUID.randomUUID());
+			entity.setBossDefeated(false);
+			entity.setUpdatedAt(Instant.now());
+			save(entity);
+			return toDto(entity);
+		}
+
 		// Never mutate ActiveRunKind here — replay must remain replay.
 		if (effective == RoomResetReason.API_STALLED) {
 			int next = Math.min(
@@ -356,6 +371,7 @@ public class MissionProgressService {
 
 		// Rotate generation so remounts bind to a fresh temporary room instance.
 		entity.setRoomGeneration(UUID.randomUUID());
+		entity.setBossDefeated(false);
 		entity.setGradedAttemptCountSinceReset(0);
 		entity.setIncorrectGradedAttemptsSinceReset(0);
 		entity.setRequiredDeviceCount(deviceEscalationService.mandatoryDeviceCount(
@@ -449,6 +465,62 @@ public class MissionProgressService {
 	}
 
 	/**
+	 * Records the Level 7 boss defeat for the active room generation. The shield is
+	 * server-authoritative: the defeat is rejected until every mandatory API device
+	 * (including any final lock) is activated, so combat can never bypass the API gates.
+	 * <p>
+	 * Like combat deaths, the server cannot verify Phaser hits; it only binds the report
+	 * to an authenticated active run whose shield is down. Boss combat never enters RCA.
+	 */
+	@Transactional
+	public MissionProgressDto reportBossDefeated(
+			String participantCode,
+			String missionId,
+			String roomGeneration) {
+		UUID expected = parseRoomGeneration(roomGeneration, "report the boss defeat");
+		MissionProgressEntity entity = findEntity(participantCode, missionId)
+				.orElseThrow(() -> new IllegalStateException("No mission progress for boss defeat"));
+		if (!isBossMission(entity.getMissionId())) {
+			throw new IllegalArgumentException("This mission has no boss encounter");
+		}
+		if (!entity.hasActiveRoomRun()) {
+			throw new IllegalStateException("No active room run for boss defeat");
+		}
+		if (!expected.equals(entity.getRoomGeneration())) {
+			throw new IllegalStateException("roomGeneration does not match the active room instance");
+		}
+		List<String> requiredIds = deviceEscalationService.requiredDeviceIds(
+				entity.getMissionId(),
+				entity.getApiResetCount(),
+				readSelectedChallengeIds(entity));
+		if (requiredIds.isEmpty() || !readUnlocked(entity).containsAll(requiredIds)) {
+			throw new IllegalStateException("The boss shield is still active: operate every mandatory API device first");
+		}
+		if (!entity.isBossDefeated()) {
+			entity.setBossDefeated(true);
+			entity.setUpdatedAt(Instant.now());
+			save(entity);
+		}
+		return toDto(entity);
+	}
+
+	/** Level 7 of every module/rank is the boss-only final room (proposal; SRS UC-06). */
+	public boolean isBossMission(String missionId) {
+		return missionCatalogService.requirePlayable(missionId).getLevel() == BOSS_LEVEL;
+	}
+
+	private static UUID parseRoomGeneration(String roomGeneration, String action) {
+		if (roomGeneration == null || roomGeneration.isBlank()) {
+			throw new IllegalArgumentException("roomGeneration is required to " + action);
+		}
+		try {
+			return UUID.fromString(roomGeneration.trim());
+		} catch (IllegalArgumentException ex) {
+			throw new IllegalArgumentException("roomGeneration is invalid");
+		}
+	}
+
+	/**
 	 * Completes the active room run. First clear sets permanent COMPLETED; replay clear
 	 * ends the REPLAY run without changing career completion or completedAt.
 	 */
@@ -490,6 +562,9 @@ public class MissionProgressService {
 		boolean exitReady = !requiredIds.isEmpty() && unlocked.containsAll(requiredIds);
 		if (!exitReady) {
 			throw new IllegalStateException("Cannot complete mission: mandatory devices are not all activated");
+		}
+		if (isBossMission(entity.getMissionId()) && !entity.isBossDefeated()) {
+			throw new IllegalStateException("Cannot complete mission: the boss has not been defeated");
 		}
 
 		Instant now = Instant.now();
@@ -561,6 +636,7 @@ public class MissionProgressService {
 		entity.setActiveRunKind(kind);
 		entity.setApiResetCount(apiResetCount);
 		entity.setRoomGeneration(UUID.randomUUID());
+		entity.setBossDefeated(false);
 		entity.setRequiredDeviceCount(deviceEscalationService.mandatoryDeviceCount(
 				entity.getMissionId(), apiResetCount));
 		entity.setFinalLockRequired(deviceEscalationService.finalLockRequired(
@@ -768,9 +844,12 @@ public class MissionProgressService {
 				entity.getApiResetCount(),
 				selected);
 		List<String> unlocked = readUnlocked(entity);
-		boolean runExitReady = entity.hasActiveRoomRun()
+		boolean devicesComplete = entity.hasActiveRoomRun()
 				&& !requiredIds.isEmpty()
 				&& unlocked.containsAll(requiredIds);
+		boolean bossRequired = isBossMission(entity.getMissionId());
+		// Level 7: the devices drop the boss shield; the exit opens only after the boss is defeated.
+		boolean runExitReady = devicesComplete && (!bossRequired || entity.isBossDefeated());
 		boolean careerCompleted = entity.getStatus() == MissionProgressStatus.COMPLETED;
 		// Career-cleared idle rows report exitReady for board UX; active runs use current unlocks only.
 		boolean exitReady = entity.hasActiveRoomRun() ? runExitReady : careerCompleted;
@@ -804,6 +883,9 @@ public class MissionProgressService {
 			nextRequiredDeviceCount = entity.getRequiredDeviceCount();
 		}
 		ActiveTerminalChallengeDto activeTerminal = resolveActiveTerminalChallenge(entity, selected, unlocked);
+		MissionProgressDto.BossStateDto boss = bossRequired
+				? new MissionProgressDto.BossStateDto(devicesComplete, entity.hasActiveRoomRun() && entity.isBossDefeated())
+				: null;
 		return new MissionProgressDto(
 				entity.getMissionId(),
 				entity.getModule(),
@@ -832,7 +914,8 @@ public class MissionProgressService {
 				nextRequiredDeviceCount,
 				devices,
 				practiceDoors,
-				activeTerminal);
+				activeTerminal,
+				boss);
 	}
 
 	private ActiveTerminalChallengeDto resolveActiveTerminalChallenge(

@@ -113,8 +113,11 @@ class Module1Level7TerminalBindingTest {
 	}
 
 	@Test
-	void fivePlusDeleteUnlocksExit() {
+	void fivePlusDeleteDropsBossShieldThenDefeatUnlocksExit() {
 		MissionProgressDto current = unlockAll("full-clear");
+		assertTrue(current.boss().shieldDown());
+		assertFalse(current.exitReady(), "boss must still be defeated");
+		current = progress.reportBossDefeated("full-clear", MISSION, current.roomGeneration());
 		assertTrue(current.exitReady());
 		assertTrue(current.unlockedDeviceIds().contains("final-lock-l7"));
 		assertEquals(6, current.unlockedDeviceIds().size());

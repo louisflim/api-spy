@@ -1,6 +1,10 @@
 import Phaser from 'phaser'
 import type { RoomLayoutPlan } from '../room/types'
+import { BossEnemy, type BossSnapshot } from './BossEnemy'
+import { AGENT_HURTBOX, spriteHurtbox } from './hurtbox'
+import { bossConfigForRank, planBossSpawn } from './bossConfig'
 import {
+  ensureBossTextures,
   ensureCombatFxTextures,
   ensureGuardAnimations,
   ensureGuardSpritesheet,
@@ -20,6 +24,7 @@ type Facing = 'down' | 'left' | 'right' | 'up'
 
 export type HeartsListener = (hearts: number, maxHearts: number) => void
 export type CombatDeathListener = () => void
+export type BossStateListener = (state: BossSnapshot) => void
 
 export interface CombatSystemOptions {
   scene: Phaser.Scene
@@ -30,6 +35,17 @@ export interface CombatSystemOptions {
   getFacing: () => Facing
   onHeartsChanged: HeartsListener
   onCombatDeath: CombatDeathListener
+  /**
+   * Level 7 boss-only room: no ordinary guards spawn; one boss whose shield follows the
+   * server's mandatory-device state (`shieldDown`).
+   */
+  boss?: {
+    shieldDown: boolean
+    /** Already defeated in this room run (server state) — the room stays empty. */
+    defeated: boolean
+    onStateChanged: BossStateListener
+    onDefeated: () => void
+  }
 }
 
 /**
@@ -52,6 +68,10 @@ export class CombatSystem {
   private readonly options: CombatSystemOptions
   private enemyCollider: Phaser.Physics.Arcade.Collider | null = null
   private enemyGroup: Phaser.Physics.Arcade.Group | null = null
+  private boss: BossEnemy | null = null
+  private bossOrbs: ProjectileManager | null = null
+  private readonly bossColliders: Phaser.Physics.Arcade.Collider[] = []
+  private readonly agentBox = new Phaser.Geom.Rectangle()
 
   constructor(options: CombatSystemOptions) {
     this.options = options
@@ -73,7 +93,53 @@ export class CombatSystem {
 
     this.health.setListeners(onHeartsChanged, () => this.handleDeath())
 
-    this.spawnGuards(layout, solids, rank)
+    if (options.boss) {
+      // Level 7 is boss-only: never spawn ordinary guards, even once the boss is down.
+      if (!options.boss.defeated) this.spawnBoss(layout, solids, rank, options.boss)
+    } else {
+      this.spawnGuards(layout, solids, rank)
+    }
+  }
+
+  private spawnBoss(
+    layout: RoomLayoutPlan,
+    solids: Phaser.Physics.Arcade.StaticGroup,
+    rank: string,
+    boss: NonNullable<CombatSystemOptions['boss']>,
+  ): void {
+    const scene = this.options.scene
+    ensureBossTextures(scene)
+    const nav = NavigationGrid.fromLayout(layout)
+    const cell = planBossSpawn(layout, nav)
+    if (!cell) return
+    this.bossOrbs = new ProjectileManager(scene)
+    this.boss = new BossEnemy({
+      scene,
+      cell,
+      config: bossConfigForRank(rank),
+      nav,
+      blocked: layout.blocked,
+      orbs: this.bossOrbs,
+      shielded: !boss.shieldDown,
+      onChange: boss.onStateChanged,
+      onDefeated: boss.onDefeated,
+    })
+    this.collisions.bindEnemies([this.boss])
+    this.bossColliders.push(
+      scene.physics.add.collider(this.boss.sprite, solids),
+      scene.physics.add.collider(this.player, this.boss.sprite),
+      scene.physics.add.collider(this.bossOrbs.getGroup(), solids, (a, b) => {
+        const orbs = this.bossOrbs
+        if (!orbs) return
+        const orb = (orbs.getGroup().contains(a as Phaser.GameObjects.GameObject) ? a : b) as Phaser.Physics.Arcade.Image
+        orbs.despawn(orb)
+      }),
+    )
+  }
+
+  /** Server-driven: true once every mandatory API device in the room is activated. */
+  setBossShieldDown(down: boolean): void {
+    this.boss?.setShieldDown(down)
   }
 
   private spawnGuards(
@@ -109,6 +175,8 @@ export class CombatSystem {
     this.weapon.setPaused(paused)
     this.projectiles.setPaused(paused)
     for (const guard of this.guards) guard.setPaused(paused)
+    this.boss?.setPaused(paused)
+    this.bossOrbs?.setPaused(paused)
     if (paused) {
       const body = this.player.body as Phaser.Physics.Arcade.Body
       body.setVelocity(0, 0)
@@ -138,6 +206,14 @@ export class CombatSystem {
     if (!this.paused) {
       this.weapon.tryFire(this.player.x, this.player.y, this.getFacing(), now)
       this.projectiles.update(time)
+      this.collisions.update()
+      this.bossOrbs?.update(time)
+      this.checkOrbHits(now)
+      if (this.boss && !this.boss.isDefeated()) {
+        this.boss.update(this.player.x, this.player.y, now)
+        const dmg = this.boss.tryContact(this.player.x, this.player.y, now)
+        if (dmg > 0) this.applyPlayerHit(dmg, now)
+      }
 
       for (const guard of this.guards) {
         if (guard.isDefeated()) continue
@@ -147,6 +223,19 @@ export class CombatSystem {
           this.applyPlayerHit(dmg, now)
         }
       }
+    }
+  }
+
+  /** Boss orbs hit the agent's body-sized hurtbox, not the feet-level movement body. */
+  private checkOrbHits(nowMs: number): void {
+    const orbs = this.bossOrbs
+    if (!orbs) return
+    const box = spriteHurtbox(this.player, AGENT_HURTBOX, this.agentBox)
+    for (const child of orbs.getGroup().getChildren()) {
+      const orb = child as Phaser.Physics.Arcade.Image
+      if (!orb.active || !box.contains(orb.x, orb.y)) continue
+      orbs.despawn(orb)
+      this.applyPlayerHit(Number(orb.getData('damage') ?? 1), nowMs)
     }
   }
 
@@ -209,6 +298,12 @@ export class CombatSystem {
     this.enemyCollider?.destroy()
     this.enemyCollider = null
     for (const guard of this.guards) guard.destroy()
+    for (const c of this.bossColliders) c.destroy()
+    this.bossColliders.length = 0
+    this.boss?.destroy()
+    this.boss = null
+    this.bossOrbs?.destroy()
+    this.bossOrbs = null
     this.guards.length = 0
     this.enemyGroup?.clear(false, false)
     this.enemyGroup?.destroy(false)

@@ -18,6 +18,12 @@ export const GAME_EVENTS = {
   ROOM_LAYOUT_READY: 'room-layout-ready',
   HEARTS_CHANGED: 'hearts-changed',
   COMBAT_DEATH: 'combat-death',
+  /** Level 7: React → scene, server mandatory-device state drops / restores the shield. */
+  BOSS_SHIELD: 'boss-shield',
+  /** Level 7: scene → React, boss health / shield snapshot for the HUD. */
+  BOSS_STATE: 'boss-state',
+  /** Level 7: scene → React, boss defeated (React reports it to the server). */
+  BOSS_DEFEATED: 'boss-defeated',
 } as const
 
 const ROOKIE_KEY = 'rookie-detective'
@@ -67,6 +73,8 @@ export class MissionScene extends Phaser.Scene {
   private wallBlocked: boolean[][] = []
   private combatEnabled = false
   private combat: CombatSystem | null = null
+  /** Level 7 boss room (null = ordinary room with patrol guards). Never spawns guards. */
+  private bossRoom: { shieldDown: boolean; defeated: boolean } | null = null
 
   constructor() {
     super('MissionScene')
@@ -90,6 +98,11 @@ export class MissionScene extends Phaser.Scene {
     }>
     /** Mission field only — Practice Mode and Module 0 stay enemy-free. */
     combatEnabled?: boolean
+    /**
+     * Level 7 boss-only room; shieldDown mirrors the server's mandatory-device state.
+     * defeated (server-recorded) keeps the room empty after a refresh.
+     */
+    boss?: { shieldDown: boolean; defeated?: boolean } | null
   }): void {
     this.exitReady = Boolean(data?.exitReady)
     this.missionId = data?.missionId ?? this.missionId
@@ -104,6 +117,9 @@ export class MissionScene extends Phaser.Scene {
       data?.mandatoryTerminalCount ?? this.terminalBindings.length ?? 1,
     )
     this.combatEnabled = Boolean(data?.combatEnabled)
+    this.bossRoom = data?.boss
+      ? { shieldDown: Boolean(data.boss.shieldDown), defeated: Boolean(data.boss.defeated) }
+      : null
   }
 
   preload(): void {
@@ -171,6 +187,15 @@ export class MissionScene extends Phaser.Scene {
         onCombatDeath: () => {
           this.game.events.emit(GAME_EVENTS.COMBAT_DEATH, { missionId: this.missionId })
         },
+        boss: this.bossRoom
+          ? {
+              shieldDown: this.bossRoom.shieldDown,
+              defeated: this.bossRoom.defeated,
+              onStateChanged: (state) => this.game.events.emit(GAME_EVENTS.BOSS_STATE, state),
+              onDefeated: () =>
+                this.game.events.emit(GAME_EVENTS.BOSS_DEFEATED, { missionId: this.missionId }),
+            }
+          : undefined,
       })
       if (this.inputLocked) this.combat.setPaused(true)
     }
@@ -206,9 +231,11 @@ export class MissionScene extends Phaser.Scene {
 
     this.game.events.on(GAME_EVENTS.EXIT_READY, this.onExitReady, this)
     this.game.events.on(GAME_EVENTS.INPUT_LOCK, this.onInputLock, this)
+    this.game.events.on(GAME_EVENTS.BOSS_SHIELD, this.onBossShield, this)
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.game.events.off(GAME_EVENTS.EXIT_READY, this.onExitReady, this)
       this.game.events.off(GAME_EVENTS.INPUT_LOCK, this.onInputLock, this)
+      this.game.events.off(GAME_EVENTS.BOSS_SHIELD, this.onBossShield, this)
       this.combat?.destroy()
       this.combat = null
     })
@@ -498,6 +525,12 @@ export class MissionScene extends Phaser.Scene {
       this.promptText.setText('Press E to open the API request editor.')
     } else if (this.exitReady) {
       this.promptText.setText('Exit unlocked. Reach the green door and press E to complete.')
+    } else if (this.bossRoom && !this.bossRoom.defeated) {
+      this.promptText.setText(
+        this.bossRoom.shieldDown
+          ? 'Shield down! Defeat the Nexus Warden · Click / Space fire'
+          : 'The Warden is shielded. Operate every API terminal to drop its shield.',
+      )
     } else if (this.combat) {
       this.promptText.setText('WASD / arrows · E interact · Aim with mouse · Click / Space fire')
     } else {
@@ -534,6 +567,12 @@ export class MissionScene extends Phaser.Scene {
   private onExitReady = (payload?: { ready?: boolean }): void => {
     this.exitReady = Boolean(payload?.ready ?? true)
     this.exitSprite.setTexture(this.exitReady ? 'spy-exit-unlocked' : 'spy-exit-locked')
+  }
+
+  private onBossShield = (payload?: { down?: boolean }): void => {
+    const down = Boolean(payload?.down)
+    if (this.bossRoom) this.bossRoom.shieldDown = down
+    this.combat?.setBossShieldDown(down)
   }
 
   private onInputLock = (payload?: { locked?: boolean }): void => {

@@ -1,4 +1,5 @@
 import { moduleLabel, normalizeRank, RANK_LABELS } from '../../content/moduleMeta'
+import type { BossSnapshot } from '../../phaser/combat'
 
 interface FieldHudProps {
   missionTitle: string
@@ -7,6 +8,8 @@ interface FieldHudProps {
   rank: string
   hearts?: number
   maxHearts?: number
+  /** Level 7 boss health / shield (null outside boss rooms). */
+  boss?: BossSnapshot | null
   pauseOpen: boolean
   onTogglePause: () => void
   onReturnToOps: () => void
@@ -19,6 +22,7 @@ export function FieldHud({
   rank,
   hearts = 3,
   maxHearts = 3,
+  boss = null,
   pauseOpen,
   onTogglePause,
   onReturnToOps,
@@ -66,6 +70,30 @@ export function FieldHud({
           </span>
         ))}
       </div>
+
+      {boss ? (
+        <div
+          className={`field-hud__boss ${boss.shielded ? 'is-shielded' : ''} ${boss.defeated ? 'is-defeated' : ''}`.trim()}
+          role="status"
+          aria-label={
+            boss.defeated
+              ? 'Nexus Warden defeated'
+              : boss.shielded
+                ? 'Nexus Warden shielded'
+                : `Nexus Warden ${boss.hp} of ${boss.maxHp}`
+          }
+        >
+          <span className="field-hud__boss-name">
+            Nexus Warden{boss.defeated ? ' · down' : boss.shielded ? ' · shielded' : ''}
+          </span>
+          <span className="field-hud__boss-track" aria-hidden="true">
+            <span
+              className="field-hud__boss-fill"
+              style={{ width: `${boss.maxHp > 0 ? (100 * boss.hp) / boss.maxHp : 0}%` }}
+            />
+          </span>
+        </div>
+      ) : null}
 
       <div className="field-hud__actions">
         <button

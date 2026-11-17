@@ -5,6 +5,7 @@ import { GAME_EVENTS } from '../phaser/MissionScene'
 import { ROOM_LAYOUT } from '../phaser/roomLayout'
 import type { RoomLayoutPlan } from '../phaser/room/types'
 import type { MandatoryDeviceState } from '../types/api'
+import type { BossSnapshot } from '../phaser/combat'
 
 export type PlayerFacing = 'down' | 'left' | 'right' | 'up'
 export type PlayerPosition = { x: number; y: number; facing?: PlayerFacing }
@@ -37,6 +38,13 @@ interface GameCanvasProps {
   onRoomLayoutReady?: (layout: RoomLayoutPlan) => void
   onHeartsChanged?: (hearts: number, maxHearts: number) => void
   onCombatDeath?: () => void
+  /**
+   * Level 7 boss room; shieldDown follows the server's mandatory-device state. When the
+   * server already records the defeat (e.g. after a page refresh) the boss is not respawned.
+   */
+  boss?: { shieldDown: boolean; defeated: boolean } | null
+  onBossState?: (state: BossSnapshot) => void
+  onBossDefeated?: () => void
 }
 
 export function GameCanvas({
@@ -56,6 +64,9 @@ export function GameCanvas({
   onRoomLayoutReady,
   onHeartsChanged,
   onCombatDeath,
+  boss = null,
+  onBossState,
+  onBossDefeated,
 }: GameCanvasProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const gameRef = useRef<Phaser.Game | null>(null)
@@ -65,6 +76,12 @@ export function GameCanvas({
   const onRoomLayoutReadyRef = useRef(onRoomLayoutReady)
   const onHeartsChangedRef = useRef(onHeartsChanged)
   const onCombatDeathRef = useRef(onCombatDeath)
+  const onBossStateRef = useRef(onBossState)
+  const onBossDefeatedRef = useRef(onBossDefeated)
+  const bossShieldDownRef = useRef(Boolean(boss?.shieldDown))
+  const bossDefeatedRef = useRef(Boolean(boss?.defeated))
+  const bossRoomActive = Boolean(boss)
+  bossDefeatedRef.current = Boolean(boss?.defeated)
   const startedRef = useRef(false)
   const inputLockedRef = useRef(inputLocked)
 
@@ -86,6 +103,12 @@ export function GameCanvas({
   useEffect(() => {
     onCombatDeathRef.current = onCombatDeath
   }, [onCombatDeath])
+  useEffect(() => {
+    onBossStateRef.current = onBossState
+  }, [onBossState])
+  useEffect(() => {
+    onBossDefeatedRef.current = onBossDefeated
+  }, [onBossDefeated])
 
   useEffect(() => {
     const parent = containerRef.current
@@ -116,12 +139,20 @@ export function GameCanvas({
     const deathHandler = () => {
       onCombatDeathRef.current?.()
     }
+    const bossStateHandler = (state: BossSnapshot) => {
+      onBossStateRef.current?.(state)
+    }
+    const bossDefeatedHandler = () => {
+      onBossDefeatedRef.current?.()
+    }
     game.events.on(GAME_EVENTS.OPEN_TERMINAL, openHandler)
     game.events.on(GAME_EVENTS.EXIT_REACHED, exitHandler)
     game.events.on(GAME_EVENTS.PLAYER_MOVED, movedHandler)
     game.events.on(GAME_EVENTS.ROOM_LAYOUT_READY, layoutHandler)
     game.events.on(GAME_EVENTS.HEARTS_CHANGED, heartsHandler)
     game.events.on(GAME_EVENTS.COMBAT_DEATH, deathHandler)
+    game.events.on(GAME_EVENTS.BOSS_STATE, bossStateHandler)
+    game.events.on(GAME_EVENTS.BOSS_DEFEATED, bossDefeatedHandler)
 
     const timer = window.setTimeout(() => {
       if (cancelled) return
@@ -137,6 +168,9 @@ export function GameCanvas({
         mandatoryTerminalCount,
         terminalBindings,
         combatEnabled,
+        boss: boss
+          ? { shieldDown: bossShieldDownRef.current, defeated: bossDefeatedRef.current }
+          : null,
       })
     }, 0)
 
@@ -149,6 +183,8 @@ export function GameCanvas({
       game.events.off(GAME_EVENTS.ROOM_LAYOUT_READY, layoutHandler)
       game.events.off(GAME_EVENTS.HEARTS_CHANGED, heartsHandler)
       game.events.off(GAME_EVENTS.COMBAT_DEATH, deathHandler)
+      game.events.off(GAME_EVENTS.BOSS_STATE, bossStateHandler)
+      game.events.off(GAME_EVENTS.BOSS_DEFEATED, bossDefeatedHandler)
       game.destroy(true)
       if (gameRef.current === game) gameRef.current = null
     }
@@ -162,6 +198,7 @@ export function GameCanvas({
     roomInstance,
     mandatoryTerminalCount,
     combatEnabled,
+    bossRoomActive,
     // Bindings identity for this room generation (device/challenge pairing).
     terminalBindings.map((b) => `${b.deviceId}:${b.challengeId}`).join('|'),
   ])
@@ -171,6 +208,13 @@ export function GameCanvas({
       gameRef.current.events.emit(GAME_EVENTS.EXIT_READY, { ready: exitReady })
     }
   }, [exitReady])
+
+  useEffect(() => {
+    bossShieldDownRef.current = Boolean(boss?.shieldDown)
+    if (gameRef.current && startedRef.current) {
+      gameRef.current.events.emit(GAME_EVENTS.BOSS_SHIELD, { down: Boolean(boss?.shieldDown) })
+    }
+  }, [boss?.shieldDown])
 
   useEffect(() => {
     inputLockedRef.current = inputLocked

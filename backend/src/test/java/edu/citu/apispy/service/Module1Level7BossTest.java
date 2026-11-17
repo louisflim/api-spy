@@ -14,6 +14,8 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -177,6 +179,7 @@ class Module1Level7BossTest {
 	@Test
 	void completeAndReplayPreserveCareerClear() {
 		MissionProgressDto current = unlockAllRequired("boss-clear");
+		current = progress.reportBossDefeated("boss-clear", MISSION, current.roomGeneration());
 		MissionProgressDto completed = progress.completeAfterExit(
 				"boss-clear", MISSION, current.roomGeneration());
 		assertTrue(completed.completed());
@@ -189,6 +192,84 @@ class Module1Level7BossTest {
 		assertEquals("REPLAY", replay.activeRunKind());
 		assertEquals(5, replay.requiredDeviceCount());
 		assertTrue(replay.finalLockRequired());
+		assertFalse(replay.boss().defeated(), "replay starts with the boss back at full strength");
+		assertFalse(replay.boss().shieldDown());
+	}
+
+	@Test
+	void bossShieldBlocksDefeatUntilEveryMandatoryDeviceIsActivated() {
+		MissionProgressDto initial = progress.getOrCreate("boss-shield", MISSION);
+		assertFalse(initial.boss().shieldDown());
+		assertThrows(IllegalStateException.class,
+				() -> progress.reportBossDefeated("boss-shield", MISSION, initial.roomGeneration()));
+		assertFalse(progress.getOrCreate("boss-shield", MISSION).boss().defeated());
+	}
+
+	@Test
+	void devicesAloneCannotClearTheBossRoom() {
+		MissionProgressDto current = unlockAllRequired("boss-no-fight");
+		String generation = current.roomGeneration();
+		assertThrows(IllegalStateException.class,
+				() -> progress.completeAfterExit("boss-no-fight", MISSION, generation));
+		assertFalse(progress.getOrCreate("boss-no-fight", MISSION).completed());
+	}
+
+	@Test
+	void bossDefeatIsBoundToTheActiveRoomGeneration() {
+		MissionProgressDto current = unlockAllRequired("boss-stale");
+		assertThrows(IllegalStateException.class,
+				() -> progress.reportBossDefeated("boss-stale", MISSION, java.util.UUID.randomUUID().toString()));
+		assertThrows(IllegalArgumentException.class,
+				() -> progress.reportBossDefeated("boss-stale", MISSION, null));
+		assertFalse(progress.getOrCreate("boss-stale", MISSION).boss().defeated());
+		assertTrue(progress.reportBossDefeated("boss-stale", MISSION, current.roomGeneration()).boss().defeated());
+	}
+
+	@Test
+	void combatDeathRestartBringsTheBossBackButKeepsOperatedDevices() {
+		MissionProgressDto current = unlockAllRequired("boss-death");
+		int tier = current.apiResetCount();
+		List<String> unlocked = current.unlockedDeviceIds();
+		progress.reportCombatDeath("boss-death", MISSION, current.roomGeneration());
+		MissionProgressDto restarted = progress.resetRoom("boss-death", MISSION, RoomResetReason.COMBAT);
+		assertEquals(tier, restarted.apiResetCount());
+		assertFalse(restarted.roomGeneration().equals(current.roomGeneration()), "fresh room instance");
+		assertEquals(unlocked, restarted.unlockedDeviceIds(), "devices stay operated");
+		assertTrue(restarted.boss().shieldDown(), "shield stays down");
+		assertFalse(restarted.boss().defeated(), "boss is back at full strength");
+		assertFalse(restarted.exitReady());
+		assertFalse(restarted.combatRestartAuthorized());
+		// The kept devices still let the agent finish once the boss falls.
+		MissionProgressDto won = progress.reportBossDefeated("boss-death", MISSION, restarted.roomGeneration());
+		assertTrue(progress.completeAfterExit("boss-death", MISSION, won.roomGeneration()).completed());
+	}
+
+	@Test
+	void bossRoomDeathMidDevicesKeepsPartialProgressWithoutEscalating() {
+		MissionProgressDto initial = progress.getOrCreate("boss-partial", MISSION);
+		MissionProgressDto.MandatoryDeviceDto first = initial.mandatoryDevices().stream()
+				.filter(d -> !d.finalLock())
+				.findFirst()
+				.orElseThrow();
+		ApiContract contract = contracts.requireByChallengeId(first.challengeId());
+		MissionProgressDto partial = simulate.simulate(
+				"boss-partial",
+				request(MISSION, contract.getDeviceId(), contract.getChallengeId(),
+						contract.getExpectedMethod(), resolvePath(contract))).missionProgress();
+		assertEquals(1, partial.unlockedDeviceIds().size());
+		progress.reportCombatDeath("boss-partial", MISSION, partial.roomGeneration());
+		MissionProgressDto restarted = progress.resetRoom("boss-partial", MISSION, RoomResetReason.COMBAT);
+		assertEquals(partial.apiResetCount(), restarted.apiResetCount());
+		assertEquals(partial.unlockedDeviceIds(), restarted.unlockedDeviceIds());
+		assertFalse(restarted.boss().shieldDown());
+	}
+
+	@Test
+	void missionsBeforeLevelSevenHaveNoBoss() {
+		MissionProgressDto l1 = progress.getOrCreate("no-boss", "m1-recruit-l1");
+		assertNull(l1.boss());
+		assertThrows(IllegalArgumentException.class,
+				() -> progress.reportBossDefeated("no-boss", "m1-recruit-l1", l1.roomGeneration()));
 	}
 
 	private MissionProgressDto unlockAllRequired(String participantCode) {
@@ -209,7 +290,8 @@ class Module1Level7BossTest {
 			assertTrue(ok.correct(), "failed unlocking " + device.deviceId());
 			current = ok.missionProgress();
 		}
-		assertTrue(current.exitReady());
+		assertTrue(current.boss().shieldDown());
+		assertFalse(current.exitReady(), "exit stays shut until the boss is defeated");
 		return current;
 	}
 

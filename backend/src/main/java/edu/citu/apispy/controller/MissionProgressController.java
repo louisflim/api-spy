@@ -2,6 +2,7 @@ package edu.citu.apispy.controller;
 
 import edu.citu.apispy.domain.mission.RoomResetReason;
 import edu.citu.apispy.dto.AcknowledgeLessonReviewDto;
+import edu.citu.apispy.dto.BossDefeatRequestDto;
 import edu.citu.apispy.dto.CombatDeathRequestDto;
 import edu.citu.apispy.dto.MissionCompleteRequestDto;
 import edu.citu.apispy.dto.MissionProgressDto;
@@ -103,6 +104,20 @@ public class MissionProgressController {
 			@PathVariable @Size(max = InputLimits.ID) String missionId,
 			@Valid @RequestBody CombatDeathRequestDto request) {
 		return ResponseEntity.ok(missionProgressService.reportCombatDeath(
+				AuthenticatedPlayer.requireUserIdString(),
+				missionId,
+				request == null ? null : request.roomGeneration()));
+	}
+
+	/**
+	 * Level 7: records the boss defeat for the active room generation. Rejected (400)
+	 * while the boss shield is up, i.e. until every mandatory API device is activated.
+	 */
+	@PostMapping("/{missionId}/boss-defeated")
+	public ResponseEntity<MissionProgressDto> bossDefeated(
+			@PathVariable @Size(max = InputLimits.ID) String missionId,
+			@Valid @RequestBody BossDefeatRequestDto request) {
+		return ResponseEntity.ok(missionProgressService.reportBossDefeated(
 				AuthenticatedPlayer.requireUserIdString(),
 				missionId,
 				request == null ? null : request.roomGeneration()));

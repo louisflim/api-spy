@@ -1,5 +1,9 @@
 export { CombatSystem } from './CombatSystem'
-export type { CombatDeathListener, HeartsListener } from './CombatSystem'
+export type { BossStateListener, CombatDeathListener, HeartsListener } from './CombatSystem'
+export { BossEnemy } from './BossEnemy'
+export type { BossSnapshot } from './BossEnemy'
+export { bossConfigForRank, planBossSpawn } from './bossConfig'
+export type { BossConfig } from './bossConfig'
 export { PlayerHealth } from './PlayerHealth'
 export { PatrolGuard } from './PatrolGuard'
 export { EnemyStateMachine } from './EnemyStateMachine'
@@ -13,6 +17,7 @@ export {
   ENEMY_TYPE_REGISTRY,
   requireEnemyType,
   patrolGuardCountForRank,
+  patrolGuardConfigForRank,
 } from './enemyTypes'
 export type { EnemyTypeId, EnemyTypeConfig, PlannedGuardSpawn } from './enemyTypes'
 export { planPatrolGuardSpawns } from './spawnPlan'

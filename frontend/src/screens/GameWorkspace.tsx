@@ -6,6 +6,7 @@ import {
   fetchMissionDetail,
   fetchMissionProgress,
   fetchMyConcepts,
+  reportBossDefeated,
   reportCombatDeath,
   resetMissionRoom,
   startMissionReplay,
@@ -14,6 +15,7 @@ import {
 import { useAuth } from '../auth/AuthContext'
 import { publicErrorMessage } from '../security/publicErrors'
 import { lessonTitle, missingRequiredLessons } from '../learning/prerequisites'
+import type { BossSnapshot } from '../phaser/combat'
 import type { RoomLayoutPlan } from '../phaser/room/types'
 import { ROOM_LAYOUT } from '../phaser/roomLayout'
 import { loadMissionProgress, saveMissionProgress } from '../storage/attemptStorage'
@@ -85,6 +87,8 @@ export function GameWorkspace({
   const [hearts, setHearts] = useState(3)
   const [combatDeathPending, setCombatDeathPending] = useState(false)
   const [resetLevelBusy, setResetLevelBusy] = useState(false)
+  /** Level 7 boss HUD snapshot from Phaser (display only; the server owns the defeat). */
+  const [bossState, setBossState] = useState<BossSnapshot | null>(null)
 
   const refreshConcepts = useCallback(async () => {
     try {
@@ -283,6 +287,7 @@ export function GameWorkspace({
     const generation = roomProgress.roomGeneration
     void resetMissionRoom(missionId, 'PLAYER', generation)
       .then((server) => {
+        setBossState(null)
         setRoomProgress(server)
         setExitReady(false)
         setTerminalLocated(false)
@@ -330,6 +335,7 @@ export function GameWorkspace({
 
   const applyCombatRoomReset = useCallback(
     (server: MissionProgressState) => {
+      setBossState(null)
       setRoomProgress(server)
       setExitReady(false)
       setPauseOpen(false)
@@ -372,6 +378,22 @@ export function GameWorkspace({
     roomProgress?.roomGeneration,
   ])
 
+  const bossRoom = roomProgress?.boss ?? null
+
+  const handleBossDefeated = useCallback(() => {
+    const missionId = missionDetail?.mission.missionId
+    const generation = roomProgress?.roomGeneration
+    if (!missionId || !generation) return
+    void reportBossDefeated(missionId, generation)
+      .then((server) => {
+        setRoomProgress(server)
+        setExitReady(Boolean(server.exitReady))
+      })
+      .catch((err) => {
+        setGateMessage(publicErrorMessage(err, 'Boss defeat could not be confirmed'))
+      })
+  }, [missionDetail?.mission.missionId, roomProgress?.roomGeneration])
+
   return (
     <div className="field-room">
       {missionDetail ? (
@@ -382,6 +404,7 @@ export function GameWorkspace({
             level={missionDetail.mission.level}
             rank={missionDetail.mission.rank}
             hearts={hearts}
+            boss={bossRoom ? bossState : null}
             pauseOpen={pauseOpen}
             onTogglePause={() => setPauseOpen((open) => !open)}
             onReturnToOps={returnToOps}
@@ -400,6 +423,7 @@ export function GameWorkspace({
                 devicesComplete={devicesComplete}
                 exitReady={exitReady}
                 missionCompleted={missionCompleted}
+                boss={bossRoom}
               />
               <FieldMinimap
                 player={playerPos}
@@ -439,6 +463,9 @@ export function GameWorkspace({
                       )}
                       terminalBindings={roomProgress.mandatoryDevices ?? []}
                       combatEnabled
+                      boss={bossRoom}
+                      onBossState={setBossState}
+                      onBossDefeated={handleBossDefeated}
                       onPlayerMoved={setPlayerPos}
                       onRoomLayoutReady={(plan) => {
                         setRoomLayout(plan)

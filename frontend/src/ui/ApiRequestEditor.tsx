@@ -638,35 +638,11 @@ export function ApiRequestEditor({
               </div>
             )}
             <pre>{JSON.stringify(result.simulatedResponse.body, null, 2)}</pre>
-            {graded && !active.practiceMode ? (
-              <p className="hint">
-                First attempt immutable:{' '}
-                {result.firstAttemptRecord.firstAttemptCorrect ? 'correct' : 'incorrect'} (
-                {result.firstAttemptRecorded ? 'recorded now' : 'preserved from earlier'}
-                {result.firstAttemptRecord.challengeId
-                  ? ` · ${result.firstAttemptRecord.challengeId}`
-                  : ''}
-                )
-              </p>
-            ) : null}
-            {!result.correct &&
-            !result.firstAttemptRecorded &&
-            result.firstAttemptRecord.firstAttemptCorrect &&
-            graded &&
-            !active.practiceMode ? (
-              <p className="hint">
-                This simulated error does not rewrite your earlier correct first-attempt record for this device, and
-                it does not count as a new eligible concept miss for CONTROL support.
-              </p>
-            ) : null}
-            {Object.keys(result.firstAttemptRecord.conceptFirstAttemptCorrect).length > 0 && (
-              <p className="hint">
-                Concept first-attempt map:{' '}
-                {Object.entries(result.firstAttemptRecord.conceptFirstAttemptCorrect)
-                  .map(([tag, ok]) => `${tag}=${ok ? 'ok' : 'miss'}`)
-                  .join(', ')}
-              </p>
-            )}
+            {/*
+              SRS NFR-S3: no academic correctness labels or research indicators in gameplay.
+              First-attempt outcomes and the per-concept map stay in the hidden research record
+              (firstAttemptRecord) and are never rendered to the player.
+            */}
             {!result.correct && !active.optionalVerification && !active.practiceMode && (
               <p className="hint">Door stays locked. Revise the request. API mistakes never remove hearts.</p>
             )}
@@ -676,9 +652,8 @@ export function ApiRequestEditor({
               result.terminalVerification.earnedSlots === 0 &&
               !result.firstAttemptRecord.firstAttemptCorrect ? (
               <p className="hint">
-                Door unlock is independent of Terminal Verification. Your preserved incorrect first attempt did not
-                earn evidence slots; corrected retries never rewrite that record. The next authored verification
-                scenario loads automatically when available.
+                Device unlocked. Terminal Verification is tracked separately from door unlocks; the next
+                verification scenario loads automatically when available.
               </p>
             ) : null}
           </div>

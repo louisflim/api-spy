@@ -24,9 +24,20 @@ public class SimulatedRequestValidator {
 
 	public ValidationResult validate(ApiRequest request, ApiContract contract) {
 		Set<ErrorCode> errors = EnumSet.noneOf(ErrorCode.class);
+		boolean pathParameterFailed = false;
+		boolean queryParameterFailed = false;
 		for (RequestValidator validator : validators) {
-			errors.addAll(validator.validate(request, contract));
+			Set<ErrorCode> found = validator.validate(request, contract);
+			errors.addAll(found);
+			if (!found.isEmpty() && validator instanceof PathParameterValidator) {
+				pathParameterFailed = true;
+			}
+			if (!found.isEmpty() && validator instanceof QueryParameterValidator) {
+				queryParameterFailed = true;
+			}
 		}
-		return errors.isEmpty() ? ValidationResult.success() : ValidationResult.failure(errors);
+		return errors.isEmpty()
+				? ValidationResult.success()
+				: ValidationResult.failure(errors, pathParameterFailed, queryParameterFailed);
 	}
 }

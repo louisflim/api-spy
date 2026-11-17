@@ -24,7 +24,7 @@ public class ConceptDecisionAnalyzer {
 		for (String conceptTag : contract.getConceptTags()) {
 			boolean applicable = isApplicable(conceptTag, contract);
 			boolean correct = applicable && FirstAttemptService.correctForConcept(conceptTag, result, contract);
-			List<String> relatedErrors = relatedErrorNames(conceptTag, result.getErrorCodes());
+			List<String> relatedErrors = relatedErrorNames(conceptTag, result);
 			decisions.add(new ConceptDecision(conceptTag, applicable, correct, relatedErrors));
 		}
 		return List.copyOf(decisions);
@@ -45,7 +45,8 @@ public class ConceptDecisionAnalyzer {
 		};
 	}
 
-	private static List<String> relatedErrorNames(String conceptTag, Set<ErrorCode> errorCodes) {
+	private static List<String> relatedErrorNames(String conceptTag, ValidationResult result) {
+		Set<ErrorCode> errorCodes = result.getErrorCodes();
 		EnumSet<ErrorCode> related = EnumSet.noneOf(ErrorCode.class);
 		switch (conceptTag) {
 			case "http.method.get",
@@ -62,12 +63,17 @@ public class ConceptDecisionAnalyzer {
 					related.add(ErrorCode.ENDPOINT);
 				}
 			}
-			case "http.path_parameter", "http.query_parameter" -> {
+			case "http.path_parameter" -> {
 				for (ErrorCode code : errorCodes) {
-					if (code == ErrorCode.PARAMETER
-							|| code == ErrorCode.PARAMETER_MISSING
-							|| code == ErrorCode.PARAMETER_VALUE
-							|| code == ErrorCode.ENDPOINT) {
+					if (code == ErrorCode.ENDPOINT
+							|| (result.pathParameterFailed() && ValidationResult.isParameterCode(code))) {
+						related.add(code);
+					}
+				}
+			}
+			case "http.query_parameter" -> {
+				for (ErrorCode code : errorCodes) {
+					if (result.queryParameterFailed() && ValidationResult.isParameterCode(code)) {
 						related.add(code);
 					}
 				}

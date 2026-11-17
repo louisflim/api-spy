@@ -169,6 +169,23 @@ class Module1HigherRanksTest {
 		assertFalse(escalation.isBossFinale("m1-field-l6"));
 	}
 
+	@Test
+	void missingQueryIsBlamedOnTheQueryConceptOnlyAndWrongPathValueOnThePathConceptOnly() {
+		ApiContract mixed = contracts.requireByChallengeId("chal-m1-fa-l3-badges-v2");
+		String base = resolvePath(mixed).split("\\?")[0];
+
+		Map<String, Boolean> missingQuery = simulate.simulate("attr-query",
+				request(mixed, mixed.getExpectedMethod(), base)).firstAttemptRecord().conceptFirstAttemptCorrect();
+		assertEquals(Boolean.TRUE, missingQuery.get("http.path_parameter"), "path was right");
+		assertEquals(Boolean.FALSE, missingQuery.get("http.query_parameter"), "query was missing");
+
+		String wrongZone = resolvePath(mixed).replace("/armory/", "/vault/");
+		Map<String, Boolean> wrongPath = simulate.simulate("attr-path",
+				request(mixed, mixed.getExpectedMethod(), wrongZone)).firstAttemptRecord().conceptFirstAttemptCorrect();
+		assertEquals(Boolean.FALSE, wrongPath.get("http.path_parameter"), "path value was wrong");
+		assertEquals(Boolean.TRUE, wrongPath.get("http.query_parameter"), "query was right");
+	}
+
 	// ---- helpers -------------------------------------------------------------------
 
 	private List<ApiContract> higherRankContracts() {

@@ -138,20 +138,14 @@ public class FirstAttemptService {
 		if (result.getErrorCodes().contains(ErrorCode.ENDPOINT)) {
 			return false;
 		}
-		return result.getErrorCodes().stream()
-				.noneMatch(code -> code == ErrorCode.PARAMETER
-						|| code == ErrorCode.PARAMETER_MISSING
-						|| code == ErrorCode.PARAMETER_VALUE);
+		return !result.pathParameterFailed();
 	}
 
 	private static boolean queryParameterConceptCorrect(ValidationResult result, ApiContract contract) {
 		if (contract.getQueryParameters().isEmpty()) {
 			return true;
 		}
-		return result.getErrorCodes().stream()
-				.noneMatch(code -> code == ErrorCode.PARAMETER
-						|| code == ErrorCode.PARAMETER_MISSING
-						|| code == ErrorCode.PARAMETER_VALUE);
+		return !result.queryParameterFailed();
 	}
 
 	private static String formatQuery(Map<String, String> queryParameters) {

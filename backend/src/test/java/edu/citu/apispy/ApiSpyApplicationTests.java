@@ -31,7 +31,8 @@ class ApiSpyApplicationTests {
 		assertEquals(2, adaptiveLearningProperties.getIncorrectAttemptThreshold());
 		assertEquals(2, adaptiveLearningProperties.getMaxPracticeDoorsPerRoom());
 		assertEquals(63, missionCatalogService.totalConfigured());
-		assertEquals(7, missionCatalogService.implementedCount());
+		// Module 1: Recruit, Field Agent and Special Agent tracks (7 levels each).
+		assertEquals(21, missionCatalogService.implementedCount());
 		assertFalse(contractCatalogService.allContracts().isEmpty());
 		assertEquals(9, lessonContentProvider.byModule(1).size());
 	}

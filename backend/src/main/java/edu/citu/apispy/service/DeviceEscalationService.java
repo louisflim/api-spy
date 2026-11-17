@@ -29,6 +29,9 @@ public class DeviceEscalationService {
 	/** Module 1 Recruit Level 7 boss — always full concept coverage + final lock. */
 	public static final String MODULE1_RECRUIT_BOSS_MISSION_ID = "m1-recruit-l7";
 
+	/** Level 7 of every module and rank is a boss finale (e.g. m1-field-l7, m1-special-l7). */
+	private static final java.util.regex.Pattern BOSS_FINALE_ID = java.util.regex.Pattern.compile("m[0-9]+-[a-z]+-l7");
+
 	private final Map<String, MissionEscalationDefinition> byMissionId;
 	private final ContractCatalogService contractCatalogService;
 
@@ -80,7 +83,7 @@ public class DeviceEscalationService {
 	}
 
 	public boolean isBossFinale(String missionId) {
-		return MODULE1_RECRUIT_BOSS_MISSION_ID.equals(missionId);
+		return missionId != null && BOSS_FINALE_ID.matcher(missionId).matches();
 	}
 
 	public List<ApiContract> requiredMandatoryContracts(String missionId, int apiResetCount) {

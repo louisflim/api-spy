@@ -101,6 +101,322 @@
         "http.query_parameter"
       ],
       "scenarioFocus": "Boss finale: disable layered command-nexus security with GET, POST, PUT, DELETE, path parameters, and query filters, then purge the master vault seal"
+    },
+    {
+      "missionId": "m1-field-l1",
+      "module": 1,
+      "rank": "FIELD_AGENT",
+      "level": 1,
+      "title": "Inspect a sector door",
+      "status": "IMPLEMENTED",
+      "primaryChallengeId": "chal-m1-fa-l1-door-v1",
+      "requiredLessonIds": [
+        "rest-fundamentals",
+        "http-get",
+        "endpoints",
+        "path-parameters"
+      ],
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "scenarioFocus": "Combine GET with a nested resource path and path parameters"
+    },
+    {
+      "missionId": "m1-field-l2",
+      "module": 1,
+      "rank": "FIELD_AGENT",
+      "level": 2,
+      "title": "Trace locks inside a building",
+      "status": "IMPLEMENTED",
+      "primaryChallengeId": "chal-m1-fa-l2-locks-v1",
+      "requiredLessonIds": [
+        "path-parameters",
+        "endpoints",
+        "http-get"
+      ],
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "scenarioFocus": "Navigate two levels of nested resources with path parameters"
+    },
+    {
+      "missionId": "m1-field-l3",
+      "module": 1,
+      "rank": "FIELD_AGENT",
+      "level": 3,
+      "title": "Filter a zone's sensors",
+      "status": "IMPLEMENTED",
+      "primaryChallengeId": "chal-m1-fa-l3-sensors-v1",
+      "requiredLessonIds": [
+        "query-parameters",
+        "path-parameters",
+        "endpoints",
+        "http-get"
+      ],
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "scenarioFocus": "Combine a path parameter with query-parameter filtering"
+    },
+    {
+      "missionId": "m1-field-l4",
+      "module": 1,
+      "rank": "FIELD_AGENT",
+      "level": 4,
+      "title": "File a report in a zone",
+      "status": "IMPLEMENTED",
+      "primaryChallengeId": "chal-m1-fa-l4-passes-v1",
+      "requiredLessonIds": [
+        "http-post",
+        "path-parameters",
+        "endpoints",
+        "simulated-responses"
+      ],
+      "conceptTags": [
+        "http.method.post",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "scenarioFocus": "Create a record in a nested collection with POST"
+    },
+    {
+      "missionId": "m1-field-l5",
+      "module": 1,
+      "rank": "FIELD_AGENT",
+      "level": 5,
+      "title": "Reassign a nested clearance",
+      "status": "IMPLEMENTED",
+      "primaryChallengeId": "chal-m1-fa-l5-clearance-v1",
+      "requiredLessonIds": [
+        "http-put-patch",
+        "path-parameters",
+        "endpoints"
+      ],
+      "conceptTags": [
+        "http.method.put",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "scenarioFocus": "Replace a nested record with PUT using two path parameters"
+    },
+    {
+      "missionId": "m1-field-l6",
+      "module": 1,
+      "rank": "FIELD_AGENT",
+      "level": 6,
+      "title": "Revoke a session with a reason",
+      "status": "IMPLEMENTED",
+      "primaryChallengeId": "chal-m1-fa-l6-session-v1",
+      "requiredLessonIds": [
+        "http-delete",
+        "path-parameters",
+        "query-parameters",
+        "endpoints"
+      ],
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "scenarioFocus": "Delete a nested record and supply a required query parameter"
+    },
+    {
+      "missionId": "m1-field-l7",
+      "module": 1,
+      "rank": "FIELD_AGENT",
+      "level": 7,
+      "title": "Breach the field command",
+      "status": "IMPLEMENTED",
+      "primaryChallengeId": "chal-m1-fa-l7-alerts-v1",
+      "requiredLessonIds": [
+        "rest-fundamentals",
+        "http-get",
+        "endpoints",
+        "simulated-responses",
+        "path-parameters",
+        "query-parameters",
+        "http-post",
+        "http-put-patch",
+        "http-delete"
+      ],
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter",
+        "http.method.post",
+        "http.method.put",
+        "http.method.delete"
+      ],
+      "scenarioFocus": "Boss finale: combine nested paths, path and query parameters, and every method"
+    },
+    {
+      "missionId": "m1-special-l1",
+      "module": 1,
+      "rank": "SPECIAL_AGENT",
+      "level": 1,
+      "title": "Locate a black-site door",
+      "status": "IMPLEMENTED",
+      "primaryChallengeId": "chal-m1-sa-l1-door-v1",
+      "requiredLessonIds": [
+        "rest-fundamentals",
+        "http-get",
+        "endpoints",
+        "path-parameters"
+      ],
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "scenarioFocus": "Derive three path parameters from facility codes"
+    },
+    {
+      "missionId": "m1-special-l2",
+      "module": 1,
+      "rank": "SPECIAL_AGENT",
+      "level": 2,
+      "title": "Pull a sealed archive record",
+      "status": "IMPLEMENTED",
+      "primaryChallengeId": "chal-m1-sa-l2-record-v1",
+      "requiredLessonIds": [
+        "path-parameters",
+        "endpoints",
+        "http-get"
+      ],
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "scenarioFocus": "Compose identifiers and choose the correct endpoint among similar routes"
+    },
+    {
+      "missionId": "m1-special-l3",
+      "module": 1,
+      "rank": "SPECIAL_AGENT",
+      "level": 3,
+      "title": "Hunt tripped sensors",
+      "status": "IMPLEMENTED",
+      "primaryChallengeId": "chal-m1-sa-l3-sensors-v1",
+      "requiredLessonIds": [
+        "query-parameters",
+        "path-parameters",
+        "endpoints",
+        "http-get"
+      ],
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "scenarioFocus": "Combine a derived path parameter with several query parameters"
+    },
+    {
+      "missionId": "m1-special-l4",
+      "module": 1,
+      "rank": "SPECIAL_AGENT",
+      "level": 4,
+      "title": "Escalate an incident",
+      "status": "IMPLEMENTED",
+      "primaryChallengeId": "chal-m1-sa-l4-incident-v1",
+      "requiredLessonIds": [
+        "http-post",
+        "path-parameters",
+        "query-parameters",
+        "endpoints",
+        "simulated-responses"
+      ],
+      "conceptTags": [
+        "http.method.post",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "scenarioFocus": "Create a record in a doubly nested collection with POST and a query flag"
+    },
+    {
+      "missionId": "m1-special-l5",
+      "module": 1,
+      "rank": "SPECIAL_AGENT",
+      "level": 5,
+      "title": "Override an agent clearance",
+      "status": "IMPLEMENTED",
+      "primaryChallengeId": "chal-m1-sa-l5-clearance-v1",
+      "requiredLessonIds": [
+        "http-put-patch",
+        "path-parameters",
+        "query-parameters",
+        "endpoints"
+      ],
+      "conceptTags": [
+        "http.method.put",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "scenarioFocus": "Replace a record using identifiers derived from a roster"
+    },
+    {
+      "missionId": "m1-special-l6",
+      "module": 1,
+      "rank": "SPECIAL_AGENT",
+      "level": 6,
+      "title": "Purge a compromised keycard",
+      "status": "IMPLEMENTED",
+      "primaryChallengeId": "chal-m1-sa-l6-keycard-v1",
+      "requiredLessonIds": [
+        "http-delete",
+        "path-parameters",
+        "query-parameters",
+        "endpoints"
+      ],
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "scenarioFocus": "Delete a deeply nested record with multiple query parameters"
+    },
+    {
+      "missionId": "m1-special-l7",
+      "module": 1,
+      "rank": "SPECIAL_AGENT",
+      "level": 7,
+      "title": "Shut down the black site",
+      "status": "IMPLEMENTED",
+      "primaryChallengeId": "chal-m1-sa-l7-grid-v1",
+      "requiredLessonIds": [
+        "rest-fundamentals",
+        "http-get",
+        "endpoints",
+        "simulated-responses",
+        "path-parameters",
+        "query-parameters",
+        "http-post",
+        "http-put-patch",
+        "http-delete"
+      ],
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter",
+        "http.method.post",
+        "http.method.put",
+        "http.method.delete"
+      ],
+      "scenarioFocus": "Boss finale: interdependent requests with derived identifiers and several parameters"
     }
   ]
 }

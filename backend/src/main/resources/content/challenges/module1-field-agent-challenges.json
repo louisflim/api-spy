@@ -1,0 +1,2015 @@
+{
+  "challenges": [
+    {
+      "challengeId": "chal-m1-fa-l1-door-v1",
+      "variantId": "fa-l1-door-v1",
+      "missionId": "m1-field-l1",
+      "deviceId": "fa-l1-door-1",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/sectors/{sectorId}/doors/{doorId}",
+      "pathParameters": {
+        "sectorId": "north",
+        "doorId": "n-12"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/sectors/north/doors/n-12",
+        "status": "secured",
+        "message": "Sector Door API accepted the request. Device fa-l1-door-1 activated."
+      },
+      "documentation": "FIELD BRIEF — Sector Door API (fictional)\n\nObjective:\nRead the status of door N-12 in the North sector before the patrol rotates.\n\nResources:\n- Doors are nested under their sector: /api/sectors/{sectorId}/doors/{doorId}.\n- {sectorId} is the sector name in lowercase (this door is in the North sector).\n- {doorId} is the door plate in lowercase, keeping the hyphen (plate N-12).\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- No request body is required for a status read.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l1-door-v2",
+      "variantId": "fa-l1-door-v2",
+      "missionId": "m1-field-l1",
+      "deviceId": "fa-l1-door-2",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/sectors/{sectorId}/doors/{doorId}",
+      "pathParameters": {
+        "sectorId": "east",
+        "doorId": "e-04"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/sectors/east/doors/e-04",
+        "status": "secured",
+        "message": "Sector Door API accepted the request. Device fa-l1-door-2 activated."
+      },
+      "documentation": "FIELD BRIEF — Sector Door API (fictional)\n\nObjective:\nRead the status of door E-04 in the East sector before the patrol rotates.\n\nResources:\n- Doors are nested under their sector: /api/sectors/{sectorId}/doors/{doorId}.\n- {sectorId} is the sector name in lowercase (this door is in the East sector).\n- {doorId} is the door plate in lowercase, keeping the hyphen (plate E-04).\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- No request body is required for a status read.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l1-door-v3",
+      "variantId": "fa-l1-door-v3",
+      "missionId": "m1-field-l1",
+      "deviceId": "fa-l1-door-3",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/sectors/{sectorId}/doors/{doorId}",
+      "pathParameters": {
+        "sectorId": "south",
+        "doorId": "s-31"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/sectors/south/doors/s-31",
+        "status": "secured",
+        "message": "Sector Door API accepted the request. Device fa-l1-door-3 activated."
+      },
+      "documentation": "FIELD BRIEF — Sector Door API (fictional)\n\nObjective:\nRead the status of door S-31 in the South sector before the patrol rotates.\n\nResources:\n- Doors are nested under their sector: /api/sectors/{sectorId}/doors/{doorId}.\n- {sectorId} is the sector name in lowercase (this door is in the South sector).\n- {doorId} is the door plate in lowercase, keeping the hyphen (plate S-31).\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- No request body is required for a status read.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l1-camera-v1",
+      "variantId": "fa-l1-camera-v1",
+      "missionId": "m1-field-l1",
+      "deviceId": "fa-l1-camera-1",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/wings/{wingId}/cameras/{cameraId}",
+      "pathParameters": {
+        "wingId": "west",
+        "cameraId": "cam-7"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/wings/west/cameras/cam-7",
+        "status": "secured",
+        "message": "Wing Camera API accepted the request. Device fa-l1-camera-1 activated."
+      },
+      "documentation": "FIELD BRIEF — Wing Camera API (fictional)\n\nObjective:\nPull the live status of camera CAM-7 in the West wing.\n\nResources:\n- Cameras are nested under their wing: /api/wings/{wingId}/cameras/{cameraId}.\n- {wingId} is the wing name in lowercase (this camera hangs in the West wing).\n- {cameraId} is the camera tag in lowercase (tag CAM-7).\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- No request body is required.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l1-camera-v2",
+      "variantId": "fa-l1-camera-v2",
+      "missionId": "m1-field-l1",
+      "deviceId": "fa-l1-camera-2",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/wings/{wingId}/cameras/{cameraId}",
+      "pathParameters": {
+        "wingId": "central",
+        "cameraId": "cam-2"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/wings/central/cameras/cam-2",
+        "status": "secured",
+        "message": "Wing Camera API accepted the request. Device fa-l1-camera-2 activated."
+      },
+      "documentation": "FIELD BRIEF — Wing Camera API (fictional)\n\nObjective:\nPull the live status of camera CAM-2 in the Central wing.\n\nResources:\n- Cameras are nested under their wing: /api/wings/{wingId}/cameras/{cameraId}.\n- {wingId} is the wing name in lowercase (this camera hangs in the Central wing).\n- {cameraId} is the camera tag in lowercase (tag CAM-2).\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- No request body is required.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l1-camera-v3",
+      "variantId": "fa-l1-camera-v3",
+      "missionId": "m1-field-l1",
+      "deviceId": "fa-l1-camera-3",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/wings/{wingId}/cameras/{cameraId}",
+      "pathParameters": {
+        "wingId": "annex",
+        "cameraId": "cam-9"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/wings/annex/cameras/cam-9",
+        "status": "secured",
+        "message": "Wing Camera API accepted the request. Device fa-l1-camera-3 activated."
+      },
+      "documentation": "FIELD BRIEF — Wing Camera API (fictional)\n\nObjective:\nPull the live status of camera CAM-9 in the Annex wing.\n\nResources:\n- Cameras are nested under their wing: /api/wings/{wingId}/cameras/{cameraId}.\n- {wingId} is the wing name in lowercase (this camera hangs in the Annex wing).\n- {cameraId} is the camera tag in lowercase (tag CAM-9).\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- No request body is required.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l1-vent-v1",
+      "variantId": "fa-l1-vent-v1",
+      "missionId": "m1-field-l1",
+      "deviceId": "fa-l1-vent-1",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/floors/{floorId}/vents/{ventId}",
+      "pathParameters": {
+        "floorId": "b2",
+        "ventId": "v-14"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/floors/b2/vents/v-14",
+        "status": "secured",
+        "message": "Floor Vent API accepted the request. Device fa-l1-vent-1 activated."
+      },
+      "documentation": "FIELD BRIEF — Floor Vent API (fictional)\n\nObjective:\nCheck whether vent V-14 on floor B2 is sealed.\n\nResources:\n- Vents are nested under their floor: /api/floors/{floorId}/vents/{ventId}.\n- {floorId} is the floor code in lowercase (floor B2).\n- {ventId} is the vent marker in lowercase (marker V-14).\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- No request body is required.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l1-vent-v2",
+      "variantId": "fa-l1-vent-v2",
+      "missionId": "m1-field-l1",
+      "deviceId": "fa-l1-vent-2",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/floors/{floorId}/vents/{ventId}",
+      "pathParameters": {
+        "floorId": "l3",
+        "ventId": "v-03"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/floors/l3/vents/v-03",
+        "status": "secured",
+        "message": "Floor Vent API accepted the request. Device fa-l1-vent-2 activated."
+      },
+      "documentation": "FIELD BRIEF — Floor Vent API (fictional)\n\nObjective:\nCheck whether vent V-03 on floor L3 is sealed.\n\nResources:\n- Vents are nested under their floor: /api/floors/{floorId}/vents/{ventId}.\n- {floorId} is the floor code in lowercase (floor L3).\n- {ventId} is the vent marker in lowercase (marker V-03).\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- No request body is required.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l1-vent-v3",
+      "variantId": "fa-l1-vent-v3",
+      "missionId": "m1-field-l1",
+      "deviceId": "fa-l1-vent-3",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/floors/{floorId}/vents/{ventId}",
+      "pathParameters": {
+        "floorId": "b1",
+        "ventId": "v-22"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/floors/b1/vents/v-22",
+        "status": "secured",
+        "message": "Floor Vent API accepted the request. Device fa-l1-vent-3 activated."
+      },
+      "documentation": "FIELD BRIEF — Floor Vent API (fictional)\n\nObjective:\nCheck whether vent V-22 on floor B1 is sealed.\n\nResources:\n- Vents are nested under their floor: /api/floors/{floorId}/vents/{ventId}.\n- {floorId} is the floor code in lowercase (floor B1).\n- {ventId} is the vent marker in lowercase (marker V-22).\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- No request body is required.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-final-lock-field-l1",
+      "variantId": "final-lock-field-l1-v1",
+      "missionId": "m1-field-l1",
+      "deviceId": "final-lock-field-l1",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/final-locks/{lockId}",
+      "pathParameters": {
+        "lockId": "fa-l1"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "lockId": "fa-l1",
+        "status": "released",
+        "message": "Field Agent level 1 final lock released."
+      },
+      "documentation": "FIELD BRIEF — Final Lock API (fictional)\n\nObjective:\nRelease this room's extra exit lock after every required device is active.\n\nResources:\n- Final locks live at /api/final-locks/{lockId}.\n- {lockId} for this room is the room code: fa-l1.\n\nMethod semantics:\n- DELETE releases (removes) the lock record. GET only reads it.\n\nRules:\n- Substitute {lockId}. Construct the method and path yourself.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l2-locks-v1",
+      "variantId": "fa-l2-locks-v1",
+      "missionId": "m1-field-l2",
+      "deviceId": "fa-l2-locks-1",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/buildings/{buildingId}/rooms/{roomId}/locks",
+      "pathParameters": {
+        "buildingId": "hq",
+        "roomId": "204"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/buildings/hq/rooms/204/locks",
+        "status": "secured",
+        "message": "Building Lock Registry API accepted the request. Device fa-l2-locks-1 activated."
+      },
+      "documentation": "FIELD BRIEF — Building Lock Registry API (fictional)\n\nObjective:\nList every lock installed in room 204 of the HQ building.\n\nResources:\n- Rooms belong to buildings, and each room exposes a locks collection: /api/buildings/{buildingId}/rooms/{roomId}/locks.\n- {buildingId} is the building name in lowercase (HQ).\n- {roomId} is the three-digit room number exactly as printed (204).\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- The collection is read as a whole: no lock id goes after /locks.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l2-locks-v2",
+      "variantId": "fa-l2-locks-v2",
+      "missionId": "m1-field-l2",
+      "deviceId": "fa-l2-locks-2",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/buildings/{buildingId}/rooms/{roomId}/locks",
+      "pathParameters": {
+        "buildingId": "depot",
+        "roomId": "011"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/buildings/depot/rooms/011/locks",
+        "status": "secured",
+        "message": "Building Lock Registry API accepted the request. Device fa-l2-locks-2 activated."
+      },
+      "documentation": "FIELD BRIEF — Building Lock Registry API (fictional)\n\nObjective:\nList every lock installed in room 011 of the Depot building.\n\nResources:\n- Rooms belong to buildings, and each room exposes a locks collection: /api/buildings/{buildingId}/rooms/{roomId}/locks.\n- {buildingId} is the building name in lowercase (Depot).\n- {roomId} is the three-digit room number exactly as printed (011).\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- The collection is read as a whole: no lock id goes after /locks.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l2-locks-v3",
+      "variantId": "fa-l2-locks-v3",
+      "missionId": "m1-field-l2",
+      "deviceId": "fa-l2-locks-3",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/buildings/{buildingId}/rooms/{roomId}/locks",
+      "pathParameters": {
+        "buildingId": "tower",
+        "roomId": "918"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/buildings/tower/rooms/918/locks",
+        "status": "secured",
+        "message": "Building Lock Registry API accepted the request. Device fa-l2-locks-3 activated."
+      },
+      "documentation": "FIELD BRIEF — Building Lock Registry API (fictional)\n\nObjective:\nList every lock installed in room 918 of the Tower building.\n\nResources:\n- Rooms belong to buildings, and each room exposes a locks collection: /api/buildings/{buildingId}/rooms/{roomId}/locks.\n- {buildingId} is the building name in lowercase (Tower).\n- {roomId} is the three-digit room number exactly as printed (918).\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- The collection is read as a whole: no lock id goes after /locks.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l2-keypads-v1",
+      "variantId": "fa-l2-keypads-v1",
+      "missionId": "m1-field-l2",
+      "deviceId": "fa-l2-keypads-1",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/buildings/{buildingId}/rooms/{roomId}/keypads",
+      "pathParameters": {
+        "buildingId": "lab",
+        "roomId": "120"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/buildings/lab/rooms/120/keypads",
+        "status": "secured",
+        "message": "Building Keypad API accepted the request. Device fa-l2-keypads-1 activated."
+      },
+      "documentation": "FIELD BRIEF — Building Keypad API (fictional)\n\nObjective:\nRetrieve the keypads guarding room 120 in the Lab building.\n\nResources:\n- Each room exposes a keypads collection: /api/buildings/{buildingId}/rooms/{roomId}/keypads.\n- {buildingId} is the building name in lowercase (Lab).\n- {roomId} is the room number with its leading zeros (120).\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- Read the whole keypads collection; no keypad id is needed.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l2-keypads-v2",
+      "variantId": "fa-l2-keypads-v2",
+      "missionId": "m1-field-l2",
+      "deviceId": "fa-l2-keypads-2",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/buildings/{buildingId}/rooms/{roomId}/keypads",
+      "pathParameters": {
+        "buildingId": "hq",
+        "roomId": "305"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/buildings/hq/rooms/305/keypads",
+        "status": "secured",
+        "message": "Building Keypad API accepted the request. Device fa-l2-keypads-2 activated."
+      },
+      "documentation": "FIELD BRIEF — Building Keypad API (fictional)\n\nObjective:\nRetrieve the keypads guarding room 305 in the HQ building.\n\nResources:\n- Each room exposes a keypads collection: /api/buildings/{buildingId}/rooms/{roomId}/keypads.\n- {buildingId} is the building name in lowercase (HQ).\n- {roomId} is the room number with its leading zeros (305).\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- Read the whole keypads collection; no keypad id is needed.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l2-keypads-v3",
+      "variantId": "fa-l2-keypads-v3",
+      "missionId": "m1-field-l2",
+      "deviceId": "fa-l2-keypads-3",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/buildings/{buildingId}/rooms/{roomId}/keypads",
+      "pathParameters": {
+        "buildingId": "hangar",
+        "roomId": "002"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/buildings/hangar/rooms/002/keypads",
+        "status": "secured",
+        "message": "Building Keypad API accepted the request. Device fa-l2-keypads-3 activated."
+      },
+      "documentation": "FIELD BRIEF — Building Keypad API (fictional)\n\nObjective:\nRetrieve the keypads guarding room 002 in the Hangar building.\n\nResources:\n- Each room exposes a keypads collection: /api/buildings/{buildingId}/rooms/{roomId}/keypads.\n- {buildingId} is the building name in lowercase (Hangar).\n- {roomId} is the room number with its leading zeros (002).\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- Read the whole keypads collection; no keypad id is needed.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l2-scanners-v1",
+      "variantId": "fa-l2-scanners-v1",
+      "missionId": "m1-field-l2",
+      "deviceId": "fa-l2-scanners-1",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/buildings/{buildingId}/rooms/{roomId}/scanners",
+      "pathParameters": {
+        "buildingId": "depot",
+        "roomId": "450"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/buildings/depot/rooms/450/scanners",
+        "status": "secured",
+        "message": "Building Scanner API accepted the request. Device fa-l2-scanners-1 activated."
+      },
+      "documentation": "FIELD BRIEF — Building Scanner API (fictional)\n\nObjective:\nRead the retina scanners attached to room 450 in the Depot building.\n\nResources:\n- Each room exposes a scanners collection: /api/buildings/{buildingId}/rooms/{roomId}/scanners.\n- {buildingId} is the building name in lowercase (Depot).\n- {roomId} is the room number as printed (450).\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- Read the collection; do not add an individual scanner id.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l2-scanners-v2",
+      "variantId": "fa-l2-scanners-v2",
+      "missionId": "m1-field-l2",
+      "deviceId": "fa-l2-scanners-2",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/buildings/{buildingId}/rooms/{roomId}/scanners",
+      "pathParameters": {
+        "buildingId": "tower",
+        "roomId": "077"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/buildings/tower/rooms/077/scanners",
+        "status": "secured",
+        "message": "Building Scanner API accepted the request. Device fa-l2-scanners-2 activated."
+      },
+      "documentation": "FIELD BRIEF — Building Scanner API (fictional)\n\nObjective:\nRead the retina scanners attached to room 077 in the Tower building.\n\nResources:\n- Each room exposes a scanners collection: /api/buildings/{buildingId}/rooms/{roomId}/scanners.\n- {buildingId} is the building name in lowercase (Tower).\n- {roomId} is the room number as printed (077).\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- Read the collection; do not add an individual scanner id.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l2-scanners-v3",
+      "variantId": "fa-l2-scanners-v3",
+      "missionId": "m1-field-l2",
+      "deviceId": "fa-l2-scanners-3",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/buildings/{buildingId}/rooms/{roomId}/scanners",
+      "pathParameters": {
+        "buildingId": "lab",
+        "roomId": "509"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/buildings/lab/rooms/509/scanners",
+        "status": "secured",
+        "message": "Building Scanner API accepted the request. Device fa-l2-scanners-3 activated."
+      },
+      "documentation": "FIELD BRIEF — Building Scanner API (fictional)\n\nObjective:\nRead the retina scanners attached to room 509 in the Lab building.\n\nResources:\n- Each room exposes a scanners collection: /api/buildings/{buildingId}/rooms/{roomId}/scanners.\n- {buildingId} is the building name in lowercase (Lab).\n- {roomId} is the room number as printed (509).\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- Read the collection; do not add an individual scanner id.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-final-lock-field-l2",
+      "variantId": "final-lock-field-l2-v1",
+      "missionId": "m1-field-l2",
+      "deviceId": "final-lock-field-l2",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/final-locks/{lockId}",
+      "pathParameters": {
+        "lockId": "fa-l2"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "lockId": "fa-l2",
+        "status": "released",
+        "message": "Field Agent level 2 final lock released."
+      },
+      "documentation": "FIELD BRIEF — Final Lock API (fictional)\n\nObjective:\nRelease this room's extra exit lock after every required device is active.\n\nResources:\n- Final locks live at /api/final-locks/{lockId}.\n- {lockId} for this room is the room code: fa-l2.\n\nMethod semantics:\n- DELETE releases (removes) the lock record. GET only reads it.\n\nRules:\n- Substitute {lockId}. Construct the method and path yourself.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l3-sensors-v1",
+      "variantId": "fa-l3-sensors-v1",
+      "missionId": "m1-field-l3",
+      "deviceId": "fa-l3-sensors-1",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/zones/{zoneId}/sensors",
+      "pathParameters": {
+        "zoneId": "dock"
+      },
+      "queryParameters": {
+        "status": "tripped"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/zones/dock/sensors",
+        "status": "secured",
+        "message": "Zone Sensor API accepted the request. Device fa-l3-sensors-1 activated."
+      },
+      "documentation": "FIELD BRIEF — Zone Sensor API (fictional)\n\nObjective:\nFind only the tripped sensors in the Dock zone.\n\nResources:\n- Sensors are listed per zone: /api/zones/{zoneId}/sensors.\n- {zoneId} is the zone name in lowercase (Dock).\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- Add the query parameter status — its value is the sensor state you are hunting for (tripped).\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l3-sensors-v2",
+      "variantId": "fa-l3-sensors-v2",
+      "missionId": "m1-field-l3",
+      "deviceId": "fa-l3-sensors-2",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/zones/{zoneId}/sensors",
+      "pathParameters": {
+        "zoneId": "vault"
+      },
+      "queryParameters": {
+        "status": "offline"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/zones/vault/sensors",
+        "status": "secured",
+        "message": "Zone Sensor API accepted the request. Device fa-l3-sensors-2 activated."
+      },
+      "documentation": "FIELD BRIEF — Zone Sensor API (fictional)\n\nObjective:\nFind only the offline sensors in the Vault zone.\n\nResources:\n- Sensors are listed per zone: /api/zones/{zoneId}/sensors.\n- {zoneId} is the zone name in lowercase (Vault).\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- Add the query parameter status — its value is the sensor state you are hunting for (offline).\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l3-sensors-v3",
+      "variantId": "fa-l3-sensors-v3",
+      "missionId": "m1-field-l3",
+      "deviceId": "fa-l3-sensors-3",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/zones/{zoneId}/sensors",
+      "pathParameters": {
+        "zoneId": "lobby"
+      },
+      "queryParameters": {
+        "status": "tripped"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/zones/lobby/sensors",
+        "status": "secured",
+        "message": "Zone Sensor API accepted the request. Device fa-l3-sensors-3 activated."
+      },
+      "documentation": "FIELD BRIEF — Zone Sensor API (fictional)\n\nObjective:\nFind only the tripped sensors in the Lobby zone.\n\nResources:\n- Sensors are listed per zone: /api/zones/{zoneId}/sensors.\n- {zoneId} is the zone name in lowercase (Lobby).\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- Add the query parameter status — its value is the sensor state you are hunting for (tripped).\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l3-badges-v1",
+      "variantId": "fa-l3-badges-v1",
+      "missionId": "m1-field-l3",
+      "deviceId": "fa-l3-badges-1",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/zones/{zoneId}/badges",
+      "pathParameters": {
+        "zoneId": "lab"
+      },
+      "queryParameters": {
+        "level": "4"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/zones/lab/badges",
+        "status": "secured",
+        "message": "Zone Badge API accepted the request. Device fa-l3-badges-1 activated."
+      },
+      "documentation": "FIELD BRIEF — Zone Badge API (fictional)\n\nObjective:\nList badges in the Lab zone that hold clearance level 4.\n\nResources:\n- Badges are listed per zone: /api/zones/{zoneId}/badges.\n- {zoneId} is the zone name in lowercase (Lab).\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- Add the query parameter level — the clearance level as a number (4).\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l3-badges-v2",
+      "variantId": "fa-l3-badges-v2",
+      "missionId": "m1-field-l3",
+      "deviceId": "fa-l3-badges-2",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/zones/{zoneId}/badges",
+      "pathParameters": {
+        "zoneId": "armory"
+      },
+      "queryParameters": {
+        "level": "5"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/zones/armory/badges",
+        "status": "secured",
+        "message": "Zone Badge API accepted the request. Device fa-l3-badges-2 activated."
+      },
+      "documentation": "FIELD BRIEF — Zone Badge API (fictional)\n\nObjective:\nList badges in the Armory zone that hold clearance level 5.\n\nResources:\n- Badges are listed per zone: /api/zones/{zoneId}/badges.\n- {zoneId} is the zone name in lowercase (Armory).\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- Add the query parameter level — the clearance level as a number (5).\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l3-badges-v3",
+      "variantId": "fa-l3-badges-v3",
+      "missionId": "m1-field-l3",
+      "deviceId": "fa-l3-badges-3",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/zones/{zoneId}/badges",
+      "pathParameters": {
+        "zoneId": "dock"
+      },
+      "queryParameters": {
+        "level": "2"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/zones/dock/badges",
+        "status": "secured",
+        "message": "Zone Badge API accepted the request. Device fa-l3-badges-3 activated."
+      },
+      "documentation": "FIELD BRIEF — Zone Badge API (fictional)\n\nObjective:\nList badges in the Dock zone that hold clearance level 2.\n\nResources:\n- Badges are listed per zone: /api/zones/{zoneId}/badges.\n- {zoneId} is the zone name in lowercase (Dock).\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- Add the query parameter level — the clearance level as a number (2).\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l3-alarms-v1",
+      "variantId": "fa-l3-alarms-v1",
+      "missionId": "m1-field-l3",
+      "deviceId": "fa-l3-alarms-1",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/zones/{zoneId}/alarms",
+      "pathParameters": {
+        "zoneId": "vault"
+      },
+      "queryParameters": {
+        "priority": "high"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/zones/vault/alarms",
+        "status": "secured",
+        "message": "Zone Alarm API accepted the request. Device fa-l3-alarms-1 activated."
+      },
+      "documentation": "FIELD BRIEF — Zone Alarm API (fictional)\n\nObjective:\nPull only the high-priority alarms raised in the Vault zone.\n\nResources:\n- Alarms are listed per zone: /api/zones/{zoneId}/alarms.\n- {zoneId} is the zone name in lowercase (Vault).\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- Add the query parameter priority — the alarm priority in lowercase (high).\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l3-alarms-v2",
+      "variantId": "fa-l3-alarms-v2",
+      "missionId": "m1-field-l3",
+      "deviceId": "fa-l3-alarms-2",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/zones/{zoneId}/alarms",
+      "pathParameters": {
+        "zoneId": "lobby"
+      },
+      "queryParameters": {
+        "priority": "critical"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/zones/lobby/alarms",
+        "status": "secured",
+        "message": "Zone Alarm API accepted the request. Device fa-l3-alarms-2 activated."
+      },
+      "documentation": "FIELD BRIEF — Zone Alarm API (fictional)\n\nObjective:\nPull only the critical-priority alarms raised in the Lobby zone.\n\nResources:\n- Alarms are listed per zone: /api/zones/{zoneId}/alarms.\n- {zoneId} is the zone name in lowercase (Lobby).\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- Add the query parameter priority — the alarm priority in lowercase (critical).\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l3-alarms-v3",
+      "variantId": "fa-l3-alarms-v3",
+      "missionId": "m1-field-l3",
+      "deviceId": "fa-l3-alarms-3",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/zones/{zoneId}/alarms",
+      "pathParameters": {
+        "zoneId": "armory"
+      },
+      "queryParameters": {
+        "priority": "high"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/zones/armory/alarms",
+        "status": "secured",
+        "message": "Zone Alarm API accepted the request. Device fa-l3-alarms-3 activated."
+      },
+      "documentation": "FIELD BRIEF — Zone Alarm API (fictional)\n\nObjective:\nPull only the high-priority alarms raised in the Armory zone.\n\nResources:\n- Alarms are listed per zone: /api/zones/{zoneId}/alarms.\n- {zoneId} is the zone name in lowercase (Armory).\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- Add the query parameter priority — the alarm priority in lowercase (high).\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-final-lock-field-l3",
+      "variantId": "final-lock-field-l3-v1",
+      "missionId": "m1-field-l3",
+      "deviceId": "final-lock-field-l3",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/final-locks/{lockId}",
+      "pathParameters": {
+        "lockId": "fa-l3"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "lockId": "fa-l3",
+        "status": "released",
+        "message": "Field Agent level 3 final lock released."
+      },
+      "documentation": "FIELD BRIEF — Final Lock API (fictional)\n\nObjective:\nRelease this room's extra exit lock after every required device is active.\n\nResources:\n- Final locks live at /api/final-locks/{lockId}.\n- {lockId} for this room is the room code: fa-l3.\n\nMethod semantics:\n- DELETE releases (removes) the lock record. GET only reads it.\n\nRules:\n- Substitute {lockId}. Construct the method and path yourself.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l4-passes-v1",
+      "variantId": "fa-l4-passes-v1",
+      "missionId": "m1-field-l4",
+      "deviceId": "fa-l4-passes-1",
+      "conceptTags": [
+        "http.method.post",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "POST",
+      "pathTemplate": "/api/zones/{zoneId}/visitor-passes",
+      "pathParameters": {
+        "zoneId": "lobby"
+      },
+      "queryParameters": {},
+      "successStatus": 201,
+      "successBody": {
+        "resource": "/api/zones/lobby/visitor-passes",
+        "status": "secured",
+        "message": "Visitor Pass API accepted the request. Device fa-l4-passes-1 activated."
+      },
+      "documentation": "FIELD BRIEF — Visitor Pass API (fictional)\n\nObjective:\nIssue a new visitor pass for an inbound courier in the Lobby zone.\n\nResources:\n- Each zone owns a visitor-passes collection: /api/zones/{zoneId}/visitor-passes.\n- {zoneId} is the zone name in lowercase (Lobby).\n\nMethod semantics:\n- POST creates a new record inside a collection resource.\n- PUT replaces an existing record at its own URL, GET only reads, and DELETE removes; none of them file a new record.\n\nRules:\n- A request body is optional in this simulation; the method and path decide the outcome.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l4-passes-v2",
+      "variantId": "fa-l4-passes-v2",
+      "missionId": "m1-field-l4",
+      "deviceId": "fa-l4-passes-2",
+      "conceptTags": [
+        "http.method.post",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "POST",
+      "pathTemplate": "/api/zones/{zoneId}/visitor-passes",
+      "pathParameters": {
+        "zoneId": "dock"
+      },
+      "queryParameters": {},
+      "successStatus": 201,
+      "successBody": {
+        "resource": "/api/zones/dock/visitor-passes",
+        "status": "secured",
+        "message": "Visitor Pass API accepted the request. Device fa-l4-passes-2 activated."
+      },
+      "documentation": "FIELD BRIEF — Visitor Pass API (fictional)\n\nObjective:\nIssue a new visitor pass for an inbound courier in the Dock zone.\n\nResources:\n- Each zone owns a visitor-passes collection: /api/zones/{zoneId}/visitor-passes.\n- {zoneId} is the zone name in lowercase (Dock).\n\nMethod semantics:\n- POST creates a new record inside a collection resource.\n- PUT replaces an existing record at its own URL, GET only reads, and DELETE removes; none of them file a new record.\n\nRules:\n- A request body is optional in this simulation; the method and path decide the outcome.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l4-passes-v3",
+      "variantId": "fa-l4-passes-v3",
+      "missionId": "m1-field-l4",
+      "deviceId": "fa-l4-passes-3",
+      "conceptTags": [
+        "http.method.post",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "POST",
+      "pathTemplate": "/api/zones/{zoneId}/visitor-passes",
+      "pathParameters": {
+        "zoneId": "lab"
+      },
+      "queryParameters": {},
+      "successStatus": 201,
+      "successBody": {
+        "resource": "/api/zones/lab/visitor-passes",
+        "status": "secured",
+        "message": "Visitor Pass API accepted the request. Device fa-l4-passes-3 activated."
+      },
+      "documentation": "FIELD BRIEF — Visitor Pass API (fictional)\n\nObjective:\nIssue a new visitor pass for an inbound courier in the Lab zone.\n\nResources:\n- Each zone owns a visitor-passes collection: /api/zones/{zoneId}/visitor-passes.\n- {zoneId} is the zone name in lowercase (Lab).\n\nMethod semantics:\n- POST creates a new record inside a collection resource.\n- PUT replaces an existing record at its own URL, GET only reads, and DELETE removes; none of them file a new record.\n\nRules:\n- A request body is optional in this simulation; the method and path decide the outcome.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l4-incidents-v1",
+      "variantId": "fa-l4-incidents-v1",
+      "missionId": "m1-field-l4",
+      "deviceId": "fa-l4-incidents-1",
+      "conceptTags": [
+        "http.method.post",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "POST",
+      "pathTemplate": "/api/zones/{zoneId}/incident-reports",
+      "pathParameters": {
+        "zoneId": "vault"
+      },
+      "queryParameters": {},
+      "successStatus": 201,
+      "successBody": {
+        "resource": "/api/zones/vault/incident-reports",
+        "status": "secured",
+        "message": "Incident Report API accepted the request. Device fa-l4-incidents-1 activated."
+      },
+      "documentation": "FIELD BRIEF — Incident Report API (fictional)\n\nObjective:\nLog a new incident report for the forced hatch in the Vault zone.\n\nResources:\n- Each zone owns an incident-reports collection: /api/zones/{zoneId}/incident-reports.\n- {zoneId} is the zone name in lowercase (Vault).\n\nMethod semantics:\n- POST creates a new record inside a collection resource.\n- PUT replaces an existing record at its own URL, GET only reads, and DELETE removes; none of them file a new record.\n\nRules:\n- File a new record in the collection; do not address an existing report id.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l4-incidents-v2",
+      "variantId": "fa-l4-incidents-v2",
+      "missionId": "m1-field-l4",
+      "deviceId": "fa-l4-incidents-2",
+      "conceptTags": [
+        "http.method.post",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "POST",
+      "pathTemplate": "/api/zones/{zoneId}/incident-reports",
+      "pathParameters": {
+        "zoneId": "armory"
+      },
+      "queryParameters": {},
+      "successStatus": 201,
+      "successBody": {
+        "resource": "/api/zones/armory/incident-reports",
+        "status": "secured",
+        "message": "Incident Report API accepted the request. Device fa-l4-incidents-2 activated."
+      },
+      "documentation": "FIELD BRIEF — Incident Report API (fictional)\n\nObjective:\nLog a new incident report for the forced hatch in the Armory zone.\n\nResources:\n- Each zone owns an incident-reports collection: /api/zones/{zoneId}/incident-reports.\n- {zoneId} is the zone name in lowercase (Armory).\n\nMethod semantics:\n- POST creates a new record inside a collection resource.\n- PUT replaces an existing record at its own URL, GET only reads, and DELETE removes; none of them file a new record.\n\nRules:\n- File a new record in the collection; do not address an existing report id.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l4-incidents-v3",
+      "variantId": "fa-l4-incidents-v3",
+      "missionId": "m1-field-l4",
+      "deviceId": "fa-l4-incidents-3",
+      "conceptTags": [
+        "http.method.post",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "POST",
+      "pathTemplate": "/api/zones/{zoneId}/incident-reports",
+      "pathParameters": {
+        "zoneId": "lobby"
+      },
+      "queryParameters": {},
+      "successStatus": 201,
+      "successBody": {
+        "resource": "/api/zones/lobby/incident-reports",
+        "status": "secured",
+        "message": "Incident Report API accepted the request. Device fa-l4-incidents-3 activated."
+      },
+      "documentation": "FIELD BRIEF — Incident Report API (fictional)\n\nObjective:\nLog a new incident report for the forced hatch in the Lobby zone.\n\nResources:\n- Each zone owns an incident-reports collection: /api/zones/{zoneId}/incident-reports.\n- {zoneId} is the zone name in lowercase (Lobby).\n\nMethod semantics:\n- POST creates a new record inside a collection resource.\n- PUT replaces an existing record at its own URL, GET only reads, and DELETE removes; none of them file a new record.\n\nRules:\n- File a new record in the collection; do not address an existing report id.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l4-tickets-v1",
+      "variantId": "fa-l4-tickets-v1",
+      "missionId": "m1-field-l4",
+      "deviceId": "fa-l4-tickets-1",
+      "conceptTags": [
+        "http.method.post",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "POST",
+      "pathTemplate": "/api/floors/{floorId}/maintenance-tickets",
+      "pathParameters": {
+        "floorId": "b2"
+      },
+      "queryParameters": {},
+      "successStatus": 201,
+      "successBody": {
+        "resource": "/api/floors/b2/maintenance-tickets",
+        "status": "secured",
+        "message": "Maintenance Ticket API accepted the request. Device fa-l4-tickets-1 activated."
+      },
+      "documentation": "FIELD BRIEF — Maintenance Ticket API (fictional)\n\nObjective:\nOpen a new maintenance ticket for the jammed shutter on floor B2.\n\nResources:\n- Each floor owns a maintenance-tickets collection: /api/floors/{floorId}/maintenance-tickets.\n- {floorId} is the floor code in lowercase (B2).\n\nMethod semantics:\n- POST creates a new record inside a collection resource.\n- PUT replaces an existing record at its own URL, GET only reads, and DELETE removes; none of them file a new record.\n\nRules:\n- Create the ticket in the collection; there is no ticket id yet.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l4-tickets-v2",
+      "variantId": "fa-l4-tickets-v2",
+      "missionId": "m1-field-l4",
+      "deviceId": "fa-l4-tickets-2",
+      "conceptTags": [
+        "http.method.post",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "POST",
+      "pathTemplate": "/api/floors/{floorId}/maintenance-tickets",
+      "pathParameters": {
+        "floorId": "l4"
+      },
+      "queryParameters": {},
+      "successStatus": 201,
+      "successBody": {
+        "resource": "/api/floors/l4/maintenance-tickets",
+        "status": "secured",
+        "message": "Maintenance Ticket API accepted the request. Device fa-l4-tickets-2 activated."
+      },
+      "documentation": "FIELD BRIEF — Maintenance Ticket API (fictional)\n\nObjective:\nOpen a new maintenance ticket for the jammed shutter on floor L4.\n\nResources:\n- Each floor owns a maintenance-tickets collection: /api/floors/{floorId}/maintenance-tickets.\n- {floorId} is the floor code in lowercase (L4).\n\nMethod semantics:\n- POST creates a new record inside a collection resource.\n- PUT replaces an existing record at its own URL, GET only reads, and DELETE removes; none of them file a new record.\n\nRules:\n- Create the ticket in the collection; there is no ticket id yet.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l4-tickets-v3",
+      "variantId": "fa-l4-tickets-v3",
+      "missionId": "m1-field-l4",
+      "deviceId": "fa-l4-tickets-3",
+      "conceptTags": [
+        "http.method.post",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "POST",
+      "pathTemplate": "/api/floors/{floorId}/maintenance-tickets",
+      "pathParameters": {
+        "floorId": "b1"
+      },
+      "queryParameters": {},
+      "successStatus": 201,
+      "successBody": {
+        "resource": "/api/floors/b1/maintenance-tickets",
+        "status": "secured",
+        "message": "Maintenance Ticket API accepted the request. Device fa-l4-tickets-3 activated."
+      },
+      "documentation": "FIELD BRIEF — Maintenance Ticket API (fictional)\n\nObjective:\nOpen a new maintenance ticket for the jammed shutter on floor B1.\n\nResources:\n- Each floor owns a maintenance-tickets collection: /api/floors/{floorId}/maintenance-tickets.\n- {floorId} is the floor code in lowercase (B1).\n\nMethod semantics:\n- POST creates a new record inside a collection resource.\n- PUT replaces an existing record at its own URL, GET only reads, and DELETE removes; none of them file a new record.\n\nRules:\n- Create the ticket in the collection; there is no ticket id yet.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-final-lock-field-l4",
+      "variantId": "final-lock-field-l4-v1",
+      "missionId": "m1-field-l4",
+      "deviceId": "final-lock-field-l4",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/final-locks/{lockId}",
+      "pathParameters": {
+        "lockId": "fa-l4"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "lockId": "fa-l4",
+        "status": "released",
+        "message": "Field Agent level 4 final lock released."
+      },
+      "documentation": "FIELD BRIEF — Final Lock API (fictional)\n\nObjective:\nRelease this room's extra exit lock after every required device is active.\n\nResources:\n- Final locks live at /api/final-locks/{lockId}.\n- {lockId} for this room is the room code: fa-l4.\n\nMethod semantics:\n- DELETE releases (removes) the lock record. GET only reads it.\n\nRules:\n- Substitute {lockId}. Construct the method and path yourself.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l5-clearance-v1",
+      "variantId": "fa-l5-clearance-v1",
+      "missionId": "m1-field-l5",
+      "deviceId": "fa-l5-clearance-1",
+      "conceptTags": [
+        "http.method.put",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "PUT",
+      "pathTemplate": "/api/agents/{agentId}/clearances/{clearanceId}",
+      "pathParameters": {
+        "agentId": "a-117",
+        "clearanceId": "vault"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/agents/a-117/clearances/vault",
+        "status": "secured",
+        "message": "Agent Clearance API accepted the request. Device fa-l5-clearance-1 activated."
+      },
+      "documentation": "FIELD BRIEF — Agent Clearance API (fictional)\n\nObjective:\nReplace agent A-117's Vault clearance record with the updated version.\n\nResources:\n- Clearances are nested under agents: /api/agents/{agentId}/clearances/{clearanceId}.\n- {agentId} is the agent code in lowercase (A-117).\n- {clearanceId} is the clearance area in lowercase with spaces as hyphens (Vault).\n\nMethod semantics:\n- PUT replaces an existing record at that record's own URL.\n- POST creates new records in a collection, GET only reads, and DELETE removes; none of them replace an existing record.\n\nRules:\n- A request body is optional in this simulation.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l5-clearance-v2",
+      "variantId": "fa-l5-clearance-v2",
+      "missionId": "m1-field-l5",
+      "deviceId": "fa-l5-clearance-2",
+      "conceptTags": [
+        "http.method.put",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "PUT",
+      "pathTemplate": "/api/agents/{agentId}/clearances/{clearanceId}",
+      "pathParameters": {
+        "agentId": "a-042",
+        "clearanceId": "armory"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/agents/a-042/clearances/armory",
+        "status": "secured",
+        "message": "Agent Clearance API accepted the request. Device fa-l5-clearance-2 activated."
+      },
+      "documentation": "FIELD BRIEF — Agent Clearance API (fictional)\n\nObjective:\nReplace agent A-042's Armory clearance record with the updated version.\n\nResources:\n- Clearances are nested under agents: /api/agents/{agentId}/clearances/{clearanceId}.\n- {agentId} is the agent code in lowercase (A-042).\n- {clearanceId} is the clearance area in lowercase with spaces as hyphens (Armory).\n\nMethod semantics:\n- PUT replaces an existing record at that record's own URL.\n- POST creates new records in a collection, GET only reads, and DELETE removes; none of them replace an existing record.\n\nRules:\n- A request body is optional in this simulation.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l5-clearance-v3",
+      "variantId": "fa-l5-clearance-v3",
+      "missionId": "m1-field-l5",
+      "deviceId": "fa-l5-clearance-3",
+      "conceptTags": [
+        "http.method.put",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "PUT",
+      "pathTemplate": "/api/agents/{agentId}/clearances/{clearanceId}",
+      "pathParameters": {
+        "agentId": "a-305",
+        "clearanceId": "server-room"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/agents/a-305/clearances/server-room",
+        "status": "secured",
+        "message": "Agent Clearance API accepted the request. Device fa-l5-clearance-3 activated."
+      },
+      "documentation": "FIELD BRIEF — Agent Clearance API (fictional)\n\nObjective:\nReplace agent A-305's Server Room clearance record with the updated version.\n\nResources:\n- Clearances are nested under agents: /api/agents/{agentId}/clearances/{clearanceId}.\n- {agentId} is the agent code in lowercase (A-305).\n- {clearanceId} is the clearance area in lowercase with spaces as hyphens (Server Room).\n\nMethod semantics:\n- PUT replaces an existing record at that record's own URL.\n- POST creates new records in a collection, GET only reads, and DELETE removes; none of them replace an existing record.\n\nRules:\n- A request body is optional in this simulation.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l5-member-v1",
+      "variantId": "fa-l5-member-v1",
+      "missionId": "m1-field-l5",
+      "deviceId": "fa-l5-member-1",
+      "conceptTags": [
+        "http.method.put",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "PUT",
+      "pathTemplate": "/api/teams/{teamId}/members/{memberId}",
+      "pathParameters": {
+        "teamId": "falcon",
+        "memberId": "m-08"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/teams/falcon/members/m-08",
+        "status": "secured",
+        "message": "Team Roster API accepted the request. Device fa-l5-member-1 activated."
+      },
+      "documentation": "FIELD BRIEF — Team Roster API (fictional)\n\nObjective:\nOverwrite member M-08's roster entry on team Falcon after the transfer.\n\nResources:\n- Members are nested under teams: /api/teams/{teamId}/members/{memberId}.\n- {teamId} is the team call sign in lowercase (Falcon).\n- {memberId} is the member code in lowercase (M-08).\n\nMethod semantics:\n- PUT replaces an existing record at that record's own URL.\n- POST creates new records in a collection, GET only reads, and DELETE removes; none of them replace an existing record.\n\nRules:\n- Replace the existing entry; do not add a new member.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l5-member-v2",
+      "variantId": "fa-l5-member-v2",
+      "missionId": "m1-field-l5",
+      "deviceId": "fa-l5-member-2",
+      "conceptTags": [
+        "http.method.put",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "PUT",
+      "pathTemplate": "/api/teams/{teamId}/members/{memberId}",
+      "pathParameters": {
+        "teamId": "raven",
+        "memberId": "m-15"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/teams/raven/members/m-15",
+        "status": "secured",
+        "message": "Team Roster API accepted the request. Device fa-l5-member-2 activated."
+      },
+      "documentation": "FIELD BRIEF — Team Roster API (fictional)\n\nObjective:\nOverwrite member M-15's roster entry on team Raven after the transfer.\n\nResources:\n- Members are nested under teams: /api/teams/{teamId}/members/{memberId}.\n- {teamId} is the team call sign in lowercase (Raven).\n- {memberId} is the member code in lowercase (M-15).\n\nMethod semantics:\n- PUT replaces an existing record at that record's own URL.\n- POST creates new records in a collection, GET only reads, and DELETE removes; none of them replace an existing record.\n\nRules:\n- Replace the existing entry; do not add a new member.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l5-member-v3",
+      "variantId": "fa-l5-member-v3",
+      "missionId": "m1-field-l5",
+      "deviceId": "fa-l5-member-3",
+      "conceptTags": [
+        "http.method.put",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "PUT",
+      "pathTemplate": "/api/teams/{teamId}/members/{memberId}",
+      "pathParameters": {
+        "teamId": "viper",
+        "memberId": "m-02"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/teams/viper/members/m-02",
+        "status": "secured",
+        "message": "Team Roster API accepted the request. Device fa-l5-member-3 activated."
+      },
+      "documentation": "FIELD BRIEF — Team Roster API (fictional)\n\nObjective:\nOverwrite member M-02's roster entry on team Viper after the transfer.\n\nResources:\n- Members are nested under teams: /api/teams/{teamId}/members/{memberId}.\n- {teamId} is the team call sign in lowercase (Viper).\n- {memberId} is the member code in lowercase (M-02).\n\nMethod semantics:\n- PUT replaces an existing record at that record's own URL.\n- POST creates new records in a collection, GET only reads, and DELETE removes; none of them replace an existing record.\n\nRules:\n- Replace the existing entry; do not add a new member.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l5-shift-v1",
+      "variantId": "fa-l5-shift-v1",
+      "missionId": "m1-field-l5",
+      "deviceId": "fa-l5-shift-1",
+      "conceptTags": [
+        "http.method.put",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "PUT",
+      "pathTemplate": "/api/guards/{guardId}/shifts/{shiftId}",
+      "pathParameters": {
+        "guardId": "g-21",
+        "shiftId": "night"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/guards/g-21/shifts/night",
+        "status": "secured",
+        "message": "Guard Shift API accepted the request. Device fa-l5-shift-1 activated."
+      },
+      "documentation": "FIELD BRIEF — Guard Shift API (fictional)\n\nObjective:\nReplace guard G-21's Night shift record so the patrol gap closes.\n\nResources:\n- Shifts are nested under guards: /api/guards/{guardId}/shifts/{shiftId}.\n- {guardId} is the guard code in lowercase (G-21).\n- {shiftId} is the shift name in lowercase (Night).\n\nMethod semantics:\n- PUT replaces an existing record at that record's own URL.\n- POST creates new records in a collection, GET only reads, and DELETE removes; none of them replace an existing record.\n\nRules:\n- Replace the existing shift record.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l5-shift-v2",
+      "variantId": "fa-l5-shift-v2",
+      "missionId": "m1-field-l5",
+      "deviceId": "fa-l5-shift-2",
+      "conceptTags": [
+        "http.method.put",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "PUT",
+      "pathTemplate": "/api/guards/{guardId}/shifts/{shiftId}",
+      "pathParameters": {
+        "guardId": "g-07",
+        "shiftId": "dawn"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/guards/g-07/shifts/dawn",
+        "status": "secured",
+        "message": "Guard Shift API accepted the request. Device fa-l5-shift-2 activated."
+      },
+      "documentation": "FIELD BRIEF — Guard Shift API (fictional)\n\nObjective:\nReplace guard G-07's Dawn shift record so the patrol gap closes.\n\nResources:\n- Shifts are nested under guards: /api/guards/{guardId}/shifts/{shiftId}.\n- {guardId} is the guard code in lowercase (G-07).\n- {shiftId} is the shift name in lowercase (Dawn).\n\nMethod semantics:\n- PUT replaces an existing record at that record's own URL.\n- POST creates new records in a collection, GET only reads, and DELETE removes; none of them replace an existing record.\n\nRules:\n- Replace the existing shift record.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l5-shift-v3",
+      "variantId": "fa-l5-shift-v3",
+      "missionId": "m1-field-l5",
+      "deviceId": "fa-l5-shift-3",
+      "conceptTags": [
+        "http.method.put",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "PUT",
+      "pathTemplate": "/api/guards/{guardId}/shifts/{shiftId}",
+      "pathParameters": {
+        "guardId": "g-33",
+        "shiftId": "late"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/guards/g-33/shifts/late",
+        "status": "secured",
+        "message": "Guard Shift API accepted the request. Device fa-l5-shift-3 activated."
+      },
+      "documentation": "FIELD BRIEF — Guard Shift API (fictional)\n\nObjective:\nReplace guard G-33's Late shift record so the patrol gap closes.\n\nResources:\n- Shifts are nested under guards: /api/guards/{guardId}/shifts/{shiftId}.\n- {guardId} is the guard code in lowercase (G-33).\n- {shiftId} is the shift name in lowercase (Late).\n\nMethod semantics:\n- PUT replaces an existing record at that record's own URL.\n- POST creates new records in a collection, GET only reads, and DELETE removes; none of them replace an existing record.\n\nRules:\n- Replace the existing shift record.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-final-lock-field-l5",
+      "variantId": "final-lock-field-l5-v1",
+      "missionId": "m1-field-l5",
+      "deviceId": "final-lock-field-l5",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/final-locks/{lockId}",
+      "pathParameters": {
+        "lockId": "fa-l5"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "lockId": "fa-l5",
+        "status": "released",
+        "message": "Field Agent level 5 final lock released."
+      },
+      "documentation": "FIELD BRIEF — Final Lock API (fictional)\n\nObjective:\nRelease this room's extra exit lock after every required device is active.\n\nResources:\n- Final locks live at /api/final-locks/{lockId}.\n- {lockId} for this room is the room code: fa-l5.\n\nMethod semantics:\n- DELETE releases (removes) the lock record. GET only reads it.\n\nRules:\n- Substitute {lockId}. Construct the method and path yourself.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l6-session-v1",
+      "variantId": "fa-l6-session-v1",
+      "missionId": "m1-field-l6",
+      "deviceId": "fa-l6-session-1",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/zones/{zoneId}/sessions/{sessionId}",
+      "pathParameters": {
+        "zoneId": "vault",
+        "sessionId": "s-5521"
+      },
+      "queryParameters": {
+        "reason": "compromised"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/zones/vault/sessions/s-5521",
+        "status": "secured",
+        "message": "Zone Session API accepted the request. Device fa-l6-session-1 activated."
+      },
+      "documentation": "FIELD BRIEF — Zone Session API (fictional)\n\nObjective:\nTerminate login session S-5521 in the Vault zone; it is compromised.\n\nResources:\n- Sessions are nested under zones: /api/zones/{zoneId}/sessions/{sessionId}.\n- {zoneId} is the zone name in lowercase (Vault).\n- {sessionId} is the session code in lowercase (S-5521).\n\nMethod semantics:\n- DELETE removes or revokes the record addressed by the URL.\n- GET only reads, and POST/PUT create or replace records; none of them revoke access.\n\nRules:\n- Add the query parameter reason — the audit reason in lowercase (compromised).\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l6-session-v2",
+      "variantId": "fa-l6-session-v2",
+      "missionId": "m1-field-l6",
+      "deviceId": "fa-l6-session-2",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/zones/{zoneId}/sessions/{sessionId}",
+      "pathParameters": {
+        "zoneId": "dock",
+        "sessionId": "s-0193"
+      },
+      "queryParameters": {
+        "reason": "expired"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/zones/dock/sessions/s-0193",
+        "status": "secured",
+        "message": "Zone Session API accepted the request. Device fa-l6-session-2 activated."
+      },
+      "documentation": "FIELD BRIEF — Zone Session API (fictional)\n\nObjective:\nTerminate login session S-0193 in the Dock zone; it is expired.\n\nResources:\n- Sessions are nested under zones: /api/zones/{zoneId}/sessions/{sessionId}.\n- {zoneId} is the zone name in lowercase (Dock).\n- {sessionId} is the session code in lowercase (S-0193).\n\nMethod semantics:\n- DELETE removes or revokes the record addressed by the URL.\n- GET only reads, and POST/PUT create or replace records; none of them revoke access.\n\nRules:\n- Add the query parameter reason — the audit reason in lowercase (expired).\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l6-session-v3",
+      "variantId": "fa-l6-session-v3",
+      "missionId": "m1-field-l6",
+      "deviceId": "fa-l6-session-3",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/zones/{zoneId}/sessions/{sessionId}",
+      "pathParameters": {
+        "zoneId": "lab",
+        "sessionId": "s-7740"
+      },
+      "queryParameters": {
+        "reason": "compromised"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/zones/lab/sessions/s-7740",
+        "status": "secured",
+        "message": "Zone Session API accepted the request. Device fa-l6-session-3 activated."
+      },
+      "documentation": "FIELD BRIEF — Zone Session API (fictional)\n\nObjective:\nTerminate login session S-7740 in the Lab zone; it is compromised.\n\nResources:\n- Sessions are nested under zones: /api/zones/{zoneId}/sessions/{sessionId}.\n- {zoneId} is the zone name in lowercase (Lab).\n- {sessionId} is the session code in lowercase (S-7740).\n\nMethod semantics:\n- DELETE removes or revokes the record addressed by the URL.\n- GET only reads, and POST/PUT create or replace records; none of them revoke access.\n\nRules:\n- Add the query parameter reason — the audit reason in lowercase (compromised).\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l6-keycard-v1",
+      "variantId": "fa-l6-keycard-v1",
+      "missionId": "m1-field-l6",
+      "deviceId": "fa-l6-keycard-1",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/holders/{holderId}/keycards/{keycardId}",
+      "pathParameters": {
+        "holderId": "h-88",
+        "keycardId": "kc-3"
+      },
+      "queryParameters": {
+        "reason": "lost"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/holders/h-88/keycards/kc-3",
+        "status": "secured",
+        "message": "Keycard Holder API accepted the request. Device fa-l6-keycard-1 activated."
+      },
+      "documentation": "FIELD BRIEF — Keycard Holder API (fictional)\n\nObjective:\nRevoke keycard KC-3 belonging to holder H-88; it was reported lost.\n\nResources:\n- Keycards are nested under holders: /api/holders/{holderId}/keycards/{keycardId}.\n- {holderId} is the holder code in lowercase (H-88).\n- {keycardId} is the keycard code in lowercase (KC-3).\n\nMethod semantics:\n- DELETE removes or revokes the record addressed by the URL.\n- GET only reads, and POST/PUT create or replace records; none of them revoke access.\n\nRules:\n- Add the query parameter reason — why the card is revoked, in lowercase (lost).\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l6-keycard-v2",
+      "variantId": "fa-l6-keycard-v2",
+      "missionId": "m1-field-l6",
+      "deviceId": "fa-l6-keycard-2",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/holders/{holderId}/keycards/{keycardId}",
+      "pathParameters": {
+        "holderId": "h-14",
+        "keycardId": "kc-9"
+      },
+      "queryParameters": {
+        "reason": "stolen"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/holders/h-14/keycards/kc-9",
+        "status": "secured",
+        "message": "Keycard Holder API accepted the request. Device fa-l6-keycard-2 activated."
+      },
+      "documentation": "FIELD BRIEF — Keycard Holder API (fictional)\n\nObjective:\nRevoke keycard KC-9 belonging to holder H-14; it was reported stolen.\n\nResources:\n- Keycards are nested under holders: /api/holders/{holderId}/keycards/{keycardId}.\n- {holderId} is the holder code in lowercase (H-14).\n- {keycardId} is the keycard code in lowercase (KC-9).\n\nMethod semantics:\n- DELETE removes or revokes the record addressed by the URL.\n- GET only reads, and POST/PUT create or replace records; none of them revoke access.\n\nRules:\n- Add the query parameter reason — why the card is revoked, in lowercase (stolen).\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l6-keycard-v3",
+      "variantId": "fa-l6-keycard-v3",
+      "missionId": "m1-field-l6",
+      "deviceId": "fa-l6-keycard-3",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/holders/{holderId}/keycards/{keycardId}",
+      "pathParameters": {
+        "holderId": "h-61",
+        "keycardId": "kc-1"
+      },
+      "queryParameters": {
+        "reason": "lost"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/holders/h-61/keycards/kc-1",
+        "status": "secured",
+        "message": "Keycard Holder API accepted the request. Device fa-l6-keycard-3 activated."
+      },
+      "documentation": "FIELD BRIEF — Keycard Holder API (fictional)\n\nObjective:\nRevoke keycard KC-1 belonging to holder H-61; it was reported lost.\n\nResources:\n- Keycards are nested under holders: /api/holders/{holderId}/keycards/{keycardId}.\n- {holderId} is the holder code in lowercase (H-61).\n- {keycardId} is the keycard code in lowercase (KC-1).\n\nMethod semantics:\n- DELETE removes or revokes the record addressed by the URL.\n- GET only reads, and POST/PUT create or replace records; none of them revoke access.\n\nRules:\n- Add the query parameter reason — why the card is revoked, in lowercase (lost).\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l6-token-v1",
+      "variantId": "fa-l6-token-v1",
+      "missionId": "m1-field-l6",
+      "deviceId": "fa-l6-token-1",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/terminals/{terminalId}/tokens/{tokenId}",
+      "pathParameters": {
+        "terminalId": "t-6",
+        "tokenId": "tk-204"
+      },
+      "queryParameters": {
+        "reason": "expired"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/terminals/t-6/tokens/tk-204",
+        "status": "secured",
+        "message": "Terminal Token API accepted the request. Device fa-l6-token-1 activated."
+      },
+      "documentation": "FIELD BRIEF — Terminal Token API (fictional)\n\nObjective:\nDelete access token TK-204 on terminal T-6; it is expired.\n\nResources:\n- Tokens are nested under terminals: /api/terminals/{terminalId}/tokens/{tokenId}.\n- {terminalId} is the terminal code in lowercase (T-6).\n- {tokenId} is the token code in lowercase (TK-204).\n\nMethod semantics:\n- DELETE removes or revokes the record addressed by the URL.\n- GET only reads, and POST/PUT create or replace records; none of them revoke access.\n\nRules:\n- Add the query parameter reason — the revocation reason in lowercase (expired).\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l6-token-v2",
+      "variantId": "fa-l6-token-v2",
+      "missionId": "m1-field-l6",
+      "deviceId": "fa-l6-token-2",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/terminals/{terminalId}/tokens/{tokenId}",
+      "pathParameters": {
+        "terminalId": "t-2",
+        "tokenId": "tk-919"
+      },
+      "queryParameters": {
+        "reason": "compromised"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/terminals/t-2/tokens/tk-919",
+        "status": "secured",
+        "message": "Terminal Token API accepted the request. Device fa-l6-token-2 activated."
+      },
+      "documentation": "FIELD BRIEF — Terminal Token API (fictional)\n\nObjective:\nDelete access token TK-919 on terminal T-2; it is compromised.\n\nResources:\n- Tokens are nested under terminals: /api/terminals/{terminalId}/tokens/{tokenId}.\n- {terminalId} is the terminal code in lowercase (T-2).\n- {tokenId} is the token code in lowercase (TK-919).\n\nMethod semantics:\n- DELETE removes or revokes the record addressed by the URL.\n- GET only reads, and POST/PUT create or replace records; none of them revoke access.\n\nRules:\n- Add the query parameter reason — the revocation reason in lowercase (compromised).\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l6-token-v3",
+      "variantId": "fa-l6-token-v3",
+      "missionId": "m1-field-l6",
+      "deviceId": "fa-l6-token-3",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/terminals/{terminalId}/tokens/{tokenId}",
+      "pathParameters": {
+        "terminalId": "t-8",
+        "tokenId": "tk-031"
+      },
+      "queryParameters": {
+        "reason": "expired"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/terminals/t-8/tokens/tk-031",
+        "status": "secured",
+        "message": "Terminal Token API accepted the request. Device fa-l6-token-3 activated."
+      },
+      "documentation": "FIELD BRIEF — Terminal Token API (fictional)\n\nObjective:\nDelete access token TK-031 on terminal T-8; it is expired.\n\nResources:\n- Tokens are nested under terminals: /api/terminals/{terminalId}/tokens/{tokenId}.\n- {terminalId} is the terminal code in lowercase (T-8).\n- {tokenId} is the token code in lowercase (TK-031).\n\nMethod semantics:\n- DELETE removes or revokes the record addressed by the URL.\n- GET only reads, and POST/PUT create or replace records; none of them revoke access.\n\nRules:\n- Add the query parameter reason — the revocation reason in lowercase (expired).\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-final-lock-field-l6",
+      "variantId": "final-lock-field-l6-v1",
+      "missionId": "m1-field-l6",
+      "deviceId": "final-lock-field-l6",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/final-locks/{lockId}",
+      "pathParameters": {
+        "lockId": "fa-l6"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "lockId": "fa-l6",
+        "status": "released",
+        "message": "Field Agent level 6 final lock released."
+      },
+      "documentation": "FIELD BRIEF — Final Lock API (fictional)\n\nObjective:\nRelease this room's extra exit lock after every required device is active.\n\nResources:\n- Final locks live at /api/final-locks/{lockId}.\n- {lockId} for this room is the room code: fa-l6.\n\nMethod semantics:\n- DELETE releases (removes) the lock record. GET only reads it.\n\nRules:\n- Substitute {lockId}. Construct the method and path yourself.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l7-alerts-v1",
+      "variantId": "fa-l7-alerts-v1",
+      "missionId": "m1-field-l7",
+      "deviceId": "fa-l7-alerts-1",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/command/sectors/{sectorId}/alerts",
+      "pathParameters": {
+        "sectorId": "north"
+      },
+      "queryParameters": {
+        "severity": "high"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/command/sectors/north/alerts",
+        "status": "secured",
+        "message": "Field Command Alert API accepted the request. Device fa-l7-alerts-1 activated."
+      },
+      "documentation": "FIELD BRIEF — Field Command Alert API (fictional)\n\nObjective:\nRead the high-severity alerts for the North sector so CONTROL can map the defences.\n\nResources:\n- Alerts are listed per sector: /api/command/sectors/{sectorId}/alerts.\n- {sectorId} is the sector name in lowercase (North).\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- Add the query parameter severity — the severity in lowercase (high).\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l7-alerts-v2",
+      "variantId": "fa-l7-alerts-v2",
+      "missionId": "m1-field-l7",
+      "deviceId": "fa-l7-alerts-2",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/command/sectors/{sectorId}/alerts",
+      "pathParameters": {
+        "sectorId": "east"
+      },
+      "queryParameters": {
+        "severity": "critical"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/command/sectors/east/alerts",
+        "status": "secured",
+        "message": "Field Command Alert API accepted the request. Device fa-l7-alerts-2 activated."
+      },
+      "documentation": "FIELD BRIEF — Field Command Alert API (fictional)\n\nObjective:\nRead the critical-severity alerts for the East sector so CONTROL can map the defences.\n\nResources:\n- Alerts are listed per sector: /api/command/sectors/{sectorId}/alerts.\n- {sectorId} is the sector name in lowercase (East).\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- Add the query parameter severity — the severity in lowercase (critical).\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l7-alerts-v3",
+      "variantId": "fa-l7-alerts-v3",
+      "missionId": "m1-field-l7",
+      "deviceId": "fa-l7-alerts-3",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/command/sectors/{sectorId}/alerts",
+      "pathParameters": {
+        "sectorId": "south"
+      },
+      "queryParameters": {
+        "severity": "high"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/command/sectors/south/alerts",
+        "status": "secured",
+        "message": "Field Command Alert API accepted the request. Device fa-l7-alerts-3 activated."
+      },
+      "documentation": "FIELD BRIEF — Field Command Alert API (fictional)\n\nObjective:\nRead the high-severity alerts for the South sector so CONTROL can map the defences.\n\nResources:\n- Alerts are listed per sector: /api/command/sectors/{sectorId}/alerts.\n- {sectorId} is the sector name in lowercase (South).\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- Add the query parameter severity — the severity in lowercase (high).\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l7-relays-v1",
+      "variantId": "fa-l7-relays-v1",
+      "missionId": "m1-field-l7",
+      "deviceId": "fa-l7-relays-1",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/command/wings/{wingId}/relays/{relayId}",
+      "pathParameters": {
+        "wingId": "west",
+        "relayId": "r-4"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/command/wings/west/relays/r-4",
+        "status": "secured",
+        "message": "Field Command Relay API accepted the request. Device fa-l7-relays-1 activated."
+      },
+      "documentation": "FIELD BRIEF — Field Command Relay API (fictional)\n\nObjective:\nInspect power relay R-4 in the West wing that feeds the commander's shield.\n\nResources:\n- Relays are nested under wings: /api/command/wings/{wingId}/relays/{relayId}.\n- {wingId} is the wing name in lowercase (West).\n- {relayId} is the relay tag in lowercase (R-4).\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- No body or query string is needed.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l7-relays-v2",
+      "variantId": "fa-l7-relays-v2",
+      "missionId": "m1-field-l7",
+      "deviceId": "fa-l7-relays-2",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/command/wings/{wingId}/relays/{relayId}",
+      "pathParameters": {
+        "wingId": "central",
+        "relayId": "r-11"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/command/wings/central/relays/r-11",
+        "status": "secured",
+        "message": "Field Command Relay API accepted the request. Device fa-l7-relays-2 activated."
+      },
+      "documentation": "FIELD BRIEF — Field Command Relay API (fictional)\n\nObjective:\nInspect power relay R-11 in the Central wing that feeds the commander's shield.\n\nResources:\n- Relays are nested under wings: /api/command/wings/{wingId}/relays/{relayId}.\n- {wingId} is the wing name in lowercase (Central).\n- {relayId} is the relay tag in lowercase (R-11).\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- No body or query string is needed.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l7-relays-v3",
+      "variantId": "fa-l7-relays-v3",
+      "missionId": "m1-field-l7",
+      "deviceId": "fa-l7-relays-3",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/command/wings/{wingId}/relays/{relayId}",
+      "pathParameters": {
+        "wingId": "annex",
+        "relayId": "r-7"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/command/wings/annex/relays/r-7",
+        "status": "secured",
+        "message": "Field Command Relay API accepted the request. Device fa-l7-relays-3 activated."
+      },
+      "documentation": "FIELD BRIEF — Field Command Relay API (fictional)\n\nObjective:\nInspect power relay R-7 in the Annex wing that feeds the commander's shield.\n\nResources:\n- Relays are nested under wings: /api/command/wings/{wingId}/relays/{relayId}.\n- {wingId} is the wing name in lowercase (Annex).\n- {relayId} is the relay tag in lowercase (R-7).\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- No body or query string is needed.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l7-override-v1",
+      "variantId": "fa-l7-override-v1",
+      "missionId": "m1-field-l7",
+      "deviceId": "fa-l7-override-1",
+      "conceptTags": [
+        "http.method.post",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "POST",
+      "pathTemplate": "/api/command/sectors/{sectorId}/override-requests",
+      "pathParameters": {
+        "sectorId": "east"
+      },
+      "queryParameters": {},
+      "successStatus": 201,
+      "successBody": {
+        "resource": "/api/command/sectors/east/override-requests",
+        "status": "secured",
+        "message": "Field Command Override API accepted the request. Device fa-l7-override-1 activated."
+      },
+      "documentation": "FIELD BRIEF — Field Command Override API (fictional)\n\nObjective:\nFile a new override request for the East sector's blast doors.\n\nResources:\n- Each sector owns an override-requests collection: /api/command/sectors/{sectorId}/override-requests.\n- {sectorId} is the sector name in lowercase (East).\n\nMethod semantics:\n- POST creates a new record inside a collection resource.\n- PUT replaces an existing record at its own URL, GET only reads, and DELETE removes; none of them file a new record.\n\nRules:\n- Create a new request in the collection.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l7-override-v2",
+      "variantId": "fa-l7-override-v2",
+      "missionId": "m1-field-l7",
+      "deviceId": "fa-l7-override-2",
+      "conceptTags": [
+        "http.method.post",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "POST",
+      "pathTemplate": "/api/command/sectors/{sectorId}/override-requests",
+      "pathParameters": {
+        "sectorId": "north"
+      },
+      "queryParameters": {},
+      "successStatus": 201,
+      "successBody": {
+        "resource": "/api/command/sectors/north/override-requests",
+        "status": "secured",
+        "message": "Field Command Override API accepted the request. Device fa-l7-override-2 activated."
+      },
+      "documentation": "FIELD BRIEF — Field Command Override API (fictional)\n\nObjective:\nFile a new override request for the North sector's blast doors.\n\nResources:\n- Each sector owns an override-requests collection: /api/command/sectors/{sectorId}/override-requests.\n- {sectorId} is the sector name in lowercase (North).\n\nMethod semantics:\n- POST creates a new record inside a collection resource.\n- PUT replaces an existing record at its own URL, GET only reads, and DELETE removes; none of them file a new record.\n\nRules:\n- Create a new request in the collection.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l7-override-v3",
+      "variantId": "fa-l7-override-v3",
+      "missionId": "m1-field-l7",
+      "deviceId": "fa-l7-override-3",
+      "conceptTags": [
+        "http.method.post",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "POST",
+      "pathTemplate": "/api/command/sectors/{sectorId}/override-requests",
+      "pathParameters": {
+        "sectorId": "west"
+      },
+      "queryParameters": {},
+      "successStatus": 201,
+      "successBody": {
+        "resource": "/api/command/sectors/west/override-requests",
+        "status": "secured",
+        "message": "Field Command Override API accepted the request. Device fa-l7-override-3 activated."
+      },
+      "documentation": "FIELD BRIEF — Field Command Override API (fictional)\n\nObjective:\nFile a new override request for the West sector's blast doors.\n\nResources:\n- Each sector owns an override-requests collection: /api/command/sectors/{sectorId}/override-requests.\n- {sectorId} is the sector name in lowercase (West).\n\nMethod semantics:\n- POST creates a new record inside a collection resource.\n- PUT replaces an existing record at its own URL, GET only reads, and DELETE removes; none of them file a new record.\n\nRules:\n- Create a new request in the collection.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l7-targeting-v1",
+      "variantId": "fa-l7-targeting-v1",
+      "missionId": "m1-field-l7",
+      "deviceId": "fa-l7-targeting-1",
+      "conceptTags": [
+        "http.method.put",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "PUT",
+      "pathTemplate": "/api/command/turrets/{turretId}/targeting",
+      "pathParameters": {
+        "turretId": "tu-1"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/command/turrets/tu-1/targeting",
+        "status": "secured",
+        "message": "Field Command Turret API accepted the request. Device fa-l7-targeting-1 activated."
+      },
+      "documentation": "FIELD BRIEF — Field Command Turret API (fictional)\n\nObjective:\nReplace turret TU-1's targeting profile so it ignores agents.\n\nResources:\n- Each turret has one targeting profile: /api/command/turrets/{turretId}/targeting.\n- {turretId} is the turret tag in lowercase (TU-1).\n\nMethod semantics:\n- PUT replaces an existing record at that record's own URL.\n- POST creates new records in a collection, GET only reads, and DELETE removes; none of them replace an existing record.\n\nRules:\n- Replace the existing profile.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l7-targeting-v2",
+      "variantId": "fa-l7-targeting-v2",
+      "missionId": "m1-field-l7",
+      "deviceId": "fa-l7-targeting-2",
+      "conceptTags": [
+        "http.method.put",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "PUT",
+      "pathTemplate": "/api/command/turrets/{turretId}/targeting",
+      "pathParameters": {
+        "turretId": "tu-5"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/command/turrets/tu-5/targeting",
+        "status": "secured",
+        "message": "Field Command Turret API accepted the request. Device fa-l7-targeting-2 activated."
+      },
+      "documentation": "FIELD BRIEF — Field Command Turret API (fictional)\n\nObjective:\nReplace turret TU-5's targeting profile so it ignores agents.\n\nResources:\n- Each turret has one targeting profile: /api/command/turrets/{turretId}/targeting.\n- {turretId} is the turret tag in lowercase (TU-5).\n\nMethod semantics:\n- PUT replaces an existing record at that record's own URL.\n- POST creates new records in a collection, GET only reads, and DELETE removes; none of them replace an existing record.\n\nRules:\n- Replace the existing profile.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l7-targeting-v3",
+      "variantId": "fa-l7-targeting-v3",
+      "missionId": "m1-field-l7",
+      "deviceId": "fa-l7-targeting-3",
+      "conceptTags": [
+        "http.method.put",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "PUT",
+      "pathTemplate": "/api/command/turrets/{turretId}/targeting",
+      "pathParameters": {
+        "turretId": "tu-3"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/command/turrets/tu-3/targeting",
+        "status": "secured",
+        "message": "Field Command Turret API accepted the request. Device fa-l7-targeting-3 activated."
+      },
+      "documentation": "FIELD BRIEF — Field Command Turret API (fictional)\n\nObjective:\nReplace turret TU-3's targeting profile so it ignores agents.\n\nResources:\n- Each turret has one targeting profile: /api/command/turrets/{turretId}/targeting.\n- {turretId} is the turret tag in lowercase (TU-3).\n\nMethod semantics:\n- PUT replaces an existing record at that record's own URL.\n- POST creates new records in a collection, GET only reads, and DELETE removes; none of them replace an existing record.\n\nRules:\n- Replace the existing profile.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l7-uplink-v1",
+      "variantId": "fa-l7-uplink-v1",
+      "missionId": "m1-field-l7",
+      "deviceId": "fa-l7-uplink-1",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/command/uplinks/{uplinkId}",
+      "pathParameters": {
+        "uplinkId": "up-9"
+      },
+      "queryParameters": {
+        "force": "true"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/command/uplinks/up-9",
+        "status": "secured",
+        "message": "Field Command Uplink API accepted the request. Device fa-l7-uplink-1 activated."
+      },
+      "documentation": "FIELD BRIEF — Field Command Uplink API (fictional)\n\nObjective:\nCut satellite uplink UP-9 so the commander cannot call reinforcements.\n\nResources:\n- Uplinks live at /api/command/uplinks/{uplinkId}.\n- {uplinkId} is the uplink tag in lowercase (UP-9).\n\nMethod semantics:\n- DELETE removes or revokes the record addressed by the URL.\n- GET only reads, and POST/PUT create or replace records; none of them revoke access.\n\nRules:\n- Add the query parameter force — a live uplink only drops when force is the word true.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l7-uplink-v2",
+      "variantId": "fa-l7-uplink-v2",
+      "missionId": "m1-field-l7",
+      "deviceId": "fa-l7-uplink-2",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/command/uplinks/{uplinkId}",
+      "pathParameters": {
+        "uplinkId": "up-2"
+      },
+      "queryParameters": {
+        "force": "true"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/command/uplinks/up-2",
+        "status": "secured",
+        "message": "Field Command Uplink API accepted the request. Device fa-l7-uplink-2 activated."
+      },
+      "documentation": "FIELD BRIEF — Field Command Uplink API (fictional)\n\nObjective:\nCut satellite uplink UP-2 so the commander cannot call reinforcements.\n\nResources:\n- Uplinks live at /api/command/uplinks/{uplinkId}.\n- {uplinkId} is the uplink tag in lowercase (UP-2).\n\nMethod semantics:\n- DELETE removes or revokes the record addressed by the URL.\n- GET only reads, and POST/PUT create or replace records; none of them revoke access.\n\nRules:\n- Add the query parameter force — a live uplink only drops when force is the word true.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-fa-l7-uplink-v3",
+      "variantId": "fa-l7-uplink-v3",
+      "missionId": "m1-field-l7",
+      "deviceId": "fa-l7-uplink-3",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/command/uplinks/{uplinkId}",
+      "pathParameters": {
+        "uplinkId": "up-6"
+      },
+      "queryParameters": {
+        "force": "true"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/command/uplinks/up-6",
+        "status": "secured",
+        "message": "Field Command Uplink API accepted the request. Device fa-l7-uplink-3 activated."
+      },
+      "documentation": "FIELD BRIEF — Field Command Uplink API (fictional)\n\nObjective:\nCut satellite uplink UP-6 so the commander cannot call reinforcements.\n\nResources:\n- Uplinks live at /api/command/uplinks/{uplinkId}.\n- {uplinkId} is the uplink tag in lowercase (UP-6).\n\nMethod semantics:\n- DELETE removes or revokes the record addressed by the URL.\n- GET only reads, and POST/PUT create or replace records; none of them revoke access.\n\nRules:\n- Add the query parameter force — a live uplink only drops when force is the word true.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-final-lock-field-l7",
+      "variantId": "final-lock-field-l7-v1",
+      "missionId": "m1-field-l7",
+      "deviceId": "final-lock-field-l7",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/final-locks/{lockId}",
+      "pathParameters": {
+        "lockId": "field-command"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "lockId": "field-command",
+        "status": "released",
+        "message": "Field command final lock released."
+      },
+      "documentation": "FIELD BRIEF — Final Lock API (fictional)\n\nObjective:\nRelease this room's extra exit lock after every required device is active.\n\nResources:\n- Final locks live at /api/final-locks/{lockId}.\n- {lockId} for this room is the room code: field-command.\n\nMethod semantics:\n- DELETE releases (removes) the lock record. GET only reads it.\n\nRules:\n- Substitute {lockId}. Construct the method and path yourself.",
+      "deviceUnlockState": "OPEN"
+    }
+  ]
+}

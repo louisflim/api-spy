@@ -1,0 +1,2150 @@
+{
+  "challenges": [
+    {
+      "challengeId": "chal-m1-sa-l1-door-v1",
+      "variantId": "sa-l1-door-v1",
+      "missionId": "m1-special-l1",
+      "deviceId": "sa-l1-door-1",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/sites/{siteId}/sectors/{sectorId}/doors/{doorId}",
+      "pathParameters": {
+        "siteId": "ceb",
+        "sectorId": "s3",
+        "doorId": "d07"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/sites/ceb/sectors/s3/doors/d07",
+        "status": "secured",
+        "message": "Black-Site Door API accepted the request. Device sa-l1-door-1 activated."
+      },
+      "documentation": "FIELD BRIEF — Black-Site Door API (fictional)\n\nObjective:\nRead the status of door 7 in sector 3 of the Cebu site.\n\nResources:\n- Doors: /api/sites/{siteId}/sectors/{sectorId}/doors/{doorId}.\n- Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n- {sectorId} is the letter s followed by the sector number (sector 9 would be s9).\n- {doorId} is the letter d followed by the door number padded to two digits (door 3 would be d03).\n\nSimilar routes on this network (not all are correct for this objective):\n- /api/sites/{siteId}/doors — site-wide door index (no sector filtering)\n- /api/sectors/{sectorId}/doors/{doorId} — legacy route without the site; rejected at black sites\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- No body is required.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l1-door-v2",
+      "variantId": "sa-l1-door-v2",
+      "missionId": "m1-special-l1",
+      "deviceId": "sa-l1-door-2",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/sites/{siteId}/sectors/{sectorId}/doors/{doorId}",
+      "pathParameters": {
+        "siteId": "mnl",
+        "sectorId": "s1",
+        "doorId": "d12"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/sites/mnl/sectors/s1/doors/d12",
+        "status": "secured",
+        "message": "Black-Site Door API accepted the request. Device sa-l1-door-2 activated."
+      },
+      "documentation": "FIELD BRIEF — Black-Site Door API (fictional)\n\nObjective:\nRead the status of door 12 in sector 1 of the Manila site.\n\nResources:\n- Doors: /api/sites/{siteId}/sectors/{sectorId}/doors/{doorId}.\n- Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n- {sectorId} is the letter s followed by the sector number (sector 9 would be s9).\n- {doorId} is the letter d followed by the door number padded to two digits (door 3 would be d03).\n\nSimilar routes on this network (not all are correct for this objective):\n- /api/sites/{siteId}/doors — site-wide door index (no sector filtering)\n- /api/sectors/{sectorId}/doors/{doorId} — legacy route without the site; rejected at black sites\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- No body is required.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l1-door-v3",
+      "variantId": "sa-l1-door-v3",
+      "missionId": "m1-special-l1",
+      "deviceId": "sa-l1-door-3",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/sites/{siteId}/sectors/{sectorId}/doors/{doorId}",
+      "pathParameters": {
+        "siteId": "dvo",
+        "sectorId": "s4",
+        "doorId": "d05"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/sites/dvo/sectors/s4/doors/d05",
+        "status": "secured",
+        "message": "Black-Site Door API accepted the request. Device sa-l1-door-3 activated."
+      },
+      "documentation": "FIELD BRIEF — Black-Site Door API (fictional)\n\nObjective:\nRead the status of door 5 in sector 4 of the Davao site.\n\nResources:\n- Doors: /api/sites/{siteId}/sectors/{sectorId}/doors/{doorId}.\n- Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n- {sectorId} is the letter s followed by the sector number (sector 9 would be s9).\n- {doorId} is the letter d followed by the door number padded to two digits (door 3 would be d03).\n\nSimilar routes on this network (not all are correct for this objective):\n- /api/sites/{siteId}/doors — site-wide door index (no sector filtering)\n- /api/sectors/{sectorId}/doors/{doorId} — legacy route without the site; rejected at black sites\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- No body is required.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l1-panel-v1",
+      "variantId": "sa-l1-panel-v1",
+      "missionId": "m1-special-l1",
+      "deviceId": "sa-l1-panel-1",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/sites/{siteId}/floors/{floorId}/panels/{panelId}",
+      "pathParameters": {
+        "siteId": "ilo",
+        "floorId": "f2",
+        "panelId": "p-04"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/sites/ilo/floors/f2/panels/p-04",
+        "status": "secured",
+        "message": "Black-Site Panel API accepted the request. Device sa-l1-panel-1 activated."
+      },
+      "documentation": "FIELD BRIEF — Black-Site Panel API (fictional)\n\nObjective:\nRead control panel 4 on floor 2 of the Iloilo site.\n\nResources:\n- Panels: /api/sites/{siteId}/floors/{floorId}/panels/{panelId}.\n- Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n- {floorId} is the letter f followed by the floor number (floor 7 would be f7).\n- {panelId} is p- followed by the panel number padded to two digits (panel 6 would be p-06).\n\nSimilar routes on this network (not all are correct for this objective):\n- /api/sites/{siteId}/panels/{panelId} — retired flat route; panels must be addressed by floor\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- No body is required.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l1-panel-v2",
+      "variantId": "sa-l1-panel-v2",
+      "missionId": "m1-special-l1",
+      "deviceId": "sa-l1-panel-2",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/sites/{siteId}/floors/{floorId}/panels/{panelId}",
+      "pathParameters": {
+        "siteId": "ceb",
+        "floorId": "f5",
+        "panelId": "p-11"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/sites/ceb/floors/f5/panels/p-11",
+        "status": "secured",
+        "message": "Black-Site Panel API accepted the request. Device sa-l1-panel-2 activated."
+      },
+      "documentation": "FIELD BRIEF — Black-Site Panel API (fictional)\n\nObjective:\nRead control panel 11 on floor 5 of the Cebu site.\n\nResources:\n- Panels: /api/sites/{siteId}/floors/{floorId}/panels/{panelId}.\n- Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n- {floorId} is the letter f followed by the floor number (floor 7 would be f7).\n- {panelId} is p- followed by the panel number padded to two digits (panel 6 would be p-06).\n\nSimilar routes on this network (not all are correct for this objective):\n- /api/sites/{siteId}/panels/{panelId} — retired flat route; panels must be addressed by floor\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- No body is required.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l1-panel-v3",
+      "variantId": "sa-l1-panel-v3",
+      "missionId": "m1-special-l1",
+      "deviceId": "sa-l1-panel-3",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/sites/{siteId}/floors/{floorId}/panels/{panelId}",
+      "pathParameters": {
+        "siteId": "mnl",
+        "floorId": "f1",
+        "panelId": "p-08"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/sites/mnl/floors/f1/panels/p-08",
+        "status": "secured",
+        "message": "Black-Site Panel API accepted the request. Device sa-l1-panel-3 activated."
+      },
+      "documentation": "FIELD BRIEF — Black-Site Panel API (fictional)\n\nObjective:\nRead control panel 8 on floor 1 of the Manila site.\n\nResources:\n- Panels: /api/sites/{siteId}/floors/{floorId}/panels/{panelId}.\n- Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n- {floorId} is the letter f followed by the floor number (floor 7 would be f7).\n- {panelId} is p- followed by the panel number padded to two digits (panel 6 would be p-06).\n\nSimilar routes on this network (not all are correct for this objective):\n- /api/sites/{siteId}/panels/{panelId} — retired flat route; panels must be addressed by floor\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- No body is required.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l1-cell-v1",
+      "variantId": "sa-l1-cell-v1",
+      "missionId": "m1-special-l1",
+      "deviceId": "sa-l1-cell-1",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/sites/{siteId}/blocks/{blockId}/cells/{cellId}",
+      "pathParameters": {
+        "siteId": "dvo",
+        "blockId": "b-c",
+        "cellId": "c113"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/sites/dvo/blocks/b-c/cells/c113",
+        "status": "secured",
+        "message": "Black-Site Holding Cell API accepted the request. Device sa-l1-cell-1 activated."
+      },
+      "documentation": "FIELD BRIEF — Black-Site Holding Cell API (fictional)\n\nObjective:\nCheck holding cell 113 in block C of the Davao site.\n\nResources:\n- Cells: /api/sites/{siteId}/blocks/{blockId}/cells/{cellId}.\n- Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n- {blockId} is b- followed by the block letter in lowercase (block F would be b-f).\n- {cellId} is the letter c followed by the cell number padded to three digits (cell 9 would be c009).\n\nSimilar routes on this network (not all are correct for this objective):\n- /api/sites/{siteId}/cells/{cellId} — index route, cannot open a specific block\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- No body is required.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l1-cell-v2",
+      "variantId": "sa-l1-cell-v2",
+      "missionId": "m1-special-l1",
+      "deviceId": "sa-l1-cell-2",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/sites/{siteId}/blocks/{blockId}/cells/{cellId}",
+      "pathParameters": {
+        "siteId": "ilo",
+        "blockId": "b-a",
+        "cellId": "c021"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/sites/ilo/blocks/b-a/cells/c021",
+        "status": "secured",
+        "message": "Black-Site Holding Cell API accepted the request. Device sa-l1-cell-2 activated."
+      },
+      "documentation": "FIELD BRIEF — Black-Site Holding Cell API (fictional)\n\nObjective:\nCheck holding cell 21 in block A of the Iloilo site.\n\nResources:\n- Cells: /api/sites/{siteId}/blocks/{blockId}/cells/{cellId}.\n- Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n- {blockId} is b- followed by the block letter in lowercase (block F would be b-f).\n- {cellId} is the letter c followed by the cell number padded to three digits (cell 9 would be c009).\n\nSimilar routes on this network (not all are correct for this objective):\n- /api/sites/{siteId}/cells/{cellId} — index route, cannot open a specific block\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- No body is required.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l1-cell-v3",
+      "variantId": "sa-l1-cell-v3",
+      "missionId": "m1-special-l1",
+      "deviceId": "sa-l1-cell-3",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/sites/{siteId}/blocks/{blockId}/cells/{cellId}",
+      "pathParameters": {
+        "siteId": "mnl",
+        "blockId": "b-d",
+        "cellId": "c304"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/sites/mnl/blocks/b-d/cells/c304",
+        "status": "secured",
+        "message": "Black-Site Holding Cell API accepted the request. Device sa-l1-cell-3 activated."
+      },
+      "documentation": "FIELD BRIEF — Black-Site Holding Cell API (fictional)\n\nObjective:\nCheck holding cell 304 in block D of the Manila site.\n\nResources:\n- Cells: /api/sites/{siteId}/blocks/{blockId}/cells/{cellId}.\n- Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n- {blockId} is b- followed by the block letter in lowercase (block F would be b-f).\n- {cellId} is the letter c followed by the cell number padded to three digits (cell 9 would be c009).\n\nSimilar routes on this network (not all are correct for this objective):\n- /api/sites/{siteId}/cells/{cellId} — index route, cannot open a specific block\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- No body is required.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-final-lock-special-l1",
+      "variantId": "final-lock-special-l1-v1",
+      "missionId": "m1-special-l1",
+      "deviceId": "final-lock-special-l1",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/final-locks/{lockId}",
+      "pathParameters": {
+        "lockId": "sa-l1"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "lockId": "sa-l1",
+        "status": "released",
+        "message": "Special Agent level 1 final lock released."
+      },
+      "documentation": "FIELD BRIEF — Final Lock API (fictional)\n\nObjective:\nRelease this room's extra exit lock after every required device is active.\n\nResources:\n- Final locks live at /api/final-locks/{lockId}.\n- {lockId} for this room is the room code: sa-l1.\n\nMethod semantics:\n- DELETE releases (removes) the lock record. GET only reads it.\n\nRules:\n- Substitute {lockId}. Construct the method and path yourself.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l2-record-v1",
+      "variantId": "sa-l2-record-v1",
+      "missionId": "m1-special-l2",
+      "deviceId": "sa-l2-record-1",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/archives/{archiveId}/records/{recordId}",
+      "pathParameters": {
+        "archiveId": "vault-east",
+        "recordId": "2019-0447"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/archives/vault-east/records/2019-0447",
+        "status": "secured",
+        "message": "Sealed Archive API accepted the request. Device sa-l2-record-1 activated."
+      },
+      "documentation": "FIELD BRIEF — Sealed Archive API (fictional)\n\nObjective:\nRetrieve the full sealed record for case 447 from 2019, held in the East Vault archive.\n\nResources:\n- Full records: /api/archives/{archiveId}/records/{recordId}.\n- {archiveId} is vault- followed by the vault direction in lowercase (South Vault would be vault-south).\n- {recordId} is the four-digit year, a hyphen, then the case number padded to four digits (case 52 from 2010 would be 2010-0052).\n\nSimilar routes on this network (not all are correct for this objective):\n- /api/archives/{archiveId}/record-index — summaries only, never the full record\n- /api/archives/{archiveId}/records — list without contents\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- No body is required.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l2-record-v2",
+      "variantId": "sa-l2-record-v2",
+      "missionId": "m1-special-l2",
+      "deviceId": "sa-l2-record-2",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/archives/{archiveId}/records/{recordId}",
+      "pathParameters": {
+        "archiveId": "vault-north",
+        "recordId": "2021-0038"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/archives/vault-north/records/2021-0038",
+        "status": "secured",
+        "message": "Sealed Archive API accepted the request. Device sa-l2-record-2 activated."
+      },
+      "documentation": "FIELD BRIEF — Sealed Archive API (fictional)\n\nObjective:\nRetrieve the full sealed record for case 38 from 2021, held in the North Vault archive.\n\nResources:\n- Full records: /api/archives/{archiveId}/records/{recordId}.\n- {archiveId} is vault- followed by the vault direction in lowercase (South Vault would be vault-south).\n- {recordId} is the four-digit year, a hyphen, then the case number padded to four digits (case 52 from 2010 would be 2010-0052).\n\nSimilar routes on this network (not all are correct for this objective):\n- /api/archives/{archiveId}/record-index — summaries only, never the full record\n- /api/archives/{archiveId}/records — list without contents\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- No body is required.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l2-record-v3",
+      "variantId": "sa-l2-record-v3",
+      "missionId": "m1-special-l2",
+      "deviceId": "sa-l2-record-3",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/archives/{archiveId}/records/{recordId}",
+      "pathParameters": {
+        "archiveId": "vault-west",
+        "recordId": "2017-1205"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/archives/vault-west/records/2017-1205",
+        "status": "secured",
+        "message": "Sealed Archive API accepted the request. Device sa-l2-record-3 activated."
+      },
+      "documentation": "FIELD BRIEF — Sealed Archive API (fictional)\n\nObjective:\nRetrieve the full sealed record for case 1205 from 2017, held in the West Vault archive.\n\nResources:\n- Full records: /api/archives/{archiveId}/records/{recordId}.\n- {archiveId} is vault- followed by the vault direction in lowercase (South Vault would be vault-south).\n- {recordId} is the four-digit year, a hyphen, then the case number padded to four digits (case 52 from 2010 would be 2010-0052).\n\nSimilar routes on this network (not all are correct for this objective):\n- /api/archives/{archiveId}/record-index — summaries only, never the full record\n- /api/archives/{archiveId}/records — list without contents\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- No body is required.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l2-dossier-v1",
+      "variantId": "sa-l2-dossier-v1",
+      "missionId": "m1-special-l2",
+      "deviceId": "sa-l2-dossier-1",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/bureaus/{bureauId}/dossiers/{dossierId}",
+      "pathParameters": {
+        "bureauId": "intel",
+        "dossierId": "ag-3310"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/bureaus/intel/dossiers/ag-3310",
+        "status": "secured",
+        "message": "Agent Dossier API accepted the request. Device sa-l2-dossier-1 activated."
+      },
+      "documentation": "FIELD BRIEF — Agent Dossier API (fictional)\n\nObjective:\nPull the dossier for agent number 3310 kept by the Intelligence bureau.\n\nResources:\n- Dossiers: /api/bureaus/{bureauId}/dossiers/{dossierId}.\n- Bureau codes: Intelligence → intel, Operations → ops, Signals → signals.\n- {dossierId} is ag- followed by the agent number padded to four digits (agent 5 would be ag-0005).\n\nSimilar routes on this network (not all are correct for this objective):\n- /api/bureaus/{bureauId}/dossier-summaries/{dossierId} — redacted summary only\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- No body is required.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l2-dossier-v2",
+      "variantId": "sa-l2-dossier-v2",
+      "missionId": "m1-special-l2",
+      "deviceId": "sa-l2-dossier-2",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/bureaus/{bureauId}/dossiers/{dossierId}",
+      "pathParameters": {
+        "bureauId": "ops",
+        "dossierId": "ag-0712"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/bureaus/ops/dossiers/ag-0712",
+        "status": "secured",
+        "message": "Agent Dossier API accepted the request. Device sa-l2-dossier-2 activated."
+      },
+      "documentation": "FIELD BRIEF — Agent Dossier API (fictional)\n\nObjective:\nPull the dossier for agent number 712 kept by the Operations bureau.\n\nResources:\n- Dossiers: /api/bureaus/{bureauId}/dossiers/{dossierId}.\n- Bureau codes: Intelligence → intel, Operations → ops, Signals → signals.\n- {dossierId} is ag- followed by the agent number padded to four digits (agent 5 would be ag-0005).\n\nSimilar routes on this network (not all are correct for this objective):\n- /api/bureaus/{bureauId}/dossier-summaries/{dossierId} — redacted summary only\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- No body is required.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l2-dossier-v3",
+      "variantId": "sa-l2-dossier-v3",
+      "missionId": "m1-special-l2",
+      "deviceId": "sa-l2-dossier-3",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/bureaus/{bureauId}/dossiers/{dossierId}",
+      "pathParameters": {
+        "bureauId": "signals",
+        "dossierId": "ag-2048"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/bureaus/signals/dossiers/ag-2048",
+        "status": "secured",
+        "message": "Agent Dossier API accepted the request. Device sa-l2-dossier-3 activated."
+      },
+      "documentation": "FIELD BRIEF — Agent Dossier API (fictional)\n\nObjective:\nPull the dossier for agent number 2048 kept by the Signals bureau.\n\nResources:\n- Dossiers: /api/bureaus/{bureauId}/dossiers/{dossierId}.\n- Bureau codes: Intelligence → intel, Operations → ops, Signals → signals.\n- {dossierId} is ag- followed by the agent number padded to four digits (agent 5 would be ag-0005).\n\nSimilar routes on this network (not all are correct for this objective):\n- /api/bureaus/{bureauId}/dossier-summaries/{dossierId} — redacted summary only\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- No body is required.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l2-ledger-v1",
+      "variantId": "sa-l2-ledger-v1",
+      "missionId": "m1-special-l2",
+      "deviceId": "sa-l2-ledger-1",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/ledgers/{ledgerId}/entries/{entryId}",
+      "pathParameters": {
+        "ledgerId": "fy2022",
+        "entryId": "q3-118"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/ledgers/fy2022/entries/q3-118",
+        "status": "secured",
+        "message": "Ledger Entry API accepted the request. Device sa-l2-ledger-1 activated."
+      },
+      "documentation": "FIELD BRIEF — Ledger Entry API (fictional)\n\nObjective:\nRead ledger entry number 118 from quarter 3 of fiscal year 2022.\n\nResources:\n- Entries: /api/ledgers/{ledgerId}/entries/{entryId}.\n- {ledgerId} is fy followed by the four-digit fiscal year (fiscal year 2015 would be fy2015).\n- {entryId} is q, the quarter number, a hyphen, then the entry number padded to three digits (entry 4 of quarter 2 would be q2-004).\n\nSimilar routes on this network (not all are correct for this objective):\n- /api/ledgers/{ledgerId}/totals — aggregated totals, not individual entries\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- No body is required.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l2-ledger-v2",
+      "variantId": "sa-l2-ledger-v2",
+      "missionId": "m1-special-l2",
+      "deviceId": "sa-l2-ledger-2",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/ledgers/{ledgerId}/entries/{entryId}",
+      "pathParameters": {
+        "ledgerId": "fy2020",
+        "entryId": "q1-007"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/ledgers/fy2020/entries/q1-007",
+        "status": "secured",
+        "message": "Ledger Entry API accepted the request. Device sa-l2-ledger-2 activated."
+      },
+      "documentation": "FIELD BRIEF — Ledger Entry API (fictional)\n\nObjective:\nRead ledger entry number 7 from quarter 1 of fiscal year 2020.\n\nResources:\n- Entries: /api/ledgers/{ledgerId}/entries/{entryId}.\n- {ledgerId} is fy followed by the four-digit fiscal year (fiscal year 2015 would be fy2015).\n- {entryId} is q, the quarter number, a hyphen, then the entry number padded to three digits (entry 4 of quarter 2 would be q2-004).\n\nSimilar routes on this network (not all are correct for this objective):\n- /api/ledgers/{ledgerId}/totals — aggregated totals, not individual entries\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- No body is required.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l2-ledger-v3",
+      "variantId": "sa-l2-ledger-v3",
+      "missionId": "m1-special-l2",
+      "deviceId": "sa-l2-ledger-3",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/ledgers/{ledgerId}/entries/{entryId}",
+      "pathParameters": {
+        "ledgerId": "fy2023",
+        "entryId": "q4-260"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/ledgers/fy2023/entries/q4-260",
+        "status": "secured",
+        "message": "Ledger Entry API accepted the request. Device sa-l2-ledger-3 activated."
+      },
+      "documentation": "FIELD BRIEF — Ledger Entry API (fictional)\n\nObjective:\nRead ledger entry number 260 from quarter 4 of fiscal year 2023.\n\nResources:\n- Entries: /api/ledgers/{ledgerId}/entries/{entryId}.\n- {ledgerId} is fy followed by the four-digit fiscal year (fiscal year 2015 would be fy2015).\n- {entryId} is q, the quarter number, a hyphen, then the entry number padded to three digits (entry 4 of quarter 2 would be q2-004).\n\nSimilar routes on this network (not all are correct for this objective):\n- /api/ledgers/{ledgerId}/totals — aggregated totals, not individual entries\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- No body is required.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-final-lock-special-l2",
+      "variantId": "final-lock-special-l2-v1",
+      "missionId": "m1-special-l2",
+      "deviceId": "final-lock-special-l2",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/final-locks/{lockId}",
+      "pathParameters": {
+        "lockId": "sa-l2"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "lockId": "sa-l2",
+        "status": "released",
+        "message": "Special Agent level 2 final lock released."
+      },
+      "documentation": "FIELD BRIEF — Final Lock API (fictional)\n\nObjective:\nRelease this room's extra exit lock after every required device is active.\n\nResources:\n- Final locks live at /api/final-locks/{lockId}.\n- {lockId} for this room is the room code: sa-l2.\n\nMethod semantics:\n- DELETE releases (removes) the lock record. GET only reads it.\n\nRules:\n- Substitute {lockId}. Construct the method and path yourself.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l3-sensors-v1",
+      "variantId": "sa-l3-sensors-v1",
+      "missionId": "m1-special-l3",
+      "deviceId": "sa-l3-sensors-1",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/sites/{siteId}/sensors",
+      "pathParameters": {
+        "siteId": "ceb"
+      },
+      "queryParameters": {
+        "status": "tripped",
+        "floor": "3"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/sites/ceb/sensors",
+        "status": "secured",
+        "message": "Site Sensor API accepted the request. Device sa-l3-sensors-1 activated."
+      },
+      "documentation": "FIELD BRIEF — Site Sensor API (fictional)\n\nObjective:\nList only the tripped sensors on floor 3 of the Cebu site.\n\nResources:\n- Sensors: /api/sites/{siteId}/sensors.\n- Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- Add the query parameter status — the sensor state in lowercase (tripped).\n- Add the query parameter floor — the floor number as digits (3).\n- Both filters are required; include them in one query string joined with &.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l3-sensors-v2",
+      "variantId": "sa-l3-sensors-v2",
+      "missionId": "m1-special-l3",
+      "deviceId": "sa-l3-sensors-2",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/sites/{siteId}/sensors",
+      "pathParameters": {
+        "siteId": "dvo"
+      },
+      "queryParameters": {
+        "status": "offline",
+        "floor": "1"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/sites/dvo/sensors",
+        "status": "secured",
+        "message": "Site Sensor API accepted the request. Device sa-l3-sensors-2 activated."
+      },
+      "documentation": "FIELD BRIEF — Site Sensor API (fictional)\n\nObjective:\nList only the offline sensors on floor 1 of the Davao site.\n\nResources:\n- Sensors: /api/sites/{siteId}/sensors.\n- Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- Add the query parameter status — the sensor state in lowercase (offline).\n- Add the query parameter floor — the floor number as digits (1).\n- Both filters are required; include them in one query string joined with &.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l3-sensors-v3",
+      "variantId": "sa-l3-sensors-v3",
+      "missionId": "m1-special-l3",
+      "deviceId": "sa-l3-sensors-3",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/sites/{siteId}/sensors",
+      "pathParameters": {
+        "siteId": "mnl"
+      },
+      "queryParameters": {
+        "status": "tripped",
+        "floor": "6"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/sites/mnl/sensors",
+        "status": "secured",
+        "message": "Site Sensor API accepted the request. Device sa-l3-sensors-3 activated."
+      },
+      "documentation": "FIELD BRIEF — Site Sensor API (fictional)\n\nObjective:\nList only the tripped sensors on floor 6 of the Manila site.\n\nResources:\n- Sensors: /api/sites/{siteId}/sensors.\n- Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- Add the query parameter status — the sensor state in lowercase (tripped).\n- Add the query parameter floor — the floor number as digits (6).\n- Both filters are required; include them in one query string joined with &.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l3-logs-v1",
+      "variantId": "sa-l3-logs-v1",
+      "missionId": "m1-special-l3",
+      "deviceId": "sa-l3-logs-1",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/sites/{siteId}/access-logs",
+      "pathParameters": {
+        "siteId": "ilo"
+      },
+      "queryParameters": {
+        "result": "denied",
+        "limit": "20"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/sites/ilo/access-logs",
+        "status": "secured",
+        "message": "Site Access Log API accepted the request. Device sa-l3-logs-1 activated."
+      },
+      "documentation": "FIELD BRIEF — Site Access Log API (fictional)\n\nObjective:\nPull the latest 20 denied access attempts at the Iloilo site.\n\nResources:\n- Access logs: /api/sites/{siteId}/access-logs.\n- Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- Add the query parameter result — the attempt outcome in lowercase (denied).\n- Add the query parameter limit — how many entries to return, as digits (20).\n- Both parameters are required in the same query string.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l3-logs-v2",
+      "variantId": "sa-l3-logs-v2",
+      "missionId": "m1-special-l3",
+      "deviceId": "sa-l3-logs-2",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/sites/{siteId}/access-logs",
+      "pathParameters": {
+        "siteId": "ceb"
+      },
+      "queryParameters": {
+        "result": "denied",
+        "limit": "50"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/sites/ceb/access-logs",
+        "status": "secured",
+        "message": "Site Access Log API accepted the request. Device sa-l3-logs-2 activated."
+      },
+      "documentation": "FIELD BRIEF — Site Access Log API (fictional)\n\nObjective:\nPull the latest 50 denied access attempts at the Cebu site.\n\nResources:\n- Access logs: /api/sites/{siteId}/access-logs.\n- Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- Add the query parameter result — the attempt outcome in lowercase (denied).\n- Add the query parameter limit — how many entries to return, as digits (50).\n- Both parameters are required in the same query string.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l3-logs-v3",
+      "variantId": "sa-l3-logs-v3",
+      "missionId": "m1-special-l3",
+      "deviceId": "sa-l3-logs-3",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/sites/{siteId}/access-logs",
+      "pathParameters": {
+        "siteId": "dvo"
+      },
+      "queryParameters": {
+        "result": "granted",
+        "limit": "10"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/sites/dvo/access-logs",
+        "status": "secured",
+        "message": "Site Access Log API accepted the request. Device sa-l3-logs-3 activated."
+      },
+      "documentation": "FIELD BRIEF — Site Access Log API (fictional)\n\nObjective:\nPull the latest 10 granted access attempts at the Davao site.\n\nResources:\n- Access logs: /api/sites/{siteId}/access-logs.\n- Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- Add the query parameter result — the attempt outcome in lowercase (granted).\n- Add the query parameter limit — how many entries to return, as digits (10).\n- Both parameters are required in the same query string.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l3-drones-v1",
+      "variantId": "sa-l3-drones-v1",
+      "missionId": "m1-special-l3",
+      "deviceId": "sa-l3-drones-1",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/sites/{siteId}/drones",
+      "pathParameters": {
+        "siteId": "mnl"
+      },
+      "queryParameters": {
+        "state": "patrolling",
+        "battery": "low"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/sites/mnl/drones",
+        "status": "secured",
+        "message": "Site Drone API accepted the request. Device sa-l3-drones-1 activated."
+      },
+      "documentation": "FIELD BRIEF — Site Drone API (fictional)\n\nObjective:\nFind drones at the Manila site that are patrolling with low battery.\n\nResources:\n- Drones: /api/sites/{siteId}/drones.\n- Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- Add the query parameter state — the drone state in lowercase (patrolling).\n- Add the query parameter battery — the battery band in lowercase (low).\n- Both filters are required together.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l3-drones-v2",
+      "variantId": "sa-l3-drones-v2",
+      "missionId": "m1-special-l3",
+      "deviceId": "sa-l3-drones-2",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/sites/{siteId}/drones",
+      "pathParameters": {
+        "siteId": "ilo"
+      },
+      "queryParameters": {
+        "state": "docked",
+        "battery": "full"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/sites/ilo/drones",
+        "status": "secured",
+        "message": "Site Drone API accepted the request. Device sa-l3-drones-2 activated."
+      },
+      "documentation": "FIELD BRIEF — Site Drone API (fictional)\n\nObjective:\nFind drones at the Iloilo site that are docked with full battery.\n\nResources:\n- Drones: /api/sites/{siteId}/drones.\n- Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- Add the query parameter state — the drone state in lowercase (docked).\n- Add the query parameter battery — the battery band in lowercase (full).\n- Both filters are required together.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l3-drones-v3",
+      "variantId": "sa-l3-drones-v3",
+      "missionId": "m1-special-l3",
+      "deviceId": "sa-l3-drones-3",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/sites/{siteId}/drones",
+      "pathParameters": {
+        "siteId": "ceb"
+      },
+      "queryParameters": {
+        "state": "patrolling",
+        "battery": "low"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/sites/ceb/drones",
+        "status": "secured",
+        "message": "Site Drone API accepted the request. Device sa-l3-drones-3 activated."
+      },
+      "documentation": "FIELD BRIEF — Site Drone API (fictional)\n\nObjective:\nFind drones at the Cebu site that are patrolling with low battery.\n\nResources:\n- Drones: /api/sites/{siteId}/drones.\n- Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- Add the query parameter state — the drone state in lowercase (patrolling).\n- Add the query parameter battery — the battery band in lowercase (low).\n- Both filters are required together.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-final-lock-special-l3",
+      "variantId": "final-lock-special-l3-v1",
+      "missionId": "m1-special-l3",
+      "deviceId": "final-lock-special-l3",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/final-locks/{lockId}",
+      "pathParameters": {
+        "lockId": "sa-l3"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "lockId": "sa-l3",
+        "status": "released",
+        "message": "Special Agent level 3 final lock released."
+      },
+      "documentation": "FIELD BRIEF — Final Lock API (fictional)\n\nObjective:\nRelease this room's extra exit lock after every required device is active.\n\nResources:\n- Final locks live at /api/final-locks/{lockId}.\n- {lockId} for this room is the room code: sa-l3.\n\nMethod semantics:\n- DELETE releases (removes) the lock record. GET only reads it.\n\nRules:\n- Substitute {lockId}. Construct the method and path yourself.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l4-incident-v1",
+      "variantId": "sa-l4-incident-v1",
+      "missionId": "m1-special-l4",
+      "deviceId": "sa-l4-incident-1",
+      "conceptTags": [
+        "http.method.post",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "POST",
+      "pathTemplate": "/api/sites/{siteId}/zones/{zoneId}/incident-reports",
+      "pathParameters": {
+        "siteId": "dvo",
+        "zoneId": "z-vault"
+      },
+      "queryParameters": {
+        "priority": "urgent"
+      },
+      "successStatus": 201,
+      "successBody": {
+        "resource": "/api/sites/dvo/zones/z-vault/incident-reports",
+        "status": "secured",
+        "message": "Black-Site Incident API accepted the request. Device sa-l4-incident-1 activated."
+      },
+      "documentation": "FIELD BRIEF — Black-Site Incident API (fictional)\n\nObjective:\nFile a new urgent incident report for the Vault zone at the Davao site.\n\nResources:\n- Incident reports: /api/sites/{siteId}/zones/{zoneId}/incident-reports.\n- Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n- {zoneId} is z- followed by the zone name in lowercase (Armory would be z-armory).\n\nSimilar routes on this network (not all are correct for this objective):\n- /api/sites/{siteId}/incident-reports — site inbox; reports there are never routed to a zone\n\nMethod semantics:\n- POST creates a new record inside a collection resource.\n- PUT replaces an existing record at its own URL, GET only reads, and DELETE removes; none of them file a new record.\n\nRules:\n- Add the query parameter priority — urgent reports must say so in lowercase (urgent).\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l4-incident-v2",
+      "variantId": "sa-l4-incident-v2",
+      "missionId": "m1-special-l4",
+      "deviceId": "sa-l4-incident-2",
+      "conceptTags": [
+        "http.method.post",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "POST",
+      "pathTemplate": "/api/sites/{siteId}/zones/{zoneId}/incident-reports",
+      "pathParameters": {
+        "siteId": "ceb",
+        "zoneId": "z-dock"
+      },
+      "queryParameters": {
+        "priority": "urgent"
+      },
+      "successStatus": 201,
+      "successBody": {
+        "resource": "/api/sites/ceb/zones/z-dock/incident-reports",
+        "status": "secured",
+        "message": "Black-Site Incident API accepted the request. Device sa-l4-incident-2 activated."
+      },
+      "documentation": "FIELD BRIEF — Black-Site Incident API (fictional)\n\nObjective:\nFile a new urgent incident report for the Dock zone at the Cebu site.\n\nResources:\n- Incident reports: /api/sites/{siteId}/zones/{zoneId}/incident-reports.\n- Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n- {zoneId} is z- followed by the zone name in lowercase (Armory would be z-armory).\n\nSimilar routes on this network (not all are correct for this objective):\n- /api/sites/{siteId}/incident-reports — site inbox; reports there are never routed to a zone\n\nMethod semantics:\n- POST creates a new record inside a collection resource.\n- PUT replaces an existing record at its own URL, GET only reads, and DELETE removes; none of them file a new record.\n\nRules:\n- Add the query parameter priority — urgent reports must say so in lowercase (urgent).\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l4-incident-v3",
+      "variantId": "sa-l4-incident-v3",
+      "missionId": "m1-special-l4",
+      "deviceId": "sa-l4-incident-3",
+      "conceptTags": [
+        "http.method.post",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "POST",
+      "pathTemplate": "/api/sites/{siteId}/zones/{zoneId}/incident-reports",
+      "pathParameters": {
+        "siteId": "ilo",
+        "zoneId": "z-lab"
+      },
+      "queryParameters": {
+        "priority": "urgent"
+      },
+      "successStatus": 201,
+      "successBody": {
+        "resource": "/api/sites/ilo/zones/z-lab/incident-reports",
+        "status": "secured",
+        "message": "Black-Site Incident API accepted the request. Device sa-l4-incident-3 activated."
+      },
+      "documentation": "FIELD BRIEF — Black-Site Incident API (fictional)\n\nObjective:\nFile a new urgent incident report for the Lab zone at the Iloilo site.\n\nResources:\n- Incident reports: /api/sites/{siteId}/zones/{zoneId}/incident-reports.\n- Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n- {zoneId} is z- followed by the zone name in lowercase (Armory would be z-armory).\n\nSimilar routes on this network (not all are correct for this objective):\n- /api/sites/{siteId}/incident-reports — site inbox; reports there are never routed to a zone\n\nMethod semantics:\n- POST creates a new record inside a collection resource.\n- PUT replaces an existing record at its own URL, GET only reads, and DELETE removes; none of them file a new record.\n\nRules:\n- Add the query parameter priority — urgent reports must say so in lowercase (urgent).\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l4-evac-v1",
+      "variantId": "sa-l4-evac-v1",
+      "missionId": "m1-special-l4",
+      "deviceId": "sa-l4-evac-1",
+      "conceptTags": [
+        "http.method.post",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "POST",
+      "pathTemplate": "/api/sites/{siteId}/floors/{floorId}/evacuation-orders",
+      "pathParameters": {
+        "siteId": "mnl",
+        "floorId": "f4"
+      },
+      "queryParameters": {
+        "drill": "false"
+      },
+      "successStatus": 201,
+      "successBody": {
+        "resource": "/api/sites/mnl/floors/f4/evacuation-orders",
+        "status": "secured",
+        "message": "Evacuation Order API accepted the request. Device sa-l4-evac-1 activated."
+      },
+      "documentation": "FIELD BRIEF — Evacuation Order API (fictional)\n\nObjective:\nIssue a real (not drill) evacuation order for floor 4 of the Manila site.\n\nResources:\n- Evacuation orders: /api/sites/{siteId}/floors/{floorId}/evacuation-orders.\n- Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n- {floorId} is the letter f followed by the floor number.\n\nMethod semantics:\n- POST creates a new record inside a collection resource.\n- PUT replaces an existing record at its own URL, GET only reads, and DELETE removes; none of them file a new record.\n\nRules:\n- Add the query parameter drill — orders default to drills; a real order must set drill to the word false.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l4-evac-v2",
+      "variantId": "sa-l4-evac-v2",
+      "missionId": "m1-special-l4",
+      "deviceId": "sa-l4-evac-2",
+      "conceptTags": [
+        "http.method.post",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "POST",
+      "pathTemplate": "/api/sites/{siteId}/floors/{floorId}/evacuation-orders",
+      "pathParameters": {
+        "siteId": "dvo",
+        "floorId": "f2"
+      },
+      "queryParameters": {
+        "drill": "false"
+      },
+      "successStatus": 201,
+      "successBody": {
+        "resource": "/api/sites/dvo/floors/f2/evacuation-orders",
+        "status": "secured",
+        "message": "Evacuation Order API accepted the request. Device sa-l4-evac-2 activated."
+      },
+      "documentation": "FIELD BRIEF — Evacuation Order API (fictional)\n\nObjective:\nIssue a real (not drill) evacuation order for floor 2 of the Davao site.\n\nResources:\n- Evacuation orders: /api/sites/{siteId}/floors/{floorId}/evacuation-orders.\n- Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n- {floorId} is the letter f followed by the floor number.\n\nMethod semantics:\n- POST creates a new record inside a collection resource.\n- PUT replaces an existing record at its own URL, GET only reads, and DELETE removes; none of them file a new record.\n\nRules:\n- Add the query parameter drill — orders default to drills; a real order must set drill to the word false.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l4-evac-v3",
+      "variantId": "sa-l4-evac-v3",
+      "missionId": "m1-special-l4",
+      "deviceId": "sa-l4-evac-3",
+      "conceptTags": [
+        "http.method.post",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "POST",
+      "pathTemplate": "/api/sites/{siteId}/floors/{floorId}/evacuation-orders",
+      "pathParameters": {
+        "siteId": "ceb",
+        "floorId": "f7"
+      },
+      "queryParameters": {
+        "drill": "false"
+      },
+      "successStatus": 201,
+      "successBody": {
+        "resource": "/api/sites/ceb/floors/f7/evacuation-orders",
+        "status": "secured",
+        "message": "Evacuation Order API accepted the request. Device sa-l4-evac-3 activated."
+      },
+      "documentation": "FIELD BRIEF — Evacuation Order API (fictional)\n\nObjective:\nIssue a real (not drill) evacuation order for floor 7 of the Cebu site.\n\nResources:\n- Evacuation orders: /api/sites/{siteId}/floors/{floorId}/evacuation-orders.\n- Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n- {floorId} is the letter f followed by the floor number.\n\nMethod semantics:\n- POST creates a new record inside a collection resource.\n- PUT replaces an existing record at its own URL, GET only reads, and DELETE removes; none of them file a new record.\n\nRules:\n- Add the query parameter drill — orders default to drills; a real order must set drill to the word false.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l4-intercept-v1",
+      "variantId": "sa-l4-intercept-v1",
+      "missionId": "m1-special-l4",
+      "deviceId": "sa-l4-intercept-1",
+      "conceptTags": [
+        "http.method.post",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "POST",
+      "pathTemplate": "/api/stations/{stationId}/channels/{channelId}/intercepts",
+      "pathParameters": {
+        "stationId": "st-ceb",
+        "channelId": "ch-12"
+      },
+      "queryParameters": {
+        "encrypt": "true"
+      },
+      "successStatus": 201,
+      "successBody": {
+        "resource": "/api/stations/st-ceb/channels/ch-12/intercepts",
+        "status": "secured",
+        "message": "Signal Intercept API accepted the request. Device sa-l4-intercept-1 activated."
+      },
+      "documentation": "FIELD BRIEF — Signal Intercept API (fictional)\n\nObjective:\nRecord a new encrypted intercept on channel 12 of the Cebu relay station.\n\nResources:\n- Intercepts: /api/stations/{stationId}/channels/{channelId}/intercepts.\n- {stationId} is st- followed by the site code. Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n- {channelId} is ch- followed by the channel number padded to two digits (channel 8 would be ch-08).\n\nMethod semantics:\n- POST creates a new record inside a collection resource.\n- PUT replaces an existing record at its own URL, GET only reads, and DELETE removes; none of them file a new record.\n\nRules:\n- Add the query parameter encrypt — intercepts must be stored encrypted (true).\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l4-intercept-v2",
+      "variantId": "sa-l4-intercept-v2",
+      "missionId": "m1-special-l4",
+      "deviceId": "sa-l4-intercept-2",
+      "conceptTags": [
+        "http.method.post",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "POST",
+      "pathTemplate": "/api/stations/{stationId}/channels/{channelId}/intercepts",
+      "pathParameters": {
+        "stationId": "st-mnl",
+        "channelId": "ch-03"
+      },
+      "queryParameters": {
+        "encrypt": "true"
+      },
+      "successStatus": 201,
+      "successBody": {
+        "resource": "/api/stations/st-mnl/channels/ch-03/intercepts",
+        "status": "secured",
+        "message": "Signal Intercept API accepted the request. Device sa-l4-intercept-2 activated."
+      },
+      "documentation": "FIELD BRIEF — Signal Intercept API (fictional)\n\nObjective:\nRecord a new encrypted intercept on channel 3 of the Manila relay station.\n\nResources:\n- Intercepts: /api/stations/{stationId}/channels/{channelId}/intercepts.\n- {stationId} is st- followed by the site code. Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n- {channelId} is ch- followed by the channel number padded to two digits (channel 8 would be ch-08).\n\nMethod semantics:\n- POST creates a new record inside a collection resource.\n- PUT replaces an existing record at its own URL, GET only reads, and DELETE removes; none of them file a new record.\n\nRules:\n- Add the query parameter encrypt — intercepts must be stored encrypted (true).\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l4-intercept-v3",
+      "variantId": "sa-l4-intercept-v3",
+      "missionId": "m1-special-l4",
+      "deviceId": "sa-l4-intercept-3",
+      "conceptTags": [
+        "http.method.post",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "POST",
+      "pathTemplate": "/api/stations/{stationId}/channels/{channelId}/intercepts",
+      "pathParameters": {
+        "stationId": "st-ilo",
+        "channelId": "ch-27"
+      },
+      "queryParameters": {
+        "encrypt": "true"
+      },
+      "successStatus": 201,
+      "successBody": {
+        "resource": "/api/stations/st-ilo/channels/ch-27/intercepts",
+        "status": "secured",
+        "message": "Signal Intercept API accepted the request. Device sa-l4-intercept-3 activated."
+      },
+      "documentation": "FIELD BRIEF — Signal Intercept API (fictional)\n\nObjective:\nRecord a new encrypted intercept on channel 27 of the Iloilo relay station.\n\nResources:\n- Intercepts: /api/stations/{stationId}/channels/{channelId}/intercepts.\n- {stationId} is st- followed by the site code. Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n- {channelId} is ch- followed by the channel number padded to two digits (channel 8 would be ch-08).\n\nMethod semantics:\n- POST creates a new record inside a collection resource.\n- PUT replaces an existing record at its own URL, GET only reads, and DELETE removes; none of them file a new record.\n\nRules:\n- Add the query parameter encrypt — intercepts must be stored encrypted (true).\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-final-lock-special-l4",
+      "variantId": "final-lock-special-l4-v1",
+      "missionId": "m1-special-l4",
+      "deviceId": "final-lock-special-l4",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/final-locks/{lockId}",
+      "pathParameters": {
+        "lockId": "sa-l4"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "lockId": "sa-l4",
+        "status": "released",
+        "message": "Special Agent level 4 final lock released."
+      },
+      "documentation": "FIELD BRIEF — Final Lock API (fictional)\n\nObjective:\nRelease this room's extra exit lock after every required device is active.\n\nResources:\n- Final locks live at /api/final-locks/{lockId}.\n- {lockId} for this room is the room code: sa-l4.\n\nMethod semantics:\n- DELETE releases (removes) the lock record. GET only reads it.\n\nRules:\n- Substitute {lockId}. Construct the method and path yourself.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l5-clearance-v1",
+      "variantId": "sa-l5-clearance-v1",
+      "missionId": "m1-special-l5",
+      "deviceId": "sa-l5-clearance-1",
+      "conceptTags": [
+        "http.method.put",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "PUT",
+      "pathTemplate": "/api/agents/{agentId}/clearances/{clearanceId}",
+      "pathParameters": {
+        "agentId": "a-0117",
+        "clearanceId": "lvl-5"
+      },
+      "queryParameters": {
+        "effective": "immediate"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/agents/a-0117/clearances/lvl-5",
+        "status": "secured",
+        "message": "Clearance Override API accepted the request. Device sa-l5-clearance-1 activated."
+      },
+      "documentation": "FIELD BRIEF — Clearance Override API (fictional)\n\nObjective:\nReplace Agent Reyes's clearance record for level 5 and make it take effect now.\n\nResources:\n- Clearances: /api/agents/{agentId}/clearances/{clearanceId}.\n- Roster: Reyes → agent 117, Santos → agent 42, Cruz → agent 305, Lim → agent 9.\n- {agentId} is a- followed by the agent number padded to four digits (agent 9 would be a-0009).\n- {clearanceId} is lvl- followed by the clearance level.\n\nMethod semantics:\n- PUT replaces an existing record at that record's own URL.\n- POST creates new records in a collection, GET only reads, and DELETE removes; none of them replace an existing record.\n\nRules:\n- Add the query parameter effective — changes are scheduled unless this is set to immediate.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l5-clearance-v2",
+      "variantId": "sa-l5-clearance-v2",
+      "missionId": "m1-special-l5",
+      "deviceId": "sa-l5-clearance-2",
+      "conceptTags": [
+        "http.method.put",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "PUT",
+      "pathTemplate": "/api/agents/{agentId}/clearances/{clearanceId}",
+      "pathParameters": {
+        "agentId": "a-0042",
+        "clearanceId": "lvl-3"
+      },
+      "queryParameters": {
+        "effective": "immediate"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/agents/a-0042/clearances/lvl-3",
+        "status": "secured",
+        "message": "Clearance Override API accepted the request. Device sa-l5-clearance-2 activated."
+      },
+      "documentation": "FIELD BRIEF — Clearance Override API (fictional)\n\nObjective:\nReplace Agent Santos's clearance record for level 3 and make it take effect now.\n\nResources:\n- Clearances: /api/agents/{agentId}/clearances/{clearanceId}.\n- Roster: Reyes → agent 117, Santos → agent 42, Cruz → agent 305, Lim → agent 9.\n- {agentId} is a- followed by the agent number padded to four digits (agent 9 would be a-0009).\n- {clearanceId} is lvl- followed by the clearance level.\n\nMethod semantics:\n- PUT replaces an existing record at that record's own URL.\n- POST creates new records in a collection, GET only reads, and DELETE removes; none of them replace an existing record.\n\nRules:\n- Add the query parameter effective — changes are scheduled unless this is set to immediate.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l5-clearance-v3",
+      "variantId": "sa-l5-clearance-v3",
+      "missionId": "m1-special-l5",
+      "deviceId": "sa-l5-clearance-3",
+      "conceptTags": [
+        "http.method.put",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "PUT",
+      "pathTemplate": "/api/agents/{agentId}/clearances/{clearanceId}",
+      "pathParameters": {
+        "agentId": "a-0305",
+        "clearanceId": "lvl-4"
+      },
+      "queryParameters": {
+        "effective": "immediate"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/agents/a-0305/clearances/lvl-4",
+        "status": "secured",
+        "message": "Clearance Override API accepted the request. Device sa-l5-clearance-3 activated."
+      },
+      "documentation": "FIELD BRIEF — Clearance Override API (fictional)\n\nObjective:\nReplace Agent Cruz's clearance record for level 4 and make it take effect now.\n\nResources:\n- Clearances: /api/agents/{agentId}/clearances/{clearanceId}.\n- Roster: Reyes → agent 117, Santos → agent 42, Cruz → agent 305, Lim → agent 9.\n- {agentId} is a- followed by the agent number padded to four digits (agent 9 would be a-0009).\n- {clearanceId} is lvl- followed by the clearance level.\n\nMethod semantics:\n- PUT replaces an existing record at that record's own URL.\n- POST creates new records in a collection, GET only reads, and DELETE removes; none of them replace an existing record.\n\nRules:\n- Add the query parameter effective — changes are scheduled unless this is set to immediate.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l5-route-v1",
+      "variantId": "sa-l5-route-v1",
+      "missionId": "m1-special-l5",
+      "deviceId": "sa-l5-route-1",
+      "conceptTags": [
+        "http.method.put",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "PUT",
+      "pathTemplate": "/api/sites/{siteId}/patrols/{patrolId}/route",
+      "pathParameters": {
+        "siteId": "ilo",
+        "patrolId": "pt-2"
+      },
+      "queryParameters": {
+        "notify": "false"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/sites/ilo/patrols/pt-2/route",
+        "status": "secured",
+        "message": "Patrol Route API accepted the request. Device sa-l5-route-1 activated."
+      },
+      "documentation": "FIELD BRIEF — Patrol Route API (fictional)\n\nObjective:\nSilently replace the route of patrol 2 at the Iloilo site.\n\nResources:\n- Each patrol has one route: /api/sites/{siteId}/patrols/{patrolId}/route.\n- Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n- {patrolId} is pt- followed by the patrol number.\n\nMethod semantics:\n- PUT replaces an existing record at that record's own URL.\n- POST creates new records in a collection, GET only reads, and DELETE removes; none of them replace an existing record.\n\nRules:\n- Add the query parameter notify — guards are alerted unless notify is the word false.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l5-route-v2",
+      "variantId": "sa-l5-route-v2",
+      "missionId": "m1-special-l5",
+      "deviceId": "sa-l5-route-2",
+      "conceptTags": [
+        "http.method.put",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "PUT",
+      "pathTemplate": "/api/sites/{siteId}/patrols/{patrolId}/route",
+      "pathParameters": {
+        "siteId": "mnl",
+        "patrolId": "pt-5"
+      },
+      "queryParameters": {
+        "notify": "false"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/sites/mnl/patrols/pt-5/route",
+        "status": "secured",
+        "message": "Patrol Route API accepted the request. Device sa-l5-route-2 activated."
+      },
+      "documentation": "FIELD BRIEF — Patrol Route API (fictional)\n\nObjective:\nSilently replace the route of patrol 5 at the Manila site.\n\nResources:\n- Each patrol has one route: /api/sites/{siteId}/patrols/{patrolId}/route.\n- Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n- {patrolId} is pt- followed by the patrol number.\n\nMethod semantics:\n- PUT replaces an existing record at that record's own URL.\n- POST creates new records in a collection, GET only reads, and DELETE removes; none of them replace an existing record.\n\nRules:\n- Add the query parameter notify — guards are alerted unless notify is the word false.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l5-route-v3",
+      "variantId": "sa-l5-route-v3",
+      "missionId": "m1-special-l5",
+      "deviceId": "sa-l5-route-3",
+      "conceptTags": [
+        "http.method.put",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "PUT",
+      "pathTemplate": "/api/sites/{siteId}/patrols/{patrolId}/route",
+      "pathParameters": {
+        "siteId": "dvo",
+        "patrolId": "pt-1"
+      },
+      "queryParameters": {
+        "notify": "false"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/sites/dvo/patrols/pt-1/route",
+        "status": "secured",
+        "message": "Patrol Route API accepted the request. Device sa-l5-route-3 activated."
+      },
+      "documentation": "FIELD BRIEF — Patrol Route API (fictional)\n\nObjective:\nSilently replace the route of patrol 1 at the Davao site.\n\nResources:\n- Each patrol has one route: /api/sites/{siteId}/patrols/{patrolId}/route.\n- Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n- {patrolId} is pt- followed by the patrol number.\n\nMethod semantics:\n- PUT replaces an existing record at that record's own URL.\n- POST creates new records in a collection, GET only reads, and DELETE removes; none of them replace an existing record.\n\nRules:\n- Add the query parameter notify — guards are alerted unless notify is the word false.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l5-cipher-v1",
+      "variantId": "sa-l5-cipher-v1",
+      "missionId": "m1-special-l5",
+      "deviceId": "sa-l5-cipher-1",
+      "conceptTags": [
+        "http.method.put",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "PUT",
+      "pathTemplate": "/api/vaults/{vaultId}/ciphers/{cipherId}",
+      "pathParameters": {
+        "vaultId": "v-east",
+        "cipherId": "cx-2024"
+      },
+      "queryParameters": {
+        "rotate": "true"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/vaults/v-east/ciphers/cx-2024",
+        "status": "secured",
+        "message": "Cipher Key API accepted the request. Device sa-l5-cipher-1 activated."
+      },
+      "documentation": "FIELD BRIEF — Cipher Key API (fictional)\n\nObjective:\nReplace the 2024 cipher key in the East vault and rotate it.\n\nResources:\n- Cipher keys: /api/vaults/{vaultId}/ciphers/{cipherId}.\n- {vaultId} is v- followed by the vault direction in lowercase (the West vault would be v-west).\n- {cipherId} is cx- followed by the four-digit key year (the 2019 key would be cx-2019).\n\nMethod semantics:\n- PUT replaces an existing record at that record's own URL.\n- POST creates new records in a collection, GET only reads, and DELETE removes; none of them replace an existing record.\n\nRules:\n- Add the query parameter rotate — the old key stays active unless rotate is true.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l5-cipher-v2",
+      "variantId": "sa-l5-cipher-v2",
+      "missionId": "m1-special-l5",
+      "deviceId": "sa-l5-cipher-2",
+      "conceptTags": [
+        "http.method.put",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "PUT",
+      "pathTemplate": "/api/vaults/{vaultId}/ciphers/{cipherId}",
+      "pathParameters": {
+        "vaultId": "v-north",
+        "cipherId": "cx-2022"
+      },
+      "queryParameters": {
+        "rotate": "true"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/vaults/v-north/ciphers/cx-2022",
+        "status": "secured",
+        "message": "Cipher Key API accepted the request. Device sa-l5-cipher-2 activated."
+      },
+      "documentation": "FIELD BRIEF — Cipher Key API (fictional)\n\nObjective:\nReplace the 2022 cipher key in the North vault and rotate it.\n\nResources:\n- Cipher keys: /api/vaults/{vaultId}/ciphers/{cipherId}.\n- {vaultId} is v- followed by the vault direction in lowercase (the West vault would be v-west).\n- {cipherId} is cx- followed by the four-digit key year (the 2019 key would be cx-2019).\n\nMethod semantics:\n- PUT replaces an existing record at that record's own URL.\n- POST creates new records in a collection, GET only reads, and DELETE removes; none of them replace an existing record.\n\nRules:\n- Add the query parameter rotate — the old key stays active unless rotate is true.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l5-cipher-v3",
+      "variantId": "sa-l5-cipher-v3",
+      "missionId": "m1-special-l5",
+      "deviceId": "sa-l5-cipher-3",
+      "conceptTags": [
+        "http.method.put",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "PUT",
+      "pathTemplate": "/api/vaults/{vaultId}/ciphers/{cipherId}",
+      "pathParameters": {
+        "vaultId": "v-south",
+        "cipherId": "cx-2023"
+      },
+      "queryParameters": {
+        "rotate": "true"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/vaults/v-south/ciphers/cx-2023",
+        "status": "secured",
+        "message": "Cipher Key API accepted the request. Device sa-l5-cipher-3 activated."
+      },
+      "documentation": "FIELD BRIEF — Cipher Key API (fictional)\n\nObjective:\nReplace the 2023 cipher key in the South vault and rotate it.\n\nResources:\n- Cipher keys: /api/vaults/{vaultId}/ciphers/{cipherId}.\n- {vaultId} is v- followed by the vault direction in lowercase (the West vault would be v-west).\n- {cipherId} is cx- followed by the four-digit key year (the 2019 key would be cx-2019).\n\nMethod semantics:\n- PUT replaces an existing record at that record's own URL.\n- POST creates new records in a collection, GET only reads, and DELETE removes; none of them replace an existing record.\n\nRules:\n- Add the query parameter rotate — the old key stays active unless rotate is true.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-final-lock-special-l5",
+      "variantId": "final-lock-special-l5-v1",
+      "missionId": "m1-special-l5",
+      "deviceId": "final-lock-special-l5",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/final-locks/{lockId}",
+      "pathParameters": {
+        "lockId": "sa-l5"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "lockId": "sa-l5",
+        "status": "released",
+        "message": "Special Agent level 5 final lock released."
+      },
+      "documentation": "FIELD BRIEF — Final Lock API (fictional)\n\nObjective:\nRelease this room's extra exit lock after every required device is active.\n\nResources:\n- Final locks live at /api/final-locks/{lockId}.\n- {lockId} for this room is the room code: sa-l5.\n\nMethod semantics:\n- DELETE releases (removes) the lock record. GET only reads it.\n\nRules:\n- Substitute {lockId}. Construct the method and path yourself.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l6-keycard-v1",
+      "variantId": "sa-l6-keycard-v1",
+      "missionId": "m1-special-l6",
+      "deviceId": "sa-l6-keycard-1",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/sites/{siteId}/holders/{holderId}/keycards/{keycardId}",
+      "pathParameters": {
+        "siteId": "ceb",
+        "holderId": "h-0088",
+        "keycardId": "kc-03"
+      },
+      "queryParameters": {
+        "reason": "compromised",
+        "notify": "security"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/sites/ceb/holders/h-0088/keycards/kc-03",
+        "status": "secured",
+        "message": "Black-Site Keycard API accepted the request. Device sa-l6-keycard-1 activated."
+      },
+      "documentation": "FIELD BRIEF — Black-Site Keycard API (fictional)\n\nObjective:\nPurge keycard 3 of holder 88 at the Cebu site and alert security.\n\nResources:\n- Keycards: /api/sites/{siteId}/holders/{holderId}/keycards/{keycardId}.\n- Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n- {holderId} is h- followed by the holder number padded to four digits.\n- {keycardId} is kc- followed by the card number padded to two digits.\n\nMethod semantics:\n- DELETE removes or revokes the record addressed by the URL.\n- GET only reads, and POST/PUT create or replace records; none of them revoke access.\n\nRules:\n- Add the query parameter reason — this card is compromised.\n- Add the query parameter notify — the team to alert, in lowercase (security).\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l6-keycard-v2",
+      "variantId": "sa-l6-keycard-v2",
+      "missionId": "m1-special-l6",
+      "deviceId": "sa-l6-keycard-2",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/sites/{siteId}/holders/{holderId}/keycards/{keycardId}",
+      "pathParameters": {
+        "siteId": "mnl",
+        "holderId": "h-0014",
+        "keycardId": "kc-09"
+      },
+      "queryParameters": {
+        "reason": "compromised",
+        "notify": "security"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/sites/mnl/holders/h-0014/keycards/kc-09",
+        "status": "secured",
+        "message": "Black-Site Keycard API accepted the request. Device sa-l6-keycard-2 activated."
+      },
+      "documentation": "FIELD BRIEF — Black-Site Keycard API (fictional)\n\nObjective:\nPurge keycard 9 of holder 14 at the Manila site and alert security.\n\nResources:\n- Keycards: /api/sites/{siteId}/holders/{holderId}/keycards/{keycardId}.\n- Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n- {holderId} is h- followed by the holder number padded to four digits.\n- {keycardId} is kc- followed by the card number padded to two digits.\n\nMethod semantics:\n- DELETE removes or revokes the record addressed by the URL.\n- GET only reads, and POST/PUT create or replace records; none of them revoke access.\n\nRules:\n- Add the query parameter reason — this card is compromised.\n- Add the query parameter notify — the team to alert, in lowercase (security).\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l6-keycard-v3",
+      "variantId": "sa-l6-keycard-v3",
+      "missionId": "m1-special-l6",
+      "deviceId": "sa-l6-keycard-3",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/sites/{siteId}/holders/{holderId}/keycards/{keycardId}",
+      "pathParameters": {
+        "siteId": "dvo",
+        "holderId": "h-0161",
+        "keycardId": "kc-01"
+      },
+      "queryParameters": {
+        "reason": "compromised",
+        "notify": "security"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/sites/dvo/holders/h-0161/keycards/kc-01",
+        "status": "secured",
+        "message": "Black-Site Keycard API accepted the request. Device sa-l6-keycard-3 activated."
+      },
+      "documentation": "FIELD BRIEF — Black-Site Keycard API (fictional)\n\nObjective:\nPurge keycard 1 of holder 161 at the Davao site and alert security.\n\nResources:\n- Keycards: /api/sites/{siteId}/holders/{holderId}/keycards/{keycardId}.\n- Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n- {holderId} is h- followed by the holder number padded to four digits.\n- {keycardId} is kc- followed by the card number padded to two digits.\n\nMethod semantics:\n- DELETE removes or revokes the record addressed by the URL.\n- GET only reads, and POST/PUT create or replace records; none of them revoke access.\n\nRules:\n- Add the query parameter reason — this card is compromised.\n- Add the query parameter notify — the team to alert, in lowercase (security).\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l6-cert-v1",
+      "variantId": "sa-l6-cert-v1",
+      "missionId": "m1-special-l6",
+      "deviceId": "sa-l6-cert-1",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/stations/{stationId}/certificates/{certId}",
+      "pathParameters": {
+        "stationId": "st-ilo",
+        "certId": "crt-77"
+      },
+      "queryParameters": {
+        "reason": "expired",
+        "cascade": "true"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/stations/st-ilo/certificates/crt-77",
+        "status": "secured",
+        "message": "Station Certificate API accepted the request. Device sa-l6-cert-1 activated."
+      },
+      "documentation": "FIELD BRIEF — Station Certificate API (fictional)\n\nObjective:\nRevoke expired certificate 77 at the Iloilo relay station and everything it signed.\n\nResources:\n- Certificates: /api/stations/{stationId}/certificates/{certId}.\n- {stationId} is st- followed by the site code. Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n- {certId} is crt- followed by the certificate number.\n\nMethod semantics:\n- DELETE removes or revokes the record addressed by the URL.\n- GET only reads, and POST/PUT create or replace records; none of them revoke access.\n\nRules:\n- Add the query parameter reason — the revocation reason (expired).\n- Add the query parameter cascade — signed child credentials are only revoked when cascade is true.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l6-cert-v2",
+      "variantId": "sa-l6-cert-v2",
+      "missionId": "m1-special-l6",
+      "deviceId": "sa-l6-cert-2",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/stations/{stationId}/certificates/{certId}",
+      "pathParameters": {
+        "stationId": "st-ceb",
+        "certId": "crt-12"
+      },
+      "queryParameters": {
+        "reason": "expired",
+        "cascade": "true"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/stations/st-ceb/certificates/crt-12",
+        "status": "secured",
+        "message": "Station Certificate API accepted the request. Device sa-l6-cert-2 activated."
+      },
+      "documentation": "FIELD BRIEF — Station Certificate API (fictional)\n\nObjective:\nRevoke expired certificate 12 at the Cebu relay station and everything it signed.\n\nResources:\n- Certificates: /api/stations/{stationId}/certificates/{certId}.\n- {stationId} is st- followed by the site code. Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n- {certId} is crt- followed by the certificate number.\n\nMethod semantics:\n- DELETE removes or revokes the record addressed by the URL.\n- GET only reads, and POST/PUT create or replace records; none of them revoke access.\n\nRules:\n- Add the query parameter reason — the revocation reason (expired).\n- Add the query parameter cascade — signed child credentials are only revoked when cascade is true.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l6-cert-v3",
+      "variantId": "sa-l6-cert-v3",
+      "missionId": "m1-special-l6",
+      "deviceId": "sa-l6-cert-3",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/stations/{stationId}/certificates/{certId}",
+      "pathParameters": {
+        "stationId": "st-mnl",
+        "certId": "crt-40"
+      },
+      "queryParameters": {
+        "reason": "expired",
+        "cascade": "true"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/stations/st-mnl/certificates/crt-40",
+        "status": "secured",
+        "message": "Station Certificate API accepted the request. Device sa-l6-cert-3 activated."
+      },
+      "documentation": "FIELD BRIEF — Station Certificate API (fictional)\n\nObjective:\nRevoke expired certificate 40 at the Manila relay station and everything it signed.\n\nResources:\n- Certificates: /api/stations/{stationId}/certificates/{certId}.\n- {stationId} is st- followed by the site code. Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n- {certId} is crt- followed by the certificate number.\n\nMethod semantics:\n- DELETE removes or revokes the record addressed by the URL.\n- GET only reads, and POST/PUT create or replace records; none of them revoke access.\n\nRules:\n- Add the query parameter reason — the revocation reason (expired).\n- Add the query parameter cascade — signed child credentials are only revoked when cascade is true.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l6-implant-v1",
+      "variantId": "sa-l6-implant-v1",
+      "missionId": "m1-special-l6",
+      "deviceId": "sa-l6-implant-1",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/sites/{siteId}/devices/{deviceSerial}/implants/{implantId}",
+      "pathParameters": {
+        "siteId": "ilo",
+        "deviceSerial": "ds-5521",
+        "implantId": "imp-2"
+      },
+      "queryParameters": {
+        "reason": "hostile",
+        "wipe": "true"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/sites/ilo/devices/ds-5521/implants/imp-2",
+        "status": "secured",
+        "message": "Device Implant API accepted the request. Device sa-l6-implant-1 activated."
+      },
+      "documentation": "FIELD BRIEF — Device Implant API (fictional)\n\nObjective:\nRemove hostile implant 2 from device serial 5521 at the Iloilo site and wipe it.\n\nResources:\n- Implants: /api/sites/{siteId}/devices/{deviceSerial}/implants/{implantId}.\n- Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n- {deviceSerial} is ds- followed by the serial padded to four digits.\n- {implantId} is imp- followed by the implant number.\n\nMethod semantics:\n- DELETE removes or revokes the record addressed by the URL.\n- GET only reads, and POST/PUT create or replace records; none of them revoke access.\n\nRules:\n- Add the query parameter reason — the implant is hostile.\n- Add the query parameter wipe — removal leaves traces unless wipe is true.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l6-implant-v2",
+      "variantId": "sa-l6-implant-v2",
+      "missionId": "m1-special-l6",
+      "deviceId": "sa-l6-implant-2",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/sites/{siteId}/devices/{deviceSerial}/implants/{implantId}",
+      "pathParameters": {
+        "siteId": "dvo",
+        "deviceSerial": "ds-0193",
+        "implantId": "imp-7"
+      },
+      "queryParameters": {
+        "reason": "hostile",
+        "wipe": "true"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/sites/dvo/devices/ds-0193/implants/imp-7",
+        "status": "secured",
+        "message": "Device Implant API accepted the request. Device sa-l6-implant-2 activated."
+      },
+      "documentation": "FIELD BRIEF — Device Implant API (fictional)\n\nObjective:\nRemove hostile implant 7 from device serial 193 at the Davao site and wipe it.\n\nResources:\n- Implants: /api/sites/{siteId}/devices/{deviceSerial}/implants/{implantId}.\n- Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n- {deviceSerial} is ds- followed by the serial padded to four digits.\n- {implantId} is imp- followed by the implant number.\n\nMethod semantics:\n- DELETE removes or revokes the record addressed by the URL.\n- GET only reads, and POST/PUT create or replace records; none of them revoke access.\n\nRules:\n- Add the query parameter reason — the implant is hostile.\n- Add the query parameter wipe — removal leaves traces unless wipe is true.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l6-implant-v3",
+      "variantId": "sa-l6-implant-v3",
+      "missionId": "m1-special-l6",
+      "deviceId": "sa-l6-implant-3",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/sites/{siteId}/devices/{deviceSerial}/implants/{implantId}",
+      "pathParameters": {
+        "siteId": "mnl",
+        "deviceSerial": "ds-7740",
+        "implantId": "imp-4"
+      },
+      "queryParameters": {
+        "reason": "hostile",
+        "wipe": "true"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/sites/mnl/devices/ds-7740/implants/imp-4",
+        "status": "secured",
+        "message": "Device Implant API accepted the request. Device sa-l6-implant-3 activated."
+      },
+      "documentation": "FIELD BRIEF — Device Implant API (fictional)\n\nObjective:\nRemove hostile implant 4 from device serial 7740 at the Manila site and wipe it.\n\nResources:\n- Implants: /api/sites/{siteId}/devices/{deviceSerial}/implants/{implantId}.\n- Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n- {deviceSerial} is ds- followed by the serial padded to four digits.\n- {implantId} is imp- followed by the implant number.\n\nMethod semantics:\n- DELETE removes or revokes the record addressed by the URL.\n- GET only reads, and POST/PUT create or replace records; none of them revoke access.\n\nRules:\n- Add the query parameter reason — the implant is hostile.\n- Add the query parameter wipe — removal leaves traces unless wipe is true.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-final-lock-special-l6",
+      "variantId": "final-lock-special-l6-v1",
+      "missionId": "m1-special-l6",
+      "deviceId": "final-lock-special-l6",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/final-locks/{lockId}",
+      "pathParameters": {
+        "lockId": "sa-l6"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "lockId": "sa-l6",
+        "status": "released",
+        "message": "Special Agent level 6 final lock released."
+      },
+      "documentation": "FIELD BRIEF — Final Lock API (fictional)\n\nObjective:\nRelease this room's extra exit lock after every required device is active.\n\nResources:\n- Final locks live at /api/final-locks/{lockId}.\n- {lockId} for this room is the room code: sa-l6.\n\nMethod semantics:\n- DELETE releases (removes) the lock record. GET only reads it.\n\nRules:\n- Substitute {lockId}. Construct the method and path yourself.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l7-grid-v1",
+      "variantId": "sa-l7-grid-v1",
+      "missionId": "m1-special-l7",
+      "deviceId": "sa-l7-grid-1",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/sites/{siteId}/grids/{gridId}/nodes",
+      "pathParameters": {
+        "siteId": "ceb",
+        "gridId": "g-02"
+      },
+      "queryParameters": {
+        "status": "armed",
+        "floor": "4"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/sites/ceb/grids/g-02/nodes",
+        "status": "secured",
+        "message": "Black-Site Grid API accepted the request. Device sa-l7-grid-1 activated."
+      },
+      "documentation": "FIELD BRIEF — Black-Site Grid API (fictional)\n\nObjective:\nList the armed nodes of power grid 2 on floor 4 at the Cebu site.\n\nResources:\n- Grid nodes: /api/sites/{siteId}/grids/{gridId}/nodes.\n- Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n- {gridId} is g- followed by the grid number padded to two digits.\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- Add the query parameter status — only armed nodes (armed).\n- Add the query parameter floor — the floor number as digits.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l7-grid-v2",
+      "variantId": "sa-l7-grid-v2",
+      "missionId": "m1-special-l7",
+      "deviceId": "sa-l7-grid-2",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/sites/{siteId}/grids/{gridId}/nodes",
+      "pathParameters": {
+        "siteId": "dvo",
+        "gridId": "g-05"
+      },
+      "queryParameters": {
+        "status": "armed",
+        "floor": "2"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/sites/dvo/grids/g-05/nodes",
+        "status": "secured",
+        "message": "Black-Site Grid API accepted the request. Device sa-l7-grid-2 activated."
+      },
+      "documentation": "FIELD BRIEF — Black-Site Grid API (fictional)\n\nObjective:\nList the armed nodes of power grid 5 on floor 2 at the Davao site.\n\nResources:\n- Grid nodes: /api/sites/{siteId}/grids/{gridId}/nodes.\n- Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n- {gridId} is g- followed by the grid number padded to two digits.\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- Add the query parameter status — only armed nodes (armed).\n- Add the query parameter floor — the floor number as digits.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l7-grid-v3",
+      "variantId": "sa-l7-grid-v3",
+      "missionId": "m1-special-l7",
+      "deviceId": "sa-l7-grid-3",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/sites/{siteId}/grids/{gridId}/nodes",
+      "pathParameters": {
+        "siteId": "mnl",
+        "gridId": "g-01"
+      },
+      "queryParameters": {
+        "status": "armed",
+        "floor": "6"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/sites/mnl/grids/g-01/nodes",
+        "status": "secured",
+        "message": "Black-Site Grid API accepted the request. Device sa-l7-grid-3 activated."
+      },
+      "documentation": "FIELD BRIEF — Black-Site Grid API (fictional)\n\nObjective:\nList the armed nodes of power grid 1 on floor 6 at the Manila site.\n\nResources:\n- Grid nodes: /api/sites/{siteId}/grids/{gridId}/nodes.\n- Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n- {gridId} is g- followed by the grid number padded to two digits.\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- Add the query parameter status — only armed nodes (armed).\n- Add the query parameter floor — the floor number as digits.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l7-vault-v1",
+      "variantId": "sa-l7-vault-v1",
+      "missionId": "m1-special-l7",
+      "deviceId": "sa-l7-vault-1",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/sites/{siteId}/vaults/{vaultId}/seals/{sealId}",
+      "pathParameters": {
+        "siteId": "ilo",
+        "vaultId": "v-north",
+        "sealId": "sl-014"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/sites/ilo/vaults/v-north/seals/sl-014",
+        "status": "secured",
+        "message": "Black-Site Vault API accepted the request. Device sa-l7-vault-1 activated."
+      },
+      "documentation": "FIELD BRIEF — Black-Site Vault API (fictional)\n\nObjective:\nInspect seal 14 on the North vault at the Iloilo site.\n\nResources:\n- Seals: /api/sites/{siteId}/vaults/{vaultId}/seals/{sealId}.\n- Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n- {vaultId} is v- followed by the vault direction in lowercase (the West vault would be v-west).\n- {sealId} is sl- followed by the seal number padded to three digits.\n\nSimilar routes on this network (not all are correct for this objective):\n- /api/sites/{siteId}/seals/{sealId} — legacy index; refuses vault seals\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- No body or query string is needed.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l7-vault-v2",
+      "variantId": "sa-l7-vault-v2",
+      "missionId": "m1-special-l7",
+      "deviceId": "sa-l7-vault-2",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/sites/{siteId}/vaults/{vaultId}/seals/{sealId}",
+      "pathParameters": {
+        "siteId": "ceb",
+        "vaultId": "v-east",
+        "sealId": "sl-207"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/sites/ceb/vaults/v-east/seals/sl-207",
+        "status": "secured",
+        "message": "Black-Site Vault API accepted the request. Device sa-l7-vault-2 activated."
+      },
+      "documentation": "FIELD BRIEF — Black-Site Vault API (fictional)\n\nObjective:\nInspect seal 207 on the East vault at the Cebu site.\n\nResources:\n- Seals: /api/sites/{siteId}/vaults/{vaultId}/seals/{sealId}.\n- Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n- {vaultId} is v- followed by the vault direction in lowercase (the West vault would be v-west).\n- {sealId} is sl- followed by the seal number padded to three digits.\n\nSimilar routes on this network (not all are correct for this objective):\n- /api/sites/{siteId}/seals/{sealId} — legacy index; refuses vault seals\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- No body or query string is needed.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l7-vault-v3",
+      "variantId": "sa-l7-vault-v3",
+      "missionId": "m1-special-l7",
+      "deviceId": "sa-l7-vault-3",
+      "conceptTags": [
+        "http.method.get",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "GET",
+      "pathTemplate": "/api/sites/{siteId}/vaults/{vaultId}/seals/{sealId}",
+      "pathParameters": {
+        "siteId": "dvo",
+        "vaultId": "v-west",
+        "sealId": "sl-033"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/sites/dvo/vaults/v-west/seals/sl-033",
+        "status": "secured",
+        "message": "Black-Site Vault API accepted the request. Device sa-l7-vault-3 activated."
+      },
+      "documentation": "FIELD BRIEF — Black-Site Vault API (fictional)\n\nObjective:\nInspect seal 33 on the West vault at the Davao site.\n\nResources:\n- Seals: /api/sites/{siteId}/vaults/{vaultId}/seals/{sealId}.\n- Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n- {vaultId} is v- followed by the vault direction in lowercase (the West vault would be v-west).\n- {sealId} is sl- followed by the seal number padded to three digits.\n\nSimilar routes on this network (not all are correct for this objective):\n- /api/sites/{siteId}/seals/{sealId} — legacy index; refuses vault seals\n\nMethod semantics:\n- GET retrieves the current representation of a resource without changing it.\n- POST, PUT, PATCH, and DELETE change server state and are wrong for a read-only check.\n\nRules:\n- No body or query string is needed.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l7-lockdown-v1",
+      "variantId": "sa-l7-lockdown-v1",
+      "missionId": "m1-special-l7",
+      "deviceId": "sa-l7-lockdown-1",
+      "conceptTags": [
+        "http.method.post",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "POST",
+      "pathTemplate": "/api/sites/{siteId}/zones/{zoneId}/lockdown-requests",
+      "pathParameters": {
+        "siteId": "mnl",
+        "zoneId": "z-core"
+      },
+      "queryParameters": {
+        "priority": "urgent"
+      },
+      "successStatus": 201,
+      "successBody": {
+        "resource": "/api/sites/mnl/zones/z-core/lockdown-requests",
+        "status": "secured",
+        "message": "Black-Site Lockdown API accepted the request. Device sa-l7-lockdown-1 activated."
+      },
+      "documentation": "FIELD BRIEF — Black-Site Lockdown API (fictional)\n\nObjective:\nFile an urgent lockdown request that traps the director's guards in the Core zone at the Manila site.\n\nResources:\n- Lockdown requests: /api/sites/{siteId}/zones/{zoneId}/lockdown-requests.\n- Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n- {zoneId} is z- followed by the zone name in lowercase.\n\nMethod semantics:\n- POST creates a new record inside a collection resource.\n- PUT replaces an existing record at its own URL, GET only reads, and DELETE removes; none of them file a new record.\n\nRules:\n- Add the query parameter priority — it must be marked urgent.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l7-lockdown-v2",
+      "variantId": "sa-l7-lockdown-v2",
+      "missionId": "m1-special-l7",
+      "deviceId": "sa-l7-lockdown-2",
+      "conceptTags": [
+        "http.method.post",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "POST",
+      "pathTemplate": "/api/sites/{siteId}/zones/{zoneId}/lockdown-requests",
+      "pathParameters": {
+        "siteId": "ilo",
+        "zoneId": "z-hangar"
+      },
+      "queryParameters": {
+        "priority": "urgent"
+      },
+      "successStatus": 201,
+      "successBody": {
+        "resource": "/api/sites/ilo/zones/z-hangar/lockdown-requests",
+        "status": "secured",
+        "message": "Black-Site Lockdown API accepted the request. Device sa-l7-lockdown-2 activated."
+      },
+      "documentation": "FIELD BRIEF — Black-Site Lockdown API (fictional)\n\nObjective:\nFile an urgent lockdown request that traps the director's guards in the Hangar zone at the Iloilo site.\n\nResources:\n- Lockdown requests: /api/sites/{siteId}/zones/{zoneId}/lockdown-requests.\n- Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n- {zoneId} is z- followed by the zone name in lowercase.\n\nMethod semantics:\n- POST creates a new record inside a collection resource.\n- PUT replaces an existing record at its own URL, GET only reads, and DELETE removes; none of them file a new record.\n\nRules:\n- Add the query parameter priority — it must be marked urgent.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l7-lockdown-v3",
+      "variantId": "sa-l7-lockdown-v3",
+      "missionId": "m1-special-l7",
+      "deviceId": "sa-l7-lockdown-3",
+      "conceptTags": [
+        "http.method.post",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "POST",
+      "pathTemplate": "/api/sites/{siteId}/zones/{zoneId}/lockdown-requests",
+      "pathParameters": {
+        "siteId": "ceb",
+        "zoneId": "z-core"
+      },
+      "queryParameters": {
+        "priority": "urgent"
+      },
+      "successStatus": 201,
+      "successBody": {
+        "resource": "/api/sites/ceb/zones/z-core/lockdown-requests",
+        "status": "secured",
+        "message": "Black-Site Lockdown API accepted the request. Device sa-l7-lockdown-3 activated."
+      },
+      "documentation": "FIELD BRIEF — Black-Site Lockdown API (fictional)\n\nObjective:\nFile an urgent lockdown request that traps the director's guards in the Core zone at the Cebu site.\n\nResources:\n- Lockdown requests: /api/sites/{siteId}/zones/{zoneId}/lockdown-requests.\n- Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n- {zoneId} is z- followed by the zone name in lowercase.\n\nMethod semantics:\n- POST creates a new record inside a collection resource.\n- PUT replaces an existing record at its own URL, GET only reads, and DELETE removes; none of them file a new record.\n\nRules:\n- Add the query parameter priority — it must be marked urgent.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l7-protocol-v1",
+      "variantId": "sa-l7-protocol-v1",
+      "missionId": "m1-special-l7",
+      "deviceId": "sa-l7-protocol-1",
+      "conceptTags": [
+        "http.method.put",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "PUT",
+      "pathTemplate": "/api/sites/{siteId}/defense-protocols/{protocolId}",
+      "pathParameters": {
+        "siteId": "dvo",
+        "protocolId": "dp-07"
+      },
+      "queryParameters": {
+        "effective": "immediate"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/sites/dvo/defense-protocols/dp-07",
+        "status": "secured",
+        "message": "Black-Site Protocol API accepted the request. Device sa-l7-protocol-1 activated."
+      },
+      "documentation": "FIELD BRIEF — Black-Site Protocol API (fictional)\n\nObjective:\nReplace defense protocol 7 at the Davao site with a disarmed version, effective now.\n\nResources:\n- Protocols: /api/sites/{siteId}/defense-protocols/{protocolId}.\n- Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n- {protocolId} is dp- followed by the protocol number padded to two digits.\n\nMethod semantics:\n- PUT replaces an existing record at that record's own URL.\n- POST creates new records in a collection, GET only reads, and DELETE removes; none of them replace an existing record.\n\nRules:\n- Add the query parameter effective — changes are scheduled unless this is immediate.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l7-protocol-v2",
+      "variantId": "sa-l7-protocol-v2",
+      "missionId": "m1-special-l7",
+      "deviceId": "sa-l7-protocol-2",
+      "conceptTags": [
+        "http.method.put",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "PUT",
+      "pathTemplate": "/api/sites/{siteId}/defense-protocols/{protocolId}",
+      "pathParameters": {
+        "siteId": "mnl",
+        "protocolId": "dp-03"
+      },
+      "queryParameters": {
+        "effective": "immediate"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/sites/mnl/defense-protocols/dp-03",
+        "status": "secured",
+        "message": "Black-Site Protocol API accepted the request. Device sa-l7-protocol-2 activated."
+      },
+      "documentation": "FIELD BRIEF — Black-Site Protocol API (fictional)\n\nObjective:\nReplace defense protocol 3 at the Manila site with a disarmed version, effective now.\n\nResources:\n- Protocols: /api/sites/{siteId}/defense-protocols/{protocolId}.\n- Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n- {protocolId} is dp- followed by the protocol number padded to two digits.\n\nMethod semantics:\n- PUT replaces an existing record at that record's own URL.\n- POST creates new records in a collection, GET only reads, and DELETE removes; none of them replace an existing record.\n\nRules:\n- Add the query parameter effective — changes are scheduled unless this is immediate.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l7-protocol-v3",
+      "variantId": "sa-l7-protocol-v3",
+      "missionId": "m1-special-l7",
+      "deviceId": "sa-l7-protocol-3",
+      "conceptTags": [
+        "http.method.put",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "PUT",
+      "pathTemplate": "/api/sites/{siteId}/defense-protocols/{protocolId}",
+      "pathParameters": {
+        "siteId": "ilo",
+        "protocolId": "dp-11"
+      },
+      "queryParameters": {
+        "effective": "immediate"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/sites/ilo/defense-protocols/dp-11",
+        "status": "secured",
+        "message": "Black-Site Protocol API accepted the request. Device sa-l7-protocol-3 activated."
+      },
+      "documentation": "FIELD BRIEF — Black-Site Protocol API (fictional)\n\nObjective:\nReplace defense protocol 11 at the Iloilo site with a disarmed version, effective now.\n\nResources:\n- Protocols: /api/sites/{siteId}/defense-protocols/{protocolId}.\n- Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n- {protocolId} is dp- followed by the protocol number padded to two digits.\n\nMethod semantics:\n- PUT replaces an existing record at that record's own URL.\n- POST creates new records in a collection, GET only reads, and DELETE removes; none of them replace an existing record.\n\nRules:\n- Add the query parameter effective — changes are scheduled unless this is immediate.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l7-director-v1",
+      "variantId": "sa-l7-director-v1",
+      "missionId": "m1-special-l7",
+      "deviceId": "sa-l7-director-1",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/sites/{siteId}/directors/{directorId}/credentials",
+      "pathParameters": {
+        "siteId": "ceb",
+        "directorId": "dir-0001"
+      },
+      "queryParameters": {
+        "reason": "compromised",
+        "cascade": "true"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/sites/ceb/directors/dir-0001/credentials",
+        "status": "secured",
+        "message": "Black-Site Credential API accepted the request. Device sa-l7-director-1 activated."
+      },
+      "documentation": "FIELD BRIEF — Black-Site Credential API (fictional)\n\nObjective:\nRevoke every credential held by director 1 at the Cebu site, including delegated ones.\n\nResources:\n- Director credentials: /api/sites/{siteId}/directors/{directorId}/credentials.\n- Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n- {directorId} is dir- followed by the director number padded to four digits.\n\nMethod semantics:\n- DELETE removes or revokes the record addressed by the URL.\n- GET only reads, and POST/PUT create or replace records; none of them revoke access.\n\nRules:\n- Add the query parameter reason — the credentials are compromised.\n- Add the query parameter cascade — delegated credentials survive unless cascade is true.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l7-director-v2",
+      "variantId": "sa-l7-director-v2",
+      "missionId": "m1-special-l7",
+      "deviceId": "sa-l7-director-2",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/sites/{siteId}/directors/{directorId}/credentials",
+      "pathParameters": {
+        "siteId": "dvo",
+        "directorId": "dir-0004"
+      },
+      "queryParameters": {
+        "reason": "compromised",
+        "cascade": "true"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/sites/dvo/directors/dir-0004/credentials",
+        "status": "secured",
+        "message": "Black-Site Credential API accepted the request. Device sa-l7-director-2 activated."
+      },
+      "documentation": "FIELD BRIEF — Black-Site Credential API (fictional)\n\nObjective:\nRevoke every credential held by director 4 at the Davao site, including delegated ones.\n\nResources:\n- Director credentials: /api/sites/{siteId}/directors/{directorId}/credentials.\n- Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n- {directorId} is dir- followed by the director number padded to four digits.\n\nMethod semantics:\n- DELETE removes or revokes the record addressed by the URL.\n- GET only reads, and POST/PUT create or replace records; none of them revoke access.\n\nRules:\n- Add the query parameter reason — the credentials are compromised.\n- Add the query parameter cascade — delegated credentials survive unless cascade is true.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-sa-l7-director-v3",
+      "variantId": "sa-l7-director-v3",
+      "missionId": "m1-special-l7",
+      "deviceId": "sa-l7-director-3",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter",
+        "http.query_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/sites/{siteId}/directors/{directorId}/credentials",
+      "pathParameters": {
+        "siteId": "mnl",
+        "directorId": "dir-0002"
+      },
+      "queryParameters": {
+        "reason": "compromised",
+        "cascade": "true"
+      },
+      "successStatus": 200,
+      "successBody": {
+        "resource": "/api/sites/mnl/directors/dir-0002/credentials",
+        "status": "secured",
+        "message": "Black-Site Credential API accepted the request. Device sa-l7-director-3 activated."
+      },
+      "documentation": "FIELD BRIEF — Black-Site Credential API (fictional)\n\nObjective:\nRevoke every credential held by director 2 at the Manila site, including delegated ones.\n\nResources:\n- Director credentials: /api/sites/{siteId}/directors/{directorId}/credentials.\n- Site codes: Manila → mnl, Cebu → ceb, Davao → dvo, Iloilo → ilo.\n- {directorId} is dir- followed by the director number padded to four digits.\n\nMethod semantics:\n- DELETE removes or revokes the record addressed by the URL.\n- GET only reads, and POST/PUT create or replace records; none of them revoke access.\n\nRules:\n- Add the query parameter reason — the credentials are compromised.\n- Add the query parameter cascade — delegated credentials survive unless cascade is true.\n- Construct the method, the full path, and any query string yourself from these rules. The terminal will not paste the completed request for you.",
+      "deviceUnlockState": "OPEN"
+    },
+    {
+      "challengeId": "chal-m1-final-lock-special-l7",
+      "variantId": "final-lock-special-l7-v1",
+      "missionId": "m1-special-l7",
+      "deviceId": "final-lock-special-l7",
+      "conceptTags": [
+        "http.method.delete",
+        "http.endpoint",
+        "http.path_parameter"
+      ],
+      "expectedMethod": "DELETE",
+      "pathTemplate": "/api/final-locks/{lockId}",
+      "pathParameters": {
+        "lockId": "black-site"
+      },
+      "queryParameters": {},
+      "successStatus": 200,
+      "successBody": {
+        "lockId": "black-site",
+        "status": "released",
+        "message": "Black site final lock released."
+      },
+      "documentation": "FIELD BRIEF — Final Lock API (fictional)\n\nObjective:\nRelease this room's extra exit lock after every required device is active.\n\nResources:\n- Final locks live at /api/final-locks/{lockId}.\n- {lockId} for this room is the room code: black-site.\n\nMethod semantics:\n- DELETE releases (removes) the lock record. GET only reads it.\n\nRules:\n- Substitute {lockId}. Construct the method and path yourself.",
+      "deviceUnlockState": "OPEN"
+    }
+  ]
+}

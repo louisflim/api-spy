@@ -210,10 +210,24 @@ export const DRILL_LABELS: Record<string, string> = {
   'm1-recruit-l6': 'DELETE badge drill',
 }
 
+/**
+ * Field Agent / Special Agent levels reuse the ungraded Recruit drill for the same
+ * module and level: practice covers the same concepts and never enters RCA.
+ */
+function drillKey(missionId: string): string {
+  if (Object.prototype.hasOwnProperty.call(PRACTICE_BY_MISSION, missionId)) return missionId
+  const match = /^m(\d+)-(field|special)-l(\d+)$/.exec(missionId)
+  return match ? `m${match[1]}-recruit-l${match[3]}` : missionId
+}
+
 export function hasPracticeDrill(missionId: string): boolean {
-  return Object.prototype.hasOwnProperty.call(PRACTICE_BY_MISSION, missionId)
+  return Object.prototype.hasOwnProperty.call(PRACTICE_BY_MISSION, drillKey(missionId))
 }
 
 export function getPracticeDetail(missionId: string): MissionDetail | null {
-  return PRACTICE_BY_MISSION[missionId] ?? null
+  return PRACTICE_BY_MISSION[drillKey(missionId)] ?? null
+}
+
+export function drillLabel(missionId: string): string | undefined {
+  return DRILL_LABELS[drillKey(missionId)]
 }

@@ -8,7 +8,7 @@ import {
   RANK_ORDER,
   type RankKey,
 } from '../content/moduleMeta'
-import { isCareerUnlocked, priorRecruitMissionId } from '../learning/careerProgression'
+import { isCareerUnlocked, priorCareerMissionId } from '../learning/careerProgression'
 import { conceptLabel } from '../learning/prerequisites'
 import { hasPracticeDrill } from '../content/practiceDrills'
 import { Module0Academy } from '../screens/Module0Academy'
@@ -79,6 +79,16 @@ function resolveMissionState(
     return 'in_progress'
   }
   return 'available'
+}
+
+/** Names the operation (with its rank) that must be cleared to unlock `mission`. */
+function lockedMessage(mission: MissionSummary, all: MissionSummary[]): string {
+  const priorId = priorCareerMissionId(mission)
+  const prior = all.find((m) => m.missionId === priorId)
+  const label = prior
+    ? `${RANK_LABELS[normalizeRank(prior.rank)]} M${prior.module} L${prior.level} (${prior.title})`
+    : priorId
+  return `Clear ${label} to unlock this operation.`
 }
 
 export function MissionHub({
@@ -440,8 +450,8 @@ export function MissionHub({
                   <p className="ops-side-note">
                     {!selected.playable
                       ? 'This dossier is planned for a later build. Levels without authored contracts stay locked.'
-                      : selectedState === 'locked' && priorRecruitMissionId(selected)
-                        ? `Complete ${priorRecruitMissionId(selected)} before launching this Recruit operation.`
+                      : selectedState === 'locked' && priorCareerMissionId(selected)
+                        ? lockedMessage(selected, missions)
                         : 'Use the API terminal in the practice room to send the request described in the mission docs. Unlock the door to finish the room.'}
                   </p>
                 </div>

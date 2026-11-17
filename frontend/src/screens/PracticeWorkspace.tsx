@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useAuth } from '../auth/AuthContext'
-import { DRILL_LABELS, getPracticeDetail } from '../content/practiceDrills'
+import { drillLabel as drillLabelFor, getPracticeDetail } from '../content/practiceDrills'
 import { moduleLabel, normalizeRank, RANK_LABELS } from '../content/moduleMeta'
 import { conceptLabel } from '../learning/prerequisites'
 import type { MissionSummary } from '../types/api'
@@ -28,7 +28,7 @@ export function PracticeWorkspace({
 
   const detail = useMemo(() => getPracticeDetail(mission.missionId), [mission.missionId])
   const rankLabel = RANK_LABELS[normalizeRank(mission.rank)]
-  const drillLabel = DRILL_LABELS[mission.missionId] ?? 'Terminal drill'
+  const drillLabel = drillLabelFor(mission.missionId) ?? 'Terminal drill'
   const conceptTags = detail?.challenge.conceptTags ?? mission.conceptTags ?? []
 
   function restartDrill() {

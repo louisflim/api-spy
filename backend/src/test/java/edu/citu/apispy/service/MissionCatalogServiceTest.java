@@ -17,8 +17,9 @@ class MissionCatalogServiceTest {
 		MissionCatalogService service = new MissionCatalogService(new ContentLoader(new ObjectMapper()));
 
 		assertEquals(63, service.totalConfigured());
-		assertEquals(7, service.implementedCount());
-		assertEquals(7, service.playableMissions().size());
+		// Module 1: Recruit, Field Agent and Special Agent tracks (7 levels each).
+		assertEquals(21, service.implementedCount());
+		assertEquals(21, service.playableMissions().size());
 		assertTrue(service.requirePlayable("m1-recruit-l1").isPlayable());
 		assertTrue(service.requirePlayable("m1-recruit-l4").isPlayable());
 		assertTrue(service.requirePlayable("m1-recruit-l5").isPlayable());

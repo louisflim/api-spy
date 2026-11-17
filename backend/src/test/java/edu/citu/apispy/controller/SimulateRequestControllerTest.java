@@ -64,7 +64,7 @@ class SimulateRequestControllerTest {
 		mockMvc.perform(get("/api/catalog").session(session))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.totalMissions").value(63))
-				.andExpect(jsonPath("$.implementedMissions").value(7))
+				.andExpect(jsonPath("$.implementedMissions").value(21))
 				.andExpect(jsonPath("$.missions[?(@.missionId=='m1-recruit-l7')].playable").value(true));
 	}
 
@@ -154,7 +154,7 @@ class SimulateRequestControllerTest {
 
 	@Test
 	void plannedMissionIsNotPlayable() throws Exception {
-		mockMvc.perform(get("/api/missions/1/SPECIAL_AGENT/7").session(session))
+		mockMvc.perform(get("/api/missions/2/SPECIAL_AGENT/7").session(session))
 				.andExpect(status().isBadRequest());
 	}
 }

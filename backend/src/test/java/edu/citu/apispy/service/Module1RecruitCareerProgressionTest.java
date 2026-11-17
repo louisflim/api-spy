@@ -67,6 +67,44 @@ class Module1RecruitCareerProgressionTest {
 		assertTrue(boss.finalLockRequired());
 	}
 
+	@Test
+	void fieldAgentUnlocksAfterRecruitFinalRoomAndSpecialAfterFieldFinalRoom() {
+		String agent = "career-ranks";
+		IllegalStateException fieldLocked = assertThrows(
+				IllegalStateException.class,
+				() -> progress.getOrCreate(agent, "m1-field-l1"));
+		assertTrue(fieldLocked.getMessage().contains("m1-recruit-l7"));
+
+		for (int level = 1; level <= 7; level++) {
+			clearMission(agent, "m1-recruit-l" + level);
+		}
+		assertEquals("m1-field-l1", progress.getOrCreate(agent, "m1-field-l1").missionId());
+		IllegalStateException fieldL2Locked = assertThrows(
+				IllegalStateException.class,
+				() -> progress.getOrCreate(agent, "m1-field-l2"));
+		assertTrue(fieldL2Locked.getMessage().contains("m1-field-l1"));
+		IllegalStateException specialLocked = assertThrows(
+				IllegalStateException.class,
+				() -> progress.getOrCreate(agent, "m1-special-l1"));
+		assertTrue(specialLocked.getMessage().contains("m1-field-l7"));
+
+		for (int level = 1; level <= 7; level++) {
+			clearMission(agent, "m1-field-l" + level);
+		}
+		assertEquals("m1-special-l1", progress.getOrCreate(agent, "m1-special-l1").missionId());
+		// Promotion never removes access to lower ranks.
+		assertDoesNotThrow(() -> progress.startReplay(agent, "m1-recruit-l3"));
+	}
+
+	@Test
+	void priorCareerMissionFollowsTheProposalProgressionTable() {
+		assertEquals(null, MissionProgressService.priorCareerMissionId(1, edu.citu.apispy.domain.mission.Rank.RECRUIT, 1));
+		assertEquals("m1-recruit-l7", MissionProgressService.priorCareerMissionId(1, edu.citu.apispy.domain.mission.Rank.FIELD_AGENT, 1));
+		assertEquals("m1-field-l7", MissionProgressService.priorCareerMissionId(1, edu.citu.apispy.domain.mission.Rank.SPECIAL_AGENT, 1));
+		assertEquals("m1-special-l4", MissionProgressService.priorCareerMissionId(1, edu.citu.apispy.domain.mission.Rank.SPECIAL_AGENT, 5));
+		assertEquals("m1-field-l7", MissionProgressService.priorCareerMissionId(2, edu.citu.apispy.domain.mission.Rank.FIELD_AGENT, 1));
+	}
+
 	private void clearMission(String participantCode, String missionId) {
 		SimulateResponseDto unlock = simulate.simulate(
 				participantCode, correctSelectedPrimary(participantCode, missionId));

@@ -746,17 +746,23 @@ public class MissionProgressService {
 	}
 
 	/**
-	 * Module 1 Recruit only: Level N requires career completion of Level N-1.
-	 * Field/Special Agent and other modules are unchanged.
+	 * Career gate (proposal progression table):
+	 * <ul>
+	 *   <li>Level N requires Level N-1 in the same module and rank.</li>
+	 *   <li>Module 1 Field Agent L1 requires the Recruit Module 1 final room (L7);
+	 *       Special Agent L1 requires the Field Agent Module 1 final room.</li>
+	 *   <li>Module 2/3 Level 1 requires the previous module's final room in the same rank.</li>
+	 * </ul>
+	 * Promotion is optional: unlocking a rank never forces switching.
 	 */
 	void assertSequentialCareerAccess(String participantCode, MissionDefinition mission) {
 		if (!sequentialCareerUnlockEnabled) {
 			return;
 		}
-		if (mission.getModule() != 1 || mission.getRank() != Rank.RECRUIT || mission.getLevel() <= 1) {
+		String priorMissionId = priorCareerMissionId(mission.getModule(), mission.getRank(), mission.getLevel());
+		if (priorMissionId == null) {
 			return;
 		}
-		String priorMissionId = "m1-recruit-l" + (mission.getLevel() - 1);
 		boolean priorCleared = findEntity(participantCode, priorMissionId)
 				.map(entity -> entity.getStatus() == MissionProgressStatus.COMPLETED
 						&& entity.getCompletedAt() != null)
@@ -767,15 +773,30 @@ public class MissionProgressService {
 		}
 	}
 
+	/** Mission that must be career-cleared before this one, or null when none is required. */
+	public static String priorCareerMissionId(int module, Rank rank, int level) {
+		if (level > 1) {
+			return MissionCatalogService.missionId(module, rank, level - 1);
+		}
+		if (module > 1) {
+			return MissionCatalogService.missionId(module - 1, rank, BOSS_LEVEL);
+		}
+		return switch (rank) {
+			case RECRUIT -> null;
+			case FIELD_AGENT -> MissionCatalogService.missionId(1, Rank.RECRUIT, BOSS_LEVEL);
+			case SPECIAL_AGENT -> MissionCatalogService.missionId(1, Rank.FIELD_AGENT, BOSS_LEVEL);
+		};
+	}
+
 	/** Whether Module 1 Recruit Level {@code level} is career-unlocked for this player. */
 	public boolean isRecruitLevelUnlocked(String participantCode, int level) {
-		if (level <= 1) {
-			return true;
-		}
 		if (!sequentialCareerUnlockEnabled) {
 			return true;
 		}
-		String priorMissionId = "m1-recruit-l" + (level - 1);
+		String priorMissionId = priorCareerMissionId(1, Rank.RECRUIT, level);
+		if (priorMissionId == null) {
+			return true;
+		}
 		return findEntity(participantCode, priorMissionId)
 				.map(entity -> entity.getStatus() == MissionProgressStatus.COMPLETED
 						&& entity.getCompletedAt() != null)

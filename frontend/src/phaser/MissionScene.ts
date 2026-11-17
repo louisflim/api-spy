@@ -1,7 +1,7 @@
 import Phaser from 'phaser'
 import { CombatSystem } from './combat'
-import { COMBAT_TEXTURE_KEYS, GUARD_SHEET_PATH } from './combat/combatArt'
-import { PATROL_GUARD_CONFIG } from './combat/enemyTypes'
+import { bossConfigFor } from './combat/bossConfig'
+import { ENEMY_SHEETS } from './combat/enemyTypes'
 import { generateRoomLayout, ROOM_COLS, ROOM_ROWS, ROOM_TILE_SIZE } from './room/generateRoomLayout'
 import { ensureRoomTextures, FLOOR_TEXTURE_KEYS, PROP_TEXTURE_KEYS } from './room/pixelArt'
 import type { RoomLayoutPlan, WorldPos } from './room/types'
@@ -26,7 +26,8 @@ export const GAME_EVENTS = {
   BOSS_DEFEATED: 'boss-defeated',
 } as const
 
-const ROOKIE_KEY = 'rookie-detective'
+/** Default agent sheet; outfits share its 4x4 layout (see content/outfits.ts). */
+const DEFAULT_PLAYER = { key: 'rookie-detective', path: '/assets/characters/rookie-detective.png' }
 const FRAME_SIZE = 272
 const PLAYER_SCALE = 0.24
 const INTERACT_RANGE = 58
@@ -75,6 +76,8 @@ export class MissionScene extends Phaser.Scene {
   private combat: CombatSystem | null = null
   /** Level 7 boss room (null = ordinary room with patrol guards). Never spawns guards. */
   private bossRoom: { shieldDown: boolean; defeated: boolean } | null = null
+  /** Equipped outfit spritesheet (cosmetic only). */
+  private playerSheet = DEFAULT_PLAYER
 
   constructor() {
     super('MissionScene')
@@ -103,6 +106,8 @@ export class MissionScene extends Phaser.Scene {
      * defeated (server-recorded) keeps the room empty after a refresh.
      */
     boss?: { shieldDown: boolean; defeated?: boolean } | null
+    /** Equipped outfit: texture key + sheet path (same 4x4 layout as the Rookie Detective). */
+    playerSheet?: { key: string; path: string } | null
   }): void {
     this.exitReady = Boolean(data?.exitReady)
     this.missionId = data?.missionId ?? this.missionId
@@ -117,28 +122,39 @@ export class MissionScene extends Phaser.Scene {
       data?.mandatoryTerminalCount ?? this.terminalBindings.length ?? 1,
     )
     this.combatEnabled = Boolean(data?.combatEnabled)
+    this.playerSheet = data?.playerSheet?.key && data.playerSheet.path ? data.playerSheet : DEFAULT_PLAYER
     this.bossRoom = data?.boss
       ? { shieldDown: Boolean(data.boss.shieldDown), defeated: Boolean(data.boss.defeated) }
       : null
   }
 
   preload(): void {
-    if (!this.textures.exists(ROOKIE_KEY)) {
-      this.load.spritesheet(ROOKIE_KEY, '/assets/characters/rookie-detective.png', {
+    if (!this.textures.exists(this.playerSheet.key)) {
+      this.load.spritesheet(this.playerSheet.key, this.playerSheet.path, {
         frameWidth: FRAME_SIZE,
         frameHeight: FRAME_SIZE,
       })
     }
-    if (this.combatEnabled && !this.textures.exists(COMBAT_TEXTURE_KEYS.guardSheet)) {
-      this.load.spritesheet(COMBAT_TEXTURE_KEYS.guardSheet, GUARD_SHEET_PATH, {
-        frameWidth: PATROL_GUARD_CONFIG.frameWidth,
-        frameHeight: PATROL_GUARD_CONFIG.frameHeight,
-      })
+    if (this.combatEnabled) {
+      const sheets = ENEMY_SHEETS.map((cfg) => ({ key: cfg.spritesheetKey, path: cfg.sheetPath }))
+      if (this.bossRoom) {
+        const boss = bossConfigFor(this.missionModule(), this.rank)
+        sheets.push({ key: boss.sheetKey, path: boss.sheetPath })
+      }
+      for (const sheet of sheets) {
+        if (!this.textures.exists(sheet.key)) {
+          this.load.spritesheet(sheet.key, sheet.path, { frameWidth: 32, frameHeight: 40 })
+        }
+      }
     }
   }
 
   create(): void {
-    this.textures.get(ROOKIE_KEY).setFilter(Phaser.Textures.FilterMode.NEAREST)
+    if (!this.textures.exists(this.playerSheet.key)) {
+      // Outfit sheet failed to load: fall back to the Rookie so the room stays playable.
+      this.playerSheet = DEFAULT_PLAYER
+    }
+    this.textures.get(this.playerSheet.key).setFilter(Phaser.Textures.FilterMode.NEAREST)
     ensureRoomTextures(this)
 
     this.layout = generateRoomLayout({
@@ -158,12 +174,12 @@ export class MissionScene extends Phaser.Scene {
 
     this.createRookieAnimations()
     const start = this.layout.playerStart
-    this.player = this.physics.add.sprite(start.x, start.y, ROOKIE_KEY, 0)
+    this.player = this.physics.add.sprite(start.x, start.y, this.playerSheet.key, 0)
     this.player.setScale(PLAYER_SCALE)
     this.player.setOrigin(0.5, 1)
     this.player.setCollideWorldBounds(true)
     this.player.setDepth(20)
-    this.player.anims.play('rookie-idle-down')
+    this.player.anims.play(`${this.playerSheet.key}-idle-down`)
 
     const bodyWidth = 56
     const bodyHeight = 28
@@ -189,6 +205,7 @@ export class MissionScene extends Phaser.Scene {
         },
         boss: this.bossRoom
           ? {
+              module: this.missionModule(),
               shieldDown: this.bossRoom.shieldDown,
               defeated: this.bossRoom.defeated,
               onStateChanged: (state) => this.game.events.emit(GAME_EVENTS.BOSS_STATE, state),
@@ -436,23 +453,24 @@ export class MissionScene extends Phaser.Scene {
   }
 
   private createRookieAnimations(): void {
+    const sheet = this.playerSheet.key
     const mk = (key: string, frames: number[], frameRate: number, repeat: number) => {
       if (this.anims.exists(key)) return
       this.anims.create({
         key,
-        frames: frames.map((frame) => ({ key: ROOKIE_KEY, frame })),
+        frames: frames.map((frame) => ({ key: sheet, frame })),
         frameRate,
         repeat,
       })
     }
-    mk('rookie-idle-down', [0], 1, -1)
-    mk('rookie-walk-down', [1, 2, 3, 1], 8, -1)
-    mk('rookie-idle-left', [4], 1, -1)
-    mk('rookie-walk-left', [5, 6, 7, 5], 8, -1)
-    mk('rookie-idle-right', [8], 1, -1)
-    mk('rookie-walk-right', [9, 10, 11, 9], 8, -1)
-    mk('rookie-idle-up', [12], 1, -1)
-    mk('rookie-walk-up', [13, 14, 15, 13], 8, -1)
+    mk(`${sheet}-idle-down`, [0], 1, -1)
+    mk(`${sheet}-walk-down`, [1, 2, 3, 1], 8, -1)
+    mk(`${sheet}-idle-left`, [4], 1, -1)
+    mk(`${sheet}-walk-left`, [5, 6, 7, 5], 8, -1)
+    mk(`${sheet}-idle-right`, [8], 1, -1)
+    mk(`${sheet}-walk-right`, [9, 10, 11, 9], 8, -1)
+    mk(`${sheet}-idle-up`, [12], 1, -1)
+    mk(`${sheet}-walk-up`, [13, 14, 15, 13], 8, -1)
   }
 
   private resolveFacing(vx: number, vy: number): Facing {
@@ -462,12 +480,12 @@ export class MissionScene extends Phaser.Scene {
   }
 
   private playWalk(facing: Facing): void {
-    const key = `rookie-walk-${facing}`
+    const key = `${this.playerSheet.key}-walk-${facing}`
     if (this.player.anims.currentAnim?.key !== key) this.player.anims.play(key, true)
   }
 
   private playIdle(facing: Facing): void {
-    const key = `rookie-idle-${facing}`
+    const key = `${this.playerSheet.key}-idle-${facing}`
     if (this.player.anims.currentAnim?.key !== key) this.player.anims.play(key, true)
   }
 
@@ -526,10 +544,11 @@ export class MissionScene extends Phaser.Scene {
     } else if (this.exitReady) {
       this.promptText.setText('Exit unlocked. Reach the green door and press E to complete.')
     } else if (this.bossRoom && !this.bossRoom.defeated) {
+      const bossName = bossConfigFor(this.missionModule(), this.rank).displayName
       this.promptText.setText(
         this.bossRoom.shieldDown
-          ? 'Shield down! Defeat the Nexus Warden · Click / Space fire'
-          : 'The Warden is shielded. Operate every API terminal to drop its shield.',
+          ? `Shield down! Defeat the ${bossName} · Click / Space fire`
+          : `The ${bossName} is shielded. Operate every API terminal to drop its shield.`,
       )
     } else if (this.combat) {
       this.promptText.setText('WASD / arrows · E interact · Aim with mouse · Click / Space fire')
@@ -567,6 +586,12 @@ export class MissionScene extends Phaser.Scene {
   private onExitReady = (payload?: { ready?: boolean }): void => {
     this.exitReady = Boolean(payload?.ready ?? true)
     this.exitSprite.setTexture(this.exitReady ? 'spy-exit-unlocked' : 'spy-exit-locked')
+  }
+
+  /** Module number from the mission id (m2-field-l7 -> 2). */
+  private missionModule(): number {
+    const match = /^m(\d+)-/.exec(this.missionId)
+    return match ? Number(match[1]) : 1
   }
 
   private onBossShield = (payload?: { down?: boolean }): void => {

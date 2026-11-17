@@ -7,6 +7,8 @@ interface FieldObjectivesProps {
   missionCompleted: boolean
   /** Level 7 boss state from the server (null when the room has no boss). */
   boss?: { shieldDown: boolean; defeated: boolean } | null
+  /** Display name of this room's boss (e.g. Nexus Warden). */
+  bossName?: string
 }
 
 export function FieldObjectives({
@@ -17,6 +19,7 @@ export function FieldObjectives({
   exitReady,
   missionCompleted,
   boss = null,
+  bossName = 'boss',
 }: FieldObjectivesProps) {
   const deviceLabel =
     requiredCount <= 1
@@ -32,7 +35,7 @@ export function FieldObjectives({
     },
     {
       id: 'devices',
-      label: boss ? `${deviceLabel} to drop the Warden's shield` : deviceLabel,
+      label: boss ? `${deviceLabel} to drop the ${bossName}'s shield` : deviceLabel,
       done: devicesComplete,
     },
   ]
@@ -40,8 +43,8 @@ export function FieldObjectives({
     items.push({
       id: 'boss',
       label: boss.shieldDown
-        ? 'Defeat the Nexus Warden'
-        : 'Defeat the Nexus Warden (shielded until every API device is operated)',
+        ? `Defeat the ${bossName}`
+        : `Defeat the ${bossName} (shielded until every API device is operated)`,
       done: boss.defeated || missionCompleted,
       pending: boss.shieldDown && !boss.defeated && !missionCompleted,
     })
@@ -51,7 +54,7 @@ export function FieldObjectives({
     label: exitReady
       ? 'Reach and interact with the unlocked exit'
       : boss
-        ? 'Unlock the exit by operating every device and defeating the Warden'
+        ? `Unlock the exit by operating every device and defeating the ${bossName}`
         : 'Unlock the exit by activating required devices',
     done: missionCompleted,
     pending: exitReady && !missionCompleted,

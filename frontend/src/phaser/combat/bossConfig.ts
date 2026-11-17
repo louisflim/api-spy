@@ -7,8 +7,16 @@ import type { GridCell } from './types'
  * Level 7 boss tuning. One reusable boss behaviour; ranks only change durability and
  * aggression (proposal: "one boss behavior template per module", rank = enemy tuning).
  */
+export type BossPattern = 'fan' | 'ring' | 'spiral'
+
 export interface BossConfig {
   displayName: string
+  /** Spritesheet (guard layout, 4x6 frames of 32x40) derived from the guard art. */
+  sheetKey: string
+  sheetPath: string
+  animPrefix: string
+  /** fan: aimed spread; ring: burst in every direction; spiral: rotating stream. */
+  pattern: BossPattern
   maxHealth: number
   /** Movement while the shield is up (holds its post near home). */
   guardSpeed: number
@@ -35,6 +43,10 @@ export interface BossConfig {
 
 const BASE: BossConfig = {
   displayName: 'Nexus Warden',
+  sheetKey: 'spy-boss-nexus-warden',
+  sheetPath: '/assets/bosses/boss-nexus-warden.png',
+  animPrefix: 'warden',
+  pattern: 'fan',
   maxHealth: 24,
   guardSpeed: 45,
   enragedSpeed: 78,
@@ -51,18 +63,83 @@ const BASE: BossConfig = {
   contactDamage: 1,
   leashPx: 70,
   displayScale: 2.4,
-  tint: 0xff5a7a,
+  tint: 0xffffff,
 }
 
-export function bossConfigForRank(rank: string): BossConfig {
+/** Module 2 boss: slow, armoured, fires rings of orbs in every direction. */
+const PACKET_JUGGERNAUT: BossConfig = {
+  ...BASE,
+  displayName: 'Packet Juggernaut',
+  sheetKey: 'spy-boss-packet-juggernaut',
+  sheetPath: '/assets/bosses/boss-packet-juggernaut.png',
+  animPrefix: 'juggernaut',
+  pattern: 'ring',
+  maxHealth: 30,
+  guardSpeed: 35,
+  enragedSpeed: 60,
+  fireRangePx: 300,
+  volleyIntervalMs: 3000,
+  enragedVolleyIntervalMs: 2300,
+  volleySize: 8,
+  orbSpeed: 140,
+  orbLifespanMs: 2600,
+  contactCooldownMs: 1300,
+}
+
+/** Module 3 boss: agile, fires a rotating spiral stream. */
+const CIPHER_QUEEN: BossConfig = {
+  ...BASE,
+  displayName: 'Cipher Queen',
+  sheetKey: 'spy-boss-cipher-queen',
+  sheetPath: '/assets/bosses/boss-cipher-queen.png',
+  animPrefix: 'cipher',
+  pattern: 'spiral',
+  maxHealth: 28,
+  guardSpeed: 55,
+  enragedSpeed: 92,
+  fireRangePx: 280,
+  volleyIntervalMs: 1400,
+  enragedVolleyIntervalMs: 700,
+  volleySize: 3,
+  orbSpeed: 175,
+  orbLifespanMs: 2000,
+}
+
+const BY_MODULE: Record<number, BossConfig> = { 1: BASE, 2: PACKET_JUGGERNAUT, 3: CIPHER_QUEEN }
+
+/** Every boss config (for preloading sheets). */
+export const BOSS_CONFIGS: BossConfig[] = Object.values(BY_MODULE)
+
+/** One boss per module; ranks change durability and aggression only (proposal). */
+export function bossConfigFor(module: number, rank: string): BossConfig {
+  const base = BY_MODULE[module] ?? BASE
   const normalized = rank.trim().toUpperCase()
   if (normalized === 'SPECIAL_AGENT') {
-    return { ...BASE, maxHealth: 40, enragedSpeed: 92, volleySize: 5, volleySpreadRad: 0.5, enragedVolleyIntervalMs: 1450 }
+    return {
+      ...base,
+      maxHealth: Math.round(base.maxHealth * 1.65),
+      enragedSpeed: base.enragedSpeed + 14,
+      volleySize: base.volleySize + 2,
+      volleySpreadRad: base.volleySpreadRad + 0.18,
+      enragedVolleyIntervalMs: Math.round(base.enragedVolleyIntervalMs * 0.76),
+    }
   }
   if (normalized === 'FIELD_AGENT') {
-    return { ...BASE, maxHealth: 32, enragedSpeed: 85, volleySize: 4, volleySpreadRad: 0.42, enragedVolleyIntervalMs: 1650 }
+    return {
+      ...base,
+      maxHealth: Math.round(base.maxHealth * 1.33),
+      enragedSpeed: base.enragedSpeed + 7,
+      volleySize: base.volleySize + 1,
+      volleySpreadRad: base.volleySpreadRad + 0.1,
+      enragedVolleyIntervalMs: Math.round(base.enragedVolleyIntervalMs * 0.87),
+    }
   }
-  return BASE
+  return base
+}
+
+/** Module 1 boss for a rank (kept for existing callers). */
+export function bossConfigForRank(rank: string): BossConfig {
+  return bossConfigFor(1, rank)
 }
 
 /**

@@ -1,7 +1,6 @@
 import Phaser from 'phaser'
 import type { BossConfig } from './bossConfig'
 import { COMBAT_TEXTURE_KEYS } from './combatArt'
-import { PATROL_GUARD_CONFIG } from './enemyTypes'
 import { NavigationGrid } from './navigationGrid'
 import { GUARD_HURTBOX, spriteHurtbox } from './hurtbox'
 import { findPath, pathFromCurrent } from './pathfind'
@@ -10,7 +9,11 @@ import type { DamageableEnemy, GridCell, WeaponDefinition } from './types'
 
 type Facing = 'down' | 'left' | 'right' | 'up'
 
+const FRAME_W = 32
+const FRAME_H = 40
+
 export interface BossSnapshot {
+  name: string
   hp: number
   maxHp: number
   shielded: boolean
@@ -53,6 +56,8 @@ export class BossEnemy implements DamageableEnemy {
   private stuckSince = 0
   /** Scene time until which the shield-break effect may still show the ring. */
   private shatterUntil = 0
+  /** Rotating offset for ring / spiral patterns. */
+  private spiralAngle = 0
   private lastX = 0
   private lastY = 0
   private readonly onChange: (s: BossSnapshot) => void
@@ -91,7 +96,7 @@ export class BossEnemy implements DamageableEnemy {
     }
 
     const { x, y } = this.home
-    this.sprite = this.scene.physics.add.sprite(x, y, PATROL_GUARD_CONFIG.spritesheetKey, 0)
+    this.sprite = this.scene.physics.add.sprite(x, y, this.cfg.sheetKey, 0)
     this.sprite.setScale(this.cfg.displayScale)
     this.sprite.setOrigin(0.5, 0.85)
     this.sprite.setTint(this.cfg.tint)
@@ -103,10 +108,10 @@ export class BossEnemy implements DamageableEnemy {
     const bodyH = 12 / scale
     const body = this.sprite.body as Phaser.Physics.Arcade.Body
     body.setSize(bodyW, bodyH)
-    body.setOffset((PATROL_GUARD_CONFIG.frameWidth - bodyW) / 2, PATROL_GUARD_CONFIG.frameHeight - bodyH - 2)
+    body.setOffset((FRAME_W - bodyW) / 2, FRAME_H - bodyH - 2)
     body.setAllowGravity(false)
     body.setImmovable(true)
-    this.sprite.anims.play('guard-idle-down')
+    this.sprite.anims.play(`${this.cfg.animPrefix}-idle-down`)
 
     this.shieldRing = this.scene.add
       .circle(x, y - 30, 42, 0x37e0ff, 0.14)
@@ -143,7 +148,13 @@ export class BossEnemy implements DamageableEnemy {
   }
 
   snapshot(): BossSnapshot {
-    return { hp: Math.max(0, this.hp), maxHp: this.cfg.maxHealth, shielded: this.shielded, defeated: this.defeated }
+    return {
+      name: this.cfg.displayName,
+      hp: Math.max(0, this.hp),
+      maxHp: this.cfg.maxHealth,
+      shielded: this.shielded,
+      defeated: this.defeated,
+    }
   }
 
   setPaused(paused: boolean): void {
@@ -217,7 +228,7 @@ export class BossEnemy implements DamageableEnemy {
     if (nowMs - this.lastContactAt < this.cfg.contactCooldownMs) return 0
     this.lastContactAt = nowMs
     this.faceToward(playerX, playerY)
-    this.sprite.anims.play(`guard-attack-${this.facing}`, true)
+    this.sprite.anims.play(`${this.cfg.animPrefix}-attack-${this.facing}`, true)
     return this.cfg.contactDamage
   }
 
@@ -306,9 +317,21 @@ export class BossEnemy implements DamageableEnemy {
     const oy = this.sprite.y - 30
     const base = Math.atan2(playerY - 14 - oy, playerX - ox)
     const n = this.cfg.volleySize
-    for (let i = 0; i < n; i += 1) {
-      const offset = n === 1 ? 0 : -this.cfg.volleySpreadRad + (2 * this.cfg.volleySpreadRad * i) / (n - 1)
-      const a = base + offset
+    const angles: number[] = []
+    if (this.cfg.pattern === 'ring') {
+      // Burst in every direction, offset each volley so the safe gaps move.
+      this.spiralAngle += Math.PI / n
+      for (let i = 0; i < n; i += 1) angles.push(this.spiralAngle + (2 * Math.PI * i) / n)
+    } else if (this.cfg.pattern === 'spiral') {
+      // Evenly spaced arms that rotate a little every volley.
+      this.spiralAngle += 0.42
+      for (let i = 0; i < n; i += 1) angles.push(this.spiralAngle + (2 * Math.PI * i) / n)
+    } else {
+      for (let i = 0; i < n; i += 1) {
+        angles.push(base + (n === 1 ? 0 : -this.cfg.volleySpreadRad + (2 * this.cfg.volleySpreadRad * i) / (n - 1)))
+      }
+    }
+    for (const a of angles) {
       this.orbs.spawn({
         x: ox,
         y: oy,
@@ -318,7 +341,7 @@ export class BossEnemy implements DamageableEnemy {
       })
     }
     this.faceToward(playerX, playerY)
-    this.sprite.anims.play(`guard-attack-${this.facing}`, true)
+    this.sprite.anims.play(`${this.cfg.animPrefix}-attack-${this.facing}`, true)
   }
 
   private playDefeat(): void {
@@ -327,7 +350,7 @@ export class BossEnemy implements DamageableEnemy {
     this.stop()
     this.emit()
     this.scene.cameras.main.shake(260, 0.01)
-    this.sprite.anims.play('guard-defeat', true)
+    this.sprite.anims.play(`${this.cfg.animPrefix}-defeat`, true)
     this.scene.tweens.add({
       targets: [this.sprite, this.nameTag],
       alpha: 0,
@@ -366,7 +389,7 @@ export class BossEnemy implements DamageableEnemy {
 
   private syncOverlays(): void {
     const x = this.sprite.x
-    const top = this.sprite.y - PATROL_GUARD_CONFIG.frameHeight * this.cfg.displayScale * 0.85
+    const top = this.sprite.y - FRAME_H * this.cfg.displayScale * 0.85
     // The ring is driven by the real shield state every frame, not by tween callbacks.
     this.shieldRing
       .setPosition(x, this.sprite.y - 30)
@@ -396,9 +419,9 @@ export class BossEnemy implements DamageableEnemy {
   }
 
   private playAnim(kind: 'idle' | 'walk'): void {
-    const key = `guard-${kind}-${this.facing}`
+    const key = `${this.cfg.animPrefix}-${kind}-${this.facing}`
     const current = this.sprite.anims.currentAnim?.key
-    if (current?.startsWith('guard-attack') && this.sprite.anims.isPlaying) return
+    if (current?.startsWith(`${this.cfg.animPrefix}-attack`) && this.sprite.anims.isPlaying) return
     if (current !== key) this.sprite.anims.play(key, true)
   }
 

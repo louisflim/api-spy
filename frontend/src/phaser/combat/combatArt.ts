@@ -78,6 +78,7 @@ export const COMBAT_TEXTURE_KEYS = {
   impact: 'spy-impact-spark',
   alert: 'spy-alert-bang',
   bossOrb: 'spy-boss-orb',
+  enemyBullet: 'spy-enemy-bullet',
   shieldSpark: 'spy-shield-spark',
 } as const
 
@@ -114,15 +115,18 @@ export function ensureCombatFxTextures(scene: Phaser.Scene): void {
  * If the PNG failed to load, gameplay continues with a single-frame warning texture
  * (temporary — not claimed as finished artwork).
  */
-export function ensureGuardSpritesheet(scene: Phaser.Scene): void {
-  const key = COMBAT_TEXTURE_KEYS.guardSheet
+export function ensureGuardSpritesheet(
+  scene: Phaser.Scene,
+  key: string = COMBAT_TEXTURE_KEYS.guardSheet,
+  path: string = GUARD_SHEET_PATH,
+): void {
   if (scene.textures.exists(key)) {
     scene.textures.get(key).setFilter(Phaser.Textures.FilterMode.NEAREST)
     return
   }
   console.warn(
-    '[combat] Guard spritesheet PNG missing at',
-    GUARD_SHEET_PATH,
+    '[combat] Enemy spritesheet PNG missing at',
+    path,
     '— using temporary single-frame placeholder',
   )
   const { frameWidth, frameHeight } = PATROL_GUARD_CONFIG
@@ -154,8 +158,12 @@ export function ensureGuardSpritesheet(scene: Phaser.Scene): void {
   }
 }
 
-export function ensureGuardAnimations(scene: Phaser.Scene): void {
-  const key = COMBAT_TEXTURE_KEYS.guardSheet
+/** Guard-layout animations for one enemy / boss sheet, keyed `${prefix}-walk-left` etc. */
+export function ensureGuardAnimations(
+  scene: Phaser.Scene,
+  key: string = COMBAT_TEXTURE_KEYS.guardSheet,
+  prefix = 'guard',
+): void {
   const mk = (animKey: string, frames: number[], frameRate: number, repeat: number) => {
     if (scene.anims.exists(animKey)) return
     scene.anims.create({
@@ -165,20 +173,20 @@ export function ensureGuardAnimations(scene: Phaser.Scene): void {
       repeat,
     })
   }
-  mk('guard-idle-down', [GUARD_FRAMES.idleDown], 1, -1)
-  mk('guard-walk-down', [...GUARD_FRAMES.walkDown], 8, -1)
-  mk('guard-idle-left', [GUARD_FRAMES.idleLeft], 1, -1)
-  mk('guard-walk-left', [...GUARD_FRAMES.walkLeft], 8, -1)
-  mk('guard-idle-right', [GUARD_FRAMES.idleRight], 1, -1)
-  mk('guard-walk-right', [...GUARD_FRAMES.walkRight], 8, -1)
-  mk('guard-idle-up', [GUARD_FRAMES.idleUp], 1, -1)
-  mk('guard-walk-up', [...GUARD_FRAMES.walkUp], 8, -1)
-  mk('guard-attack-down', [GUARD_FRAMES.attackDown], 8, 0)
-  mk('guard-attack-left', [GUARD_FRAMES.attackLeft], 8, 0)
-  mk('guard-attack-right', [GUARD_FRAMES.attackRight], 8, 0)
-  mk('guard-attack-up', [GUARD_FRAMES.attackUp], 8, 0)
-  mk('guard-hit', [GUARD_FRAMES.hit], 8, 0)
-  mk('guard-defeat', [...GUARD_FRAMES.defeat], 6, 0)
+  mk(`${prefix}-idle-down`, [GUARD_FRAMES.idleDown], 1, -1)
+  mk(`${prefix}-walk-down`, [...GUARD_FRAMES.walkDown], 8, -1)
+  mk(`${prefix}-idle-left`, [GUARD_FRAMES.idleLeft], 1, -1)
+  mk(`${prefix}-walk-left`, [...GUARD_FRAMES.walkLeft], 8, -1)
+  mk(`${prefix}-idle-right`, [GUARD_FRAMES.idleRight], 1, -1)
+  mk(`${prefix}-walk-right`, [...GUARD_FRAMES.walkRight], 8, -1)
+  mk(`${prefix}-idle-up`, [GUARD_FRAMES.idleUp], 1, -1)
+  mk(`${prefix}-walk-up`, [...GUARD_FRAMES.walkUp], 8, -1)
+  mk(`${prefix}-attack-down`, [GUARD_FRAMES.attackDown], 8, 0)
+  mk(`${prefix}-attack-left`, [GUARD_FRAMES.attackLeft], 8, 0)
+  mk(`${prefix}-attack-right`, [GUARD_FRAMES.attackRight], 8, 0)
+  mk(`${prefix}-attack-up`, [GUARD_FRAMES.attackUp], 8, 0)
+  mk(`${prefix}-hit`, [GUARD_FRAMES.hit], 8, 0)
+  mk(`${prefix}-defeat`, [...GUARD_FRAMES.defeat], 6, 0)
 }
 
 function makeBossOrb(): HTMLCanvasElement {
@@ -208,6 +216,24 @@ function makeShieldSpark(): HTMLCanvasElement {
   px(ctx, 3, 3, 8, 8, '#2ad4ff')
   px(ctx, 5, 5, 4, 4, '#e8ffff')
   return c
+}
+
+function makeEnemyBullet(): HTMLCanvasElement {
+  const c = document.createElement('canvas')
+  c.width = 8
+  c.height = 4
+  const ctx = c.getContext('2d')!
+  ctx.imageSmoothingEnabled = false
+  ctx.clearRect(0, 0, 8, 4)
+  px(ctx, 0, 1, 8, 2, '#ff9a3c')
+  px(ctx, 2, 0, 5, 4, '#ffb05e')
+  px(ctx, 4, 1, 3, 2, '#fff1c2')
+  return c
+}
+
+/** Rifleman tracer round. */
+export function ensureEnemyShotTexture(scene: Phaser.Scene): void {
+  registerCanvas(scene, COMBAT_TEXTURE_KEYS.enemyBullet, makeEnemyBullet())
 }
 
 /** Level 7 boss textures: enemy orb projectile and shield-deflect spark. */

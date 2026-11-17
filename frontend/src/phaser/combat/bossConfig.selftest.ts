@@ -2,7 +2,8 @@
  * Level 7 boss placement + tuning self-test — npx tsx src/phaser/combat/bossConfig.selftest.ts
  */
 import { generateRoomLayout, ROOM_TILE_SIZE } from '../room/generateRoomLayout'
-import { bossConfigForRank, planBossSpawn } from './bossConfig'
+import { BOSS_CONFIGS, bossConfigFor, bossConfigForRank, planBossSpawn } from './bossConfig'
+import { enemyConfigForRank, enemyRosterForRank } from './enemyTypes'
 import { NavigationGrid } from './navigationGrid'
 import { hasPath } from './pathfind'
 import { buildCombatExclusionSet } from './patrolZones'
@@ -43,5 +44,23 @@ for (const roomInstance of [0, 1, 2]) {
     }
     console.log(`instance=${roomInstance} terminals=${terminals} boss post=(${a.col},${a.row})`)
   }
+}
+// One distinct boss per module, each with its own sheet and attack pattern.
+const bosses = [1, 2, 3].map((m) => bossConfigFor(m, 'RECRUIT'))
+assert(new Set(bosses.map((b) => b.sheetKey)).size === 3, 'distinct boss sheets per module')
+assert(new Set(bosses.map((b) => b.pattern)).size === 3, 'distinct boss patterns per module')
+assert(BOSS_CONFIGS.length === 3, 'three bosses registered')
+for (const m of [1, 2, 3]) {
+  assert(bossConfigFor(m, 'SPECIAL_AGENT').maxHealth > bossConfigFor(m, 'RECRUIT').maxHealth, `M${m} boss tougher on Special Agent`)
+}
+
+// Enemy roster: new enemy types appear on higher ranks; durability scales with rank.
+assert(enemyRosterForRank('RECRUIT').join() === 'PATROL_GUARD', 'recruit roster')
+assert(enemyRosterForRank('FIELD_AGENT').includes('RIFLEMAN'), 'field agent meets riflemen')
+assert(enemyRosterForRank('SPECIAL_AGENT').includes('SHOCK_ENFORCER'), 'special agent meets enforcers')
+assert(enemyConfigForRank('RIFLEMAN', 'RIFLEMAN').attackKind === 'ranged', 'rifleman shoots')
+for (const t of ['PATROL_GUARD', 'RIFLEMAN', 'SHOCK_ENFORCER'] as const) {
+  assert(enemyConfigForRank(t, 'SPECIAL_AGENT').maxHealth > enemyConfigForRank(t, 'RECRUIT').maxHealth, `${t} scales`)
+  assert(enemyConfigForRank(t, 'RECRUIT').maxHealth >= 3, `${t} survives several hits`)
 }
 console.log('bossConfig.selftest OK')

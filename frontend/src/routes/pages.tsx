@@ -13,6 +13,7 @@ import { normalizeRank } from '../content/moduleMeta'
 import { missingRequiredLessons } from '../learning/prerequisites'
 import { ForgotPasswordScreen } from '../screens/ForgotPasswordScreen'
 import { GameWorkspace } from '../screens/GameWorkspace'
+import { LoadoutScreen } from '../screens/LoadoutScreen'
 import { LoginScreen } from '../screens/LoginScreen'
 import { MainMenu } from '../screens/MainMenu'
 import { MissionBriefingScreen } from '../screens/MissionBriefingScreen'
@@ -174,12 +175,7 @@ export function ProfilePage() {
 }
 
 export function LoadoutPage() {
-  return (
-    <PlaceholderScreen
-      title="Agent Loadout"
-      blurb="Cosmetics and loadout options are deferred. Rookie Detective remains the only playable sprite."
-    />
-  )
+  return <LoadoutScreen />
 }
 
 export function SettingsPage() {

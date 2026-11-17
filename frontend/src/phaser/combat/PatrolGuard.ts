@@ -22,6 +22,10 @@ const MAX_REPATH_BURST = 3
  * FSM: PATROL → ALERT → CHASE → ATTACK → RETURN
  * Movement follows A* paths on the room {@link NavigationGrid}.
  */
+export type EnemyStrike =
+  | { kind: 'melee'; damage: number }
+  | { kind: 'shot'; damage: number; x: number; y: number; vx: number; vy: number; lifespanMs: number }
+
 export class PatrolGuard {
   readonly sprite: Phaser.Physics.Arcade.Sprite
   private readonly fsm = new EnemyStateMachine('PATROL')
@@ -94,7 +98,7 @@ export class PatrolGuard {
     body.setSize(bodyW, bodyH)
     body.setOffset((config.frameWidth - bodyW) / 2, config.frameHeight - bodyH - 2)
     body.setAllowGravity(false)
-    this.sprite.anims.play('guard-idle-down')
+    this.sprite.anims.play(`${this.config.animPrefix}-idle-down`)
     this.lastStuckX = start.x
     this.lastStuckY = start.y
 
@@ -134,7 +138,7 @@ export class PatrolGuard {
     if (this.defeated || amount <= 0) return false
     this.hp -= amount
     this.drawHealthBar()
-    this.sprite.anims.play('guard-hit', true)
+    this.sprite.anims.play(`${this.config.animPrefix}-hit`, true)
     this.sprite.setTint(0xff6666)
     this.sprite.scene.time.delayedCall(140, () => {
       if (!this.defeated) this.sprite.clearTint()
@@ -152,7 +156,7 @@ export class PatrolGuard {
     this.clearPath()
     this.alertIcon.setVisible(false)
     this.hpBar.clear()
-    this.sprite.anims.play('guard-defeat', true)
+    this.sprite.anims.play(`${this.config.animPrefix}-defeat`, true)
     this.sprite.scene.tweens.add({
       targets: this.sprite,
       alpha: 0,
@@ -273,18 +277,37 @@ export class PatrolGuard {
     this.syncAlertIcon()
   }
 
-  tryAttack(playerX: number, playerY: number, nowMs: number): number {
-    if (this.defeated || this.paused || this.fsm.getState() !== 'ATTACK') return 0
-    if (nowMs < this.attackLockUntil) return 0
+  /**
+   * Melee types return contact damage; ranged types return a shot for the combat system
+   * to spawn (it only hurts if it actually reaches the agent's hurtbox).
+   */
+  tryAttack(playerX: number, playerY: number, nowMs: number): EnemyStrike | null {
+    if (this.defeated || this.paused || this.fsm.getState() !== 'ATTACK') return null
+    if (nowMs < this.attackLockUntil) return null
     const dist = Phaser.Math.Distance.Between(this.sprite.x, this.sprite.y, playerX, playerY)
-    if (dist > this.config.attackRangePx) return 0
-    if (!this.hasLineOfSight(playerX, playerY)) return 0
-    if (nowMs - this.lastAttackAt < this.config.attackCooldownMs) return 0
+    if (dist > this.config.attackRangePx) return null
+    if (!this.hasLineOfSight(playerX, playerY)) return null
+    if (nowMs - this.lastAttackAt < this.config.attackCooldownMs) return null
     this.lastAttackAt = nowMs
     this.attackLockUntil = nowMs + 280
     this.faceToward(playerX, playerY)
-    this.sprite.anims.play(`guard-attack-${this.facing}`, true)
-    return this.config.attackDamage
+    this.sprite.anims.play(`${this.config.animPrefix}-attack-${this.facing}`, true)
+    if (this.config.attackKind === 'ranged') {
+      const fromX = this.sprite.x
+      const fromY = this.sprite.y - this.config.frameHeight * this.config.displayScale * 0.45
+      const angle = Math.atan2(playerY - 22 - fromY, playerX - fromX)
+      const speed = this.config.shotSpeed ?? 220
+      return {
+        kind: 'shot',
+        damage: this.config.attackDamage,
+        x: fromX,
+        y: fromY,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        lifespanMs: this.config.shotLifespanMs ?? 1200,
+      }
+    }
+    return { kind: 'melee', damage: this.config.attackDamage }
   }
 
   destroy(): void {
@@ -529,12 +552,12 @@ export class PatrolGuard {
   }
 
   private playWalk(): void {
-    const key = `guard-walk-${this.facing}`
+    const key = `${this.config.animPrefix}-walk-${this.facing}`
     if (this.sprite.anims.currentAnim?.key !== key) this.sprite.anims.play(key, true)
   }
 
   private playIdle(): void {
-    const key = `guard-idle-${this.facing}`
+    const key = `${this.config.animPrefix}-idle-${this.facing}`
     if (this.sprite.anims.currentAnim?.key !== key) this.sprite.anims.play(key, true)
   }
 

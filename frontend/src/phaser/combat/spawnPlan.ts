@@ -1,10 +1,6 @@
 import { createRng, rngShuffle } from '../room/rng'
 import type { RoomLayoutPlan } from '../room/types'
-import {
-  patrolGuardConfigForRank,
-  patrolGuardCountForRank,
-  type PlannedGuardSpawn,
-} from './enemyTypes'
+import { enemyConfigForRank, enemyRosterForRank, type PlannedGuardSpawn } from './enemyTypes'
 import { NavigationGrid } from './navigationGrid'
 import { hasPath } from './pathfind'
 import {
@@ -23,8 +19,8 @@ export function planPatrolGuardSpawns(
   rank: string,
   nav: NavigationGrid = NavigationGrid.fromLayout(layout),
 ): PlannedGuardSpawn[] {
-  const count = patrolGuardCountForRank(rank)
-  const config = patrolGuardConfigForRank(rank)
+  const roster = enemyRosterForRank(rank)
+  const count = roster.length
   const excluded = buildCombatExclusionSet(layout)
   const rng = createRng((layout.seed ^ 0xc0a7) >>> 0)
   const routes = patrolRoutesForFootprint(layout.footprintId)
@@ -40,9 +36,10 @@ export function planPatrolGuardSpawns(
   const planned: PlannedGuardSpawn[] = []
   for (let i = 0; i < count && i < candidates.length; i += 1) {
     const pick = candidates[i]!
+    const typeId = roster[i]!
     planned.push({
-      typeId: 'PATROL_GUARD',
-      config,
+      typeId,
+      config: enemyConfigForRank(typeId, rank),
       routeId: pick.route.id,
       waypoints: pick.waypoints,
     })

@@ -2,9 +2,10 @@ import Phaser from 'phaser'
 import type { RoomLayoutPlan } from '../room/types'
 import { BossEnemy, type BossSnapshot } from './BossEnemy'
 import { AGENT_HURTBOX, spriteHurtbox } from './hurtbox'
-import { bossConfigForRank, planBossSpawn } from './bossConfig'
+import { bossConfigFor, planBossSpawn } from './bossConfig'
 import {
   ensureBossTextures,
+  ensureEnemyShotTexture,
   ensureCombatFxTextures,
   ensureGuardAnimations,
   ensureGuardSpritesheet,
@@ -13,7 +14,8 @@ import {
 import { COMBAT_TUNING } from './combatTuning'
 import { CombatCollisionManager } from './CombatCollisionManager'
 import { NavigationGrid } from './navigationGrid'
-import { PatrolGuard } from './PatrolGuard'
+import { PatrolGuard, type EnemyStrike } from './PatrolGuard'
+import { ENEMY_SHEETS } from './enemyTypes'
 import { PlayerHealth } from './PlayerHealth'
 import { planPatrolGuardSpawns } from './spawnPlan'
 import { ProjectileManager } from './ProjectileManager'
@@ -40,6 +42,8 @@ export interface CombatSystemOptions {
    * server's mandatory-device state (`shieldDown`).
    */
   boss?: {
+    /** Module whose boss guards this room (1 Nexus Warden, 2 Packet Juggernaut, 3 Cipher Queen). */
+    module: number
     shieldDown: boolean
     /** Already defeated in this room run (server state) — the room stays empty. */
     defeated: boolean
@@ -69,8 +73,10 @@ export class CombatSystem {
   private enemyCollider: Phaser.Physics.Arcade.Collider | null = null
   private enemyGroup: Phaser.Physics.Arcade.Group | null = null
   private boss: BossEnemy | null = null
-  private bossOrbs: ProjectileManager | null = null
+  /** Shared pool for hostile projectiles (rifleman tracers, boss orbs). */
+  private readonly enemyShots: ProjectileManager
   private readonly bossColliders: Phaser.Physics.Arcade.Collider[] = []
+  private readonly enemyShotCollider: Phaser.Physics.Arcade.Collider
   private readonly agentBox = new Phaser.Geom.Rectangle()
 
   constructor(options: CombatSystemOptions) {
@@ -82,14 +88,23 @@ export class CombatSystem {
     this.onCombatDeath = onCombatDeath
 
     ensureCombatFxTextures(scene)
-    ensureGuardSpritesheet(scene)
-    ensureGuardAnimations(scene)
+    ensureEnemyShotTexture(scene)
+    for (const cfg of ENEMY_SHEETS) {
+      ensureGuardSpritesheet(scene, cfg.spritesheetKey, cfg.sheetPath)
+      ensureGuardAnimations(scene, cfg.spritesheetKey, cfg.animPrefix)
+    }
 
     this.projectiles = new ProjectileManager(scene)
     this.weapon = new WeaponController(scene, this.projectiles, STARTER_SIDEARM.id)
     this.weapon.bindInput()
     this.collisions = new CombatCollisionManager(scene, this.projectiles)
     this.collisions.bindWalls(solids)
+    this.enemyShots = new ProjectileManager(scene)
+    this.enemyShotCollider = scene.physics.add.collider(this.enemyShots.getGroup(), solids, (a, b) => {
+      const group = this.enemyShots.getGroup()
+      const shot = (group.contains(a as Phaser.GameObjects.GameObject) ? a : b) as Phaser.Physics.Arcade.Image
+      this.enemyShots.despawn(shot)
+    })
 
     this.health.setListeners(onHeartsChanged, () => this.handleDeath())
 
@@ -112,14 +127,16 @@ export class CombatSystem {
     const nav = NavigationGrid.fromLayout(layout)
     const cell = planBossSpawn(layout, nav)
     if (!cell) return
-    this.bossOrbs = new ProjectileManager(scene)
+    const config = bossConfigFor(boss.module, rank)
+    ensureGuardSpritesheet(scene, config.sheetKey, config.sheetPath)
+    ensureGuardAnimations(scene, config.sheetKey, config.animPrefix)
     this.boss = new BossEnemy({
       scene,
       cell,
-      config: bossConfigForRank(rank),
+      config,
       nav,
       blocked: layout.blocked,
-      orbs: this.bossOrbs,
+      orbs: this.enemyShots,
       shielded: !boss.shieldDown,
       onChange: boss.onStateChanged,
       onDefeated: boss.onDefeated,
@@ -128,12 +145,6 @@ export class CombatSystem {
     this.bossColliders.push(
       scene.physics.add.collider(this.boss.sprite, solids),
       scene.physics.add.collider(this.player, this.boss.sprite),
-      scene.physics.add.collider(this.bossOrbs.getGroup(), solids, (a, b) => {
-        const orbs = this.bossOrbs
-        if (!orbs) return
-        const orb = (orbs.getGroup().contains(a as Phaser.GameObjects.GameObject) ? a : b) as Phaser.Physics.Arcade.Image
-        orbs.despawn(orb)
-      }),
     )
   }
 
@@ -176,7 +187,7 @@ export class CombatSystem {
     this.projectiles.setPaused(paused)
     for (const guard of this.guards) guard.setPaused(paused)
     this.boss?.setPaused(paused)
-    this.bossOrbs?.setPaused(paused)
+    this.enemyShots.setPaused(paused)
     if (paused) {
       const body = this.player.body as Phaser.Physics.Arcade.Body
       body.setVelocity(0, 0)
@@ -207,8 +218,8 @@ export class CombatSystem {
       this.weapon.tryFire(this.player.x, this.player.y, this.getFacing(), now)
       this.projectiles.update(time)
       this.collisions.update()
-      this.bossOrbs?.update(time)
-      this.checkOrbHits(now)
+      this.enemyShots.update(time)
+      this.checkEnemyShotHits(now)
       if (this.boss && !this.boss.isDefeated()) {
         this.boss.update(this.player.x, this.player.y, now)
         const dmg = this.boss.tryContact(this.player.x, this.player.y, now)
@@ -218,18 +229,39 @@ export class CombatSystem {
       for (const guard of this.guards) {
         if (guard.isDefeated()) continue
         guard.update(this.player.x, this.player.y, now)
-        const dmg = guard.tryAttack(this.player.x, this.player.y, now)
-        if (dmg > 0) {
-          this.applyPlayerHit(dmg, now)
-        }
+        const strike = guard.tryAttack(this.player.x, this.player.y, now)
+        if (strike) this.resolveStrike(strike, now)
       }
     }
   }
 
-  /** Boss orbs hit the agent's body-sized hurtbox, not the feet-level movement body. */
-  private checkOrbHits(nowMs: number): void {
-    const orbs = this.bossOrbs
-    if (!orbs) return
+  private resolveStrike(strike: EnemyStrike, nowMs: number): void {
+    if (strike.kind === 'melee') {
+      this.applyPlayerHit(strike.damage, nowMs)
+      return
+    }
+    // Ranged: only hurts if the tracer actually reaches the agent.
+    this.enemyShots.spawn({
+      x: strike.x,
+      y: strike.y,
+      vx: strike.vx,
+      vy: strike.vy,
+      weapon: {
+        id: 'enemy_rifle',
+        displayName: 'Rifle',
+        cooldownMs: 0,
+        projectileSpeed: Math.hypot(strike.vx, strike.vy),
+        damage: strike.damage,
+        projectileKey: COMBAT_TEXTURE_KEYS.enemyBullet,
+        projectileLifespanMs: strike.lifespanMs,
+        projectileScale: 1.4,
+      },
+    })
+  }
+
+  /** Enemy shots hit the agent's body-sized hurtbox, not the feet-level movement body. */
+  private checkEnemyShotHits(nowMs: number): void {
+    const orbs = this.enemyShots
     const box = spriteHurtbox(this.player, AGENT_HURTBOX, this.agentBox)
     for (const child of orbs.getGroup().getChildren()) {
       const orb = child as Phaser.Physics.Arcade.Image
@@ -302,8 +334,8 @@ export class CombatSystem {
     this.bossColliders.length = 0
     this.boss?.destroy()
     this.boss = null
-    this.bossOrbs?.destroy()
-    this.bossOrbs = null
+    this.enemyShotCollider.destroy()
+    this.enemyShots.destroy()
     this.guards.length = 0
     this.enemyGroup?.clear(false, false)
     this.enemyGroup?.destroy(false)

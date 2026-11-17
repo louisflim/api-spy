@@ -77,14 +77,14 @@ export function FieldHud({
           role="status"
           aria-label={
             boss.defeated
-              ? 'Nexus Warden defeated'
+              ? `${boss.name} defeated`
               : boss.shielded
-                ? 'Nexus Warden shielded'
-                : `Nexus Warden ${boss.hp} of ${boss.maxHp}`
+                ? `${boss.name} shielded`
+                : `${boss.name} ${boss.hp} of ${boss.maxHp}`
           }
         >
           <span className="field-hud__boss-name">
-            Nexus Warden{boss.defeated ? ' · down' : boss.shielded ? ' · shielded' : ''}
+            {boss.name}{boss.defeated ? ' · down' : boss.shielded ? ' · shielded' : ''}
           </span>
           <span className="field-hud__boss-track" aria-hidden="true">
             <span

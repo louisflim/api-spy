@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   completeMissionAtExit,
+  fetchAllMissionProgress,
   fetchHealth,
   fetchLessons,
   fetchMissionDetail,
@@ -14,8 +15,9 @@ import {
 } from '../api/client'
 import { useAuth } from '../auth/AuthContext'
 import { publicErrorMessage } from '../security/publicErrors'
+import { clearedMissionIds, effectiveOutfit, OUTFITS, type Outfit } from '../content/outfits'
 import { lessonTitle, missingRequiredLessons } from '../learning/prerequisites'
-import type { BossSnapshot } from '../phaser/combat'
+import { bossConfigFor, type BossSnapshot } from '../phaser/combat'
 import type { RoomLayoutPlan } from '../phaser/room/types'
 import { ROOM_LAYOUT } from '../phaser/roomLayout'
 import { loadMissionProgress, saveMissionProgress } from '../storage/attemptStorage'
@@ -87,6 +89,21 @@ export function GameWorkspace({
   const [hearts, setHearts] = useState(3)
   const [combatDeathPending, setCombatDeathPending] = useState(false)
   const [resetLevelBusy, setResetLevelBusy] = useState(false)
+  /** Equipped outfit (cosmetic): validated against the agent's cleared missions. */
+  const [outfit, setOutfit] = useState<Outfit>(OUTFITS[0]!)
+  /** Canvas waits for the outfit so the room is not restarted when it arrives. */
+  const [outfitReady, setOutfitReady] = useState(false)
+  useEffect(() => {
+    if (!playerId) return
+    let live = true
+    fetchAllMissionProgress()
+      .then((rows) => live && setOutfit(effectiveOutfit(playerId, clearedMissionIds(rows))))
+      .catch(() => undefined)
+      .finally(() => live && setOutfitReady(true))
+    return () => {
+      live = false
+    }
+  }, [playerId])
   /** Level 7 boss HUD snapshot from Phaser (display only; the server owns the defeat). */
   const [bossState, setBossState] = useState<BossSnapshot | null>(null)
 
@@ -424,6 +441,9 @@ export function GameWorkspace({
                 exitReady={exitReady}
                 missionCompleted={missionCompleted}
                 boss={bossRoom}
+                bossName={
+                  bossConfigFor(missionDetail.mission.module, missionDetail.mission.rank).displayName
+                }
               />
               <FieldMinimap
                 player={playerPos}
@@ -437,7 +457,7 @@ export function GameWorkspace({
                 <h2 className="field-room__stage-title">Security room · top-down view</h2>
               </div>
               <div className="field-room__canvas-frame">
-                {roomProgress ? (
+                {roomProgress && outfitReady ? (
                   <GameErrorBoundary>
                     <GameCanvas
                       key={roomProgress.roomGeneration}
@@ -464,6 +484,7 @@ export function GameWorkspace({
                       terminalBindings={roomProgress.mandatoryDevices ?? []}
                       combatEnabled
                       boss={bossRoom}
+                      playerSheet={{ key: `agent-${outfit.id}`, path: outfit.sheet }}
                       onBossState={setBossState}
                       onBossDefeated={handleBossDefeated}
                       onPlayerMoved={setPlayerPos}

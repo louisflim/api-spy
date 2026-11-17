@@ -45,6 +45,8 @@ interface GameCanvasProps {
   boss?: { shieldDown: boolean; defeated: boolean } | null
   onBossState?: (state: BossSnapshot) => void
   onBossDefeated?: () => void
+  /** Equipped outfit spritesheet (cosmetic only). */
+  playerSheet?: { key: string; path: string } | null
 }
 
 export function GameCanvas({
@@ -67,6 +69,7 @@ export function GameCanvas({
   boss = null,
   onBossState,
   onBossDefeated,
+  playerSheet = null,
 }: GameCanvasProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const gameRef = useRef<Phaser.Game | null>(null)
@@ -81,6 +84,7 @@ export function GameCanvas({
   const bossShieldDownRef = useRef(Boolean(boss?.shieldDown))
   const bossDefeatedRef = useRef(Boolean(boss?.defeated))
   const bossRoomActive = Boolean(boss)
+  const playerSheetKey = playerSheet?.key ?? ''
   bossDefeatedRef.current = Boolean(boss?.defeated)
   const startedRef = useRef(false)
   const inputLockedRef = useRef(inputLocked)
@@ -171,6 +175,7 @@ export function GameCanvas({
         boss: boss
           ? { shieldDown: bossShieldDownRef.current, defeated: bossDefeatedRef.current }
           : null,
+        playerSheet,
       })
     }, 0)
 
@@ -199,6 +204,7 @@ export function GameCanvas({
     mandatoryTerminalCount,
     combatEnabled,
     bossRoomActive,
+    playerSheetKey,
     // Bindings identity for this room generation (device/challenge pairing).
     terminalBindings.map((b) => `${b.deviceId}:${b.challengeId}`).join('|'),
   ])

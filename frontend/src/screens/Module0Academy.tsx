@@ -319,7 +319,11 @@ export function Module0Academy({ onFinished, moduleSelect, onReturnToBriefing }:
                         onOpenTerminal={() => {
                           setEditorOpen(true)
                         }}
-                        onExitReached={() => undefined}
+                        onExitReached={() => {
+                          if(!interactionDone) {
+                            void handleInteractionComplete()
+                          }
+                        }}
                       />
                     </GameErrorBoundary>
                     <div className="m0-nav-row">
@@ -383,6 +387,9 @@ export function Module0Academy({ onFinished, moduleSelect, onReturnToBriefing }:
             setTerminalDone(true)
             setControlTone('success')
             setControlMessage(topic.interaction.successFeedback)
+            if(!interactionDone) {
+              void handleInteractionComplete()
+            }
           }}
           onAttemptSaved={() => undefined}
         />

@@ -29,6 +29,13 @@ public class UserAccount {
 	@Column(nullable = false)
 	private boolean enabled = true;
 
+	/** PLAYER (default) or ADMINISTRATOR (research console access). */
+	@Column(nullable = false, length = 32)
+	private String role = ROLE_PLAYER;
+
+	public static final String ROLE_PLAYER = "PLAYER";
+	public static final String ROLE_ADMINISTRATOR = "ADMINISTRATOR";
+
 	@Column(name = "created_at", nullable = false)
 	private Instant createdAt;
 
@@ -80,6 +87,18 @@ public class UserAccount {
 
 	public boolean isEnabled() {
 		return enabled;
+	}
+
+	public String getRole() {
+		return role == null ? ROLE_PLAYER : role;
+	}
+
+	public void setRole(String role) {
+		this.role = role;
+	}
+
+	public boolean isAdministrator() {
+		return ROLE_ADMINISTRATOR.equals(getRole());
 	}
 
 	public Instant getCreatedAt() {

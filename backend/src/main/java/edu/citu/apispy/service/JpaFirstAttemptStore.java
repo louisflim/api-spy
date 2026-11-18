@@ -65,6 +65,15 @@ public class JpaFirstAttemptStore implements FirstAttemptStore {
 	}
 
 	@Override
+	@Transactional(readOnly = true)
+	public List<FirstAttemptRecord> findAll() {
+		return repository.findAll().stream()
+				.map(this::toDomain)
+				.sorted((a, b) -> a.getSubmittedAt().compareTo(b.getSubmittedAt()))
+				.toList();
+	}
+
+	@Override
 	@Transactional
 	public void clearAll() {
 		repository.deleteAllInBatch();

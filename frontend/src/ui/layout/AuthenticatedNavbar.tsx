@@ -5,6 +5,7 @@ export type AppNavId =
   | 'dashboard'
   | 'select-mission'
   | 'loadout'
+  | 'research'
 
 interface AuthenticatedNavbarProps {
   /** Null when on placeholder pages (profile/settings) so no primary tab looks active. */
@@ -13,6 +14,8 @@ interface AuthenticatedNavbarProps {
   uplink: 'checking' | 'up' | 'down'
   onNavigate: (destination: MenuDestination) => void
   onLogout: () => void
+  /** Research console tab (administrators only). */
+  showResearch?: boolean
 }
 
 const NAV_ITEMS: Array<{ id: AppNavId; label: string; destination: MenuDestination }> = [
@@ -27,7 +30,11 @@ export function AuthenticatedNavbar({
   uplink,
   onNavigate,
   onLogout,
+  showResearch = false,
 }: AuthenticatedNavbarProps) {
+  const navItems = showResearch
+    ? [...NAV_ITEMS, { id: 'research' as const, label: 'Research', destination: 'research' as const }]
+    : NAV_ITEMS
   const menuId = useId()
   const mobileNavId = useId()
   const [accountOpen, setAccountOpen] = useState(false)
@@ -96,7 +103,7 @@ export function AuthenticatedNavbar({
         className={`dash-nav__tabs ${mobileOpen ? 'is-open' : ''}`.trim()}
         aria-label="Application"
       >
-        {NAV_ITEMS.map((item) => (
+        {navItems.map((item) => (
           <button
             key={item.id}
             type="button"

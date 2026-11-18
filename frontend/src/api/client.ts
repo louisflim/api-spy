@@ -14,6 +14,8 @@ export interface AuthUser {
   userId: string
   username: string
   email: string
+  /** PLAYER or ADMINISTRATOR (research console). */
+  role?: string
 }
 
 function readCookie(name: string): string | null {
@@ -290,6 +292,63 @@ export async function reportBossDefeated(
     throw new Error(await readError(response, 'Boss defeat report failed'))
   }
   return stripGradedAnswerKeys(await response.json())
+}
+
+/** Research log: the agent entered the field room (fire-and-forget, never blocks play). */
+export function reportRoomEntered(missionId: string, roomGeneration: string): void {
+  void apiFetch(`/api/missions/${encodeURIComponent(missionId)}/room-entered`, {
+    method: 'POST',
+    body: JSON.stringify({ roomGeneration }),
+  }).catch(() => undefined)
+}
+
+/** Research log: the agent opened a mandatory API terminal (fire-and-forget). */
+export function reportTerminalOpened(missionId: string, roomGeneration: string, deviceId: string): void {
+  void apiFetch(`/api/missions/${encodeURIComponent(missionId)}/terminal-opened`, {
+    method: 'POST',
+    body: JSON.stringify({ roomGeneration, deviceId }),
+  }).catch(() => undefined)
+}
+
+/** Research console (Administrator role). Throws with the HTTP status on 401/403. */
+export class ResearchAccessError extends Error {
+  readonly status: number
+
+  constructor(status: number, message: string) {
+    super(message)
+    this.status = status
+  }
+}
+
+async function researchGet(path: string): Promise<Response> {
+  const response = await apiFetch(path)
+  if (response.status === 401 || response.status === 403) {
+    throw new ResearchAccessError(response.status, 'Administrator role required.')
+  }
+  if (!response.ok) {
+    throw new Error(await readError(response, 'Research report failed'))
+  }
+  return response
+}
+
+export async function fetchResearchKpi(participant: string): Promise<import('../types/research').KpiReport> {
+  const query = participant ? `?participant=${encodeURIComponent(participant)}` : ''
+  return (await researchGet(`/api/admin/reports/kpi${query}`)).json()
+}
+
+export async function fetchResearchParticipants(): Promise<import('../types/research').ParticipantRow[]> {
+  return (await researchGet('/api/admin/participants')).json()
+}
+
+/** Downloads a CSV export through the authenticated session. */
+export async function downloadResearchCsv(kind: 'events' | 'first-attempts'): Promise<void> {
+  const response = await researchGet(`/api/admin/export/${kind}.csv`)
+  const url = URL.createObjectURL(await response.blob())
+  const link = document.createElement('a')
+  link.href = url
+  link.download = kind === 'events' ? 'api-spy-research-events.csv' : 'api-spy-first-attempts.csv'
+  link.click()
+  URL.revokeObjectURL(url)
 }
 
 export async function reportCombatDeath(

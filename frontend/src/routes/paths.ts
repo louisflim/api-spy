@@ -15,6 +15,7 @@ export const paths = {
     `/training-academy?returnTo=${encodeURIComponent(returnPath)}`,
   profile: '/profile',
   loadout: '/loadout',
+  research: '/research',
   settings: '/settings',
   missionBriefing: (missionId: string) =>
     `/missions/${encodeURIComponent(missionId)}/briefing`,

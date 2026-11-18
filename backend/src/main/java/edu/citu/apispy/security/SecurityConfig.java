@@ -74,6 +74,8 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.POST, "/api/auth/register", "/api/auth/login").permitAll()
 						.requestMatchers(HttpMethod.POST, "/api/auth/password-reset/request").permitAll()
 						.requestMatchers(HttpMethod.POST, "/api/auth/password-reset/confirm").permitAll()
+						// Research console: Administrator role only (players get 403).
+						.requestMatchers("/api/admin/**").hasRole("ADMINISTRATOR")
 						.requestMatchers("/api/**").authenticated()
 						.anyRequest().permitAll())
 				.exceptionHandling(ex -> ex.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))

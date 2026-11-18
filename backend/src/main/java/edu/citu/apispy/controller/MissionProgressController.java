@@ -4,6 +4,7 @@ import edu.citu.apispy.domain.mission.RoomResetReason;
 import edu.citu.apispy.dto.AcknowledgeLessonReviewDto;
 import edu.citu.apispy.dto.BossDefeatRequestDto;
 import edu.citu.apispy.dto.CombatDeathRequestDto;
+import edu.citu.apispy.dto.ResearchSignalDto;
 import edu.citu.apispy.dto.MissionCompleteRequestDto;
 import edu.citu.apispy.dto.MissionProgressDto;
 import edu.citu.apispy.dto.RoomResetRequestDto;
@@ -121,6 +122,26 @@ public class MissionProgressController {
 				AuthenticatedPlayer.requireUserIdString(),
 				missionId,
 				request == null ? null : request.roomGeneration()));
+	}
+
+	/** Research log: the agent loaded the field room for this generation (no game-state change). */
+	@PostMapping("/{missionId}/room-entered")
+	public ResponseEntity<Void> roomEntered(
+			@PathVariable @Size(max = InputLimits.ID) String missionId,
+			@Valid @RequestBody ResearchSignalDto request) {
+		missionProgressService.recordRoomEntered(
+				AuthenticatedPlayer.requireUserIdString(), missionId, request.roomGeneration());
+		return ResponseEntity.noContent().build();
+	}
+
+	/** Research log: the agent opened a mandatory API terminal (no game-state change). */
+	@PostMapping("/{missionId}/terminal-opened")
+	public ResponseEntity<Void> terminalOpened(
+			@PathVariable @Size(max = InputLimits.ID) String missionId,
+			@Valid @RequestBody ResearchSignalDto request) {
+		missionProgressService.recordTerminalOpened(
+				AuthenticatedPlayer.requireUserIdString(), missionId, request.roomGeneration(), request.deviceId());
+		return ResponseEntity.noContent().build();
 	}
 
 	@PostMapping("/{missionId}/complete")

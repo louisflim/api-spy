@@ -15,6 +15,7 @@ function navIdForPath(pathname: string): AppNavId | null {
     return 'select-mission'
   }
   if (pathname.startsWith('/loadout')) return 'loadout'
+  if (pathname.startsWith('/research')) return 'research'
   if (pathname.startsWith('/profile') || pathname.startsWith('/settings')) return null
   return 'dashboard'
 }
@@ -51,6 +52,10 @@ export function AppShell() {
     }
     if (destination === 'settings') {
       navigate(paths.settings)
+      return
+    }
+    if (destination === 'research') {
+      navigate(paths.research)
       return
     }
     if (destination === 'continue') {

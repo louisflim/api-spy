@@ -23,5 +23,8 @@ public interface FirstAttemptStore {
 
 	List<FirstAttemptRecord> findAllForParticipant(String participantCode);
 
+	/** Every participant's records (research reporting only), oldest first. */
+	List<FirstAttemptRecord> findAll();
+
 	void clearAll();
 }

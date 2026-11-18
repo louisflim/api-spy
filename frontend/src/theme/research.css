@@ -1,0 +1,143 @@
+/* Research console (administrators) — spy theme variables from spyCinema.css */
+
+.research {
+  width: min(1240px, 100%);
+  margin: clamp(1rem, 4vh, 2.5rem) auto;
+  padding: 1.25rem 1.35rem;
+  background: var(--spy-panel);
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  backdrop-filter: blur(12px);
+  animation: spy-panel-in 0.65s var(--spy-ease) both;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.research__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.6rem;
+  margin-top: 0.4rem;
+}
+
+.research__toolbar button {
+  padding: 0.45rem 0.8rem;
+  font-family: var(--spy-font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  color: var(--spy-text);
+  background: rgba(0, 229, 255, 0.1);
+  border: 1px solid rgba(0, 229, 255, 0.4);
+  cursor: pointer;
+}
+
+.research__toolbar button:hover:not(:disabled) {
+  background: rgba(0, 229, 255, 0.22);
+}
+
+.research__filter {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-family: var(--spy-font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--spy-cyan-dim);
+}
+
+.research__filter select {
+  min-width: 200px;
+  padding: 0.4rem 0.5rem;
+  color: var(--spy-text);
+  background: var(--spy-panel-solid);
+  border: 1px solid rgba(0, 229, 255, 0.35);
+}
+
+.research__spacer {
+  flex: 1;
+}
+
+.research__empty {
+  padding: 0.9rem 1rem;
+  border: 1px dashed rgba(143, 168, 191, 0.4);
+  color: var(--spy-muted);
+}
+
+.research__headline {
+  margin: 0.4rem 0 0;
+  color: var(--spy-text);
+}
+
+.research__h2 {
+  margin: 0.9rem 0 0.3rem;
+  font-family: var(--spy-font-display);
+  font-size: 0.95rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--spy-cyan-bright);
+}
+
+.research__table-wrap {
+  overflow-x: auto;
+}
+
+.research__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.research__table th,
+.research__table td {
+  padding: 0.38rem 0.55rem;
+  text-align: left;
+  white-space: nowrap;
+  vertical-align: top;
+  border-bottom: 1px solid rgba(0, 229, 255, 0.12);
+}
+
+.research__table thead th {
+  font-family: var(--spy-font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--spy-cyan-dim);
+}
+
+.research__table tbody th {
+  color: var(--spy-text);
+  font-weight: 600;
+}
+
+.research__table tr.is-total td {
+  font-weight: 600;
+  background: rgba(0, 229, 255, 0.05);
+}
+
+.research__muted {
+  color: var(--spy-muted);
+  font-size: 0.8em;
+}
+
+.research__defs {
+  margin: 0.3rem 0 0;
+  color: var(--spy-muted);
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.research__split {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1rem;
+}
+
+.research__details summary {
+  margin-top: 0.8rem;
+  cursor: pointer;
+  font-family: var(--spy-font-mono);
+  font-size: 0.82rem;
+  color: var(--spy-cyan);
+}

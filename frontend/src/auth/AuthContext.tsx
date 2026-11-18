@@ -22,6 +22,8 @@ export interface AuthUserProfile {
   userId: string
   email: string
   username: string
+  /** True for research administrators (server-enforced; this only shows the console link). */
+  isAdministrator: boolean
 }
 
 interface AuthContextValue {
@@ -49,6 +51,7 @@ function toProfile(user: AuthUser | null): AuthUserProfile | null {
     userId: user.userId,
     email: user.email,
     username: user.username,
+    isAdministrator: user.role === 'ADMINISTRATOR',
   }
 }
 

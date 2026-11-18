@@ -8,6 +8,8 @@ import {
   fetchMissionProgress,
   fetchMyConcepts,
   reportBossDefeated,
+  reportRoomEntered,
+  reportTerminalOpened,
   reportCombatDeath,
   resetMissionRoom,
   startMissionReplay,
@@ -489,6 +491,8 @@ export function GameWorkspace({
                       onBossDefeated={handleBossDefeated}
                       onPlayerMoved={setPlayerPos}
                       onRoomLayoutReady={(plan) => {
+                        // Research log: this room generation was actually entered (SCR denominator).
+                        reportRoomEntered(missionDetail.mission.missionId, roomProgress.roomGeneration)
                         setRoomLayout(plan)
                         setPlayerPos(plan.playerStart)
                         setHearts(3)
@@ -500,6 +504,9 @@ export function GameWorkspace({
                         const byIndex = devices[payload.terminalIndex]
                         const byDevice = devices.find((d) => d.deviceId === payload.deviceId)
                         const bound = byIndex ?? byDevice
+                        const openedDevice = bound?.deviceId ?? payload.deviceId
+                        // Research log: an opened-but-unsubmitted mandatory decision counts in RCA.
+                        reportTerminalOpened(missionDetail.mission.missionId, roomProgress.roomGeneration, openedDevice)
                         setOpenedTerminal({
                           deviceId: bound?.deviceId ?? payload.deviceId,
                           challengeId: bound?.challengeId ?? payload.challengeId ?? '',

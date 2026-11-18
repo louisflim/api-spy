@@ -5,6 +5,8 @@ import edu.citu.apispy.domain.mission.MissionDefinition;
 import edu.citu.apispy.domain.mission.MissionProgressEntity;
 import edu.citu.apispy.domain.mission.MissionProgressStatus;
 import edu.citu.apispy.domain.mission.Rank;
+import edu.citu.apispy.domain.research.ResearchEvent;
+import edu.citu.apispy.service.research.ResearchEventLog;
 import edu.citu.apispy.domain.mission.RoomResetReason;
 import edu.citu.apispy.domain.simulation.ApiContract;
 import edu.citu.apispy.dto.ActiveTerminalChallengeDto;
@@ -64,6 +66,13 @@ public class MissionProgressService {
 	 * Unit fixtures and the Maven test profile disable this so isolated mission tests stay focused.
 	 */
 	private final boolean sequentialCareerUnlockEnabled;
+	/** Hidden research log (SRS UC-07). No-op until wired, so focused tests are unaffected. */
+	private ResearchEventLog researchEvents = ResearchEventLog.NOOP;
+
+	@Autowired(required = false)
+	public void setResearchEventLog(ResearchEventLog researchEvents) {
+		this.researchEvents = researchEvents == null ? ResearchEventLog.NOOP : researchEvents;
+	}
 
 	@Autowired
 	public MissionProgressService(
@@ -198,6 +207,7 @@ public class MissionProgressService {
 		entity.setReplayCount(entity.getReplayCount() + 1);
 		entity.setUpdatedAt(Instant.now());
 		save(entity);
+		logEvent(entity, ResearchEvent.ROOM_START, null, null);
 		return toDto(entity);
 	}
 
@@ -305,6 +315,7 @@ public class MissionProgressService {
 		entity.setCombatRestartAuthorized(true);
 		entity.setUpdatedAt(Instant.now());
 		save(entity);
+		logEvent(entity, ResearchEvent.COMBAT_DEATH, null, null);
 		return toDto(entity);
 	}
 
@@ -345,13 +356,18 @@ public class MissionProgressService {
 			// Level 7: losing to the boss only restarts the fight. Operated devices, the
 			// terminal sequence and graded counters are kept, so the shield stays down and
 			// the agent never has to redo API work because of combat skill. Tier unchanged.
+			logEvent(entity, ResearchEvent.ROOM_RESET, RoomResetReason.COMBAT.name(), null);
 			entity.setCombatRestartAuthorized(false);
 			entity.setRoomGeneration(UUID.randomUUID());
 			entity.setBossDefeated(false);
 			entity.setUpdatedAt(Instant.now());
 			save(entity);
+			logEvent(entity, ResearchEvent.ROOM_START, null, null);
 			return toDto(entity);
 		}
+
+		// Close the old attempt with its server-classified reason before rotating.
+		logEvent(entity, ResearchEvent.ROOM_RESET, effective.name(), null);
 
 		// Never mutate ActiveRunKind here — replay must remain replay.
 		if (effective == RoomResetReason.API_STALLED) {
@@ -395,6 +411,7 @@ public class MissionProgressService {
 		}
 		entity.setUpdatedAt(Instant.now());
 		save(entity);
+		logEvent(entity, ResearchEvent.ROOM_START, null, null);
 		return toDto(entity);
 	}
 
@@ -500,8 +517,66 @@ public class MissionProgressService {
 			entity.setBossDefeated(true);
 			entity.setUpdatedAt(Instant.now());
 			save(entity);
+			logEvent(entity, ResearchEvent.BOSS_DEFEATED, null, null);
 		}
 		return toDto(entity);
+	}
+
+	/**
+	 * Records that the agent opened a mandatory API terminal in the active room. Used by the
+	 * research report so assigned decisions the agent entered but never submitted count as
+	 * incorrect in RCA (proposal), while devices never reached (e.g. after a combat death) do not.
+	 * Ignored for stale generations, inactive runs and devices not required in this room.
+	 */
+	@Transactional
+	public void recordTerminalOpened(String participantCode, String missionId, String roomGeneration, String deviceId) {
+		if (deviceId == null || deviceId.isBlank()) {
+			return;
+		}
+		UUID expected = parseRoomGeneration(roomGeneration, "record a terminal open");
+		findEntity(participantCode, missionId).ifPresent(entity -> {
+			if (!entity.hasActiveRoomRun() || !expected.equals(entity.getRoomGeneration())) {
+				return;
+			}
+			List<String> required = deviceEscalationService.requiredDeviceIds(
+					entity.getMissionId(), entity.getApiResetCount(), readSelectedChallengeIds(entity));
+			if (required.contains(deviceId)) {
+				logEvent(entity, ResearchEvent.TERMINAL_OPENED, null, deviceId);
+			}
+		});
+	}
+
+	/**
+	 * Records that the agent actually entered the field room for the active generation.
+	 * Progress rows can be created from the training screen; an attempt only counts toward
+	 * SCR / HLCR once it was entered (or shows real activity).
+	 */
+	@Transactional
+	public void recordRoomEntered(String participantCode, String missionId, String roomGeneration) {
+		UUID expected = parseRoomGeneration(roomGeneration, "record a room entry");
+		findEntity(participantCode, missionId).ifPresent(entity -> {
+			if (entity.hasActiveRoomRun() && expected.equals(entity.getRoomGeneration())) {
+				logEvent(entity, ResearchEvent.ROOM_ENTERED, null, null);
+			}
+		});
+	}
+
+	private void logEvent(MissionProgressEntity entity, String type, String reason, String deviceId) {
+		MissionDefinition mission = missionCatalogService.findById(entity.getMissionId()).orElse(null);
+		researchEvents.append(new ResearchEvent(
+				UUID.randomUUID(),
+				entity.getParticipantCode(),
+				entity.getMissionId(),
+				entity.getModule(),
+				entity.getRankCode(),
+				mission == null ? 0 : mission.getLevel(),
+				entity.getRoomGeneration(),
+				type,
+				reason,
+				deviceId,
+				entity.getActiveRunKind().name(),
+				entity.getApiResetCount(),
+				Instant.now()));
 	}
 
 	/** Level 7 of every module/rank is the boss-only final room (proposal; SRS UC-06). */
@@ -568,6 +643,7 @@ public class MissionProgressService {
 		}
 
 		Instant now = Instant.now();
+		logEvent(entity, ResearchEvent.ROOM_COMPLETE, null, null);
 		if (entity.getActiveRunKind() == ActiveRunKind.REPLAY) {
 			entity.setActiveRunKind(ActiveRunKind.NONE);
 			entity.setCombatRestartAuthorized(false);
@@ -837,6 +913,7 @@ public class MissionProgressService {
 		entity.setActiveTerminalChallengeId(null);
 		reselectScenarios(entity);
 		save(entity);
+		logEvent(entity, ResearchEvent.ROOM_START, null, null);
 		return entity;
 	}
 

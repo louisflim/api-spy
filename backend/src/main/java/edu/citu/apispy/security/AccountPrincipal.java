@@ -16,6 +16,7 @@ public class AccountPrincipal implements UserDetails {
 	private final String email;
 	private final String passwordHash;
 	private final boolean enabled;
+	private final boolean administrator;
 
 	public AccountPrincipal(UserAccount account) {
 		this.id = account.getId();
@@ -23,6 +24,7 @@ public class AccountPrincipal implements UserDetails {
 		this.email = account.getEmail();
 		this.passwordHash = account.getPasswordHash();
 		this.enabled = account.isEnabled();
+		this.administrator = account.isAdministrator();
 	}
 
 	public UUID getId() {
@@ -35,7 +37,10 @@ public class AccountPrincipal implements UserDetails {
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
-		return List.of(new SimpleGrantedAuthority("ROLE_PLAYER"));
+		// Every account plays; research administrators additionally get ROLE_ADMINISTRATOR.
+		return administrator
+				? List.of(new SimpleGrantedAuthority("ROLE_PLAYER"), new SimpleGrantedAuthority("ROLE_ADMINISTRATOR"))
+				: List.of(new SimpleGrantedAuthority("ROLE_PLAYER"));
 	}
 
 	@Override

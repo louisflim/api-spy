@@ -14,6 +14,7 @@ import { missingRequiredLessons } from '../learning/prerequisites'
 import { ForgotPasswordScreen } from '../screens/ForgotPasswordScreen'
 import { GameWorkspace } from '../screens/GameWorkspace'
 import { LoadoutScreen } from '../screens/LoadoutScreen'
+import { ResearchConsoleScreen } from '../screens/ResearchConsoleScreen'
 import { LoginScreen } from '../screens/LoginScreen'
 import { MainMenu } from '../screens/MainMenu'
 import { MissionBriefingScreen } from '../screens/MissionBriefingScreen'
@@ -125,6 +126,10 @@ export function DashboardPage() {
           navigate(paths.loadout)
           return
         }
+        if (destination === 'research') {
+          navigate(paths.research)
+          return
+        }
         navigate(paths.settings)
       }}
     />
@@ -172,6 +177,10 @@ export function ProfilePage() {
       blurb="Profile details and career stats will live here. Not implemented yet."
     />
   )
+}
+
+export function ResearchPage() {
+  return <ResearchConsoleScreen />
 }
 
 export function LoadoutPage() {

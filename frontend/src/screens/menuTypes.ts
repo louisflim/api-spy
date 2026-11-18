@@ -6,3 +6,4 @@ export type MenuDestination =
   | 'loadout'
   | 'settings'
   | 'dashboard'
+  | 'research'

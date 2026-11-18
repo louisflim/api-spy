@@ -38,6 +38,13 @@ public final class InMemoryFirstAttemptStore implements FirstAttemptStore {
 	}
 
 	@Override
+	public List<FirstAttemptRecord> findAll() {
+		return records.values().stream()
+				.sorted((a, b) -> a.getSubmittedAt().compareTo(b.getSubmittedAt()))
+				.toList();
+	}
+
+	@Override
 	public void clearAll() {
 		records.clear();
 	}

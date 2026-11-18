@@ -14,6 +14,7 @@ import edu.citu.apispy.repository.PasswordResetTokenRepository;
 import edu.citu.apispy.repository.PlayerProfileRepository;
 import edu.citu.apispy.repository.UserAccountRepository;
 import edu.citu.apispy.security.AccountPrincipal;
+import edu.citu.apispy.security.AdminAccountPolicy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -53,6 +54,13 @@ public class AuthService {
 	private final AuthenticationManager authenticationManager;
 	private final AuthProperties authProperties;
 	private final SecureRandom secureRandom = new SecureRandom();
+	/** Optional so focused tests can build the service without it. */
+	private AdminAccountPolicy adminAccountPolicy;
+
+	@org.springframework.beans.factory.annotation.Autowired(required = false)
+	void setAdminAccountPolicy(AdminAccountPolicy adminAccountPolicy) {
+		this.adminAccountPolicy = adminAccountPolicy;
+	}
 
 	public AuthService(
 			UserAccountRepository userAccountRepository,
@@ -89,7 +97,11 @@ public class AuthService {
 		}
 
 		String hash = passwordEncoder.encode(request.password());
-		UserAccount account = userAccountRepository.save(new UserAccount(username, email, hash));
+		UserAccount fresh = new UserAccount(username, email, hash);
+		if (adminAccountPolicy != null) {
+			adminAccountPolicy.applyTo(fresh);
+		}
+		UserAccount account = userAccountRepository.save(fresh);
 		playerProfileRepository.save(new PlayerProfile(account, username));
 
 		authenticateSession(email, request.password(), httpRequest);
@@ -188,7 +200,7 @@ public class AuthService {
 	}
 
 	private AuthUserResponseDto toResponse(UserAccount account) {
-		return new AuthUserResponseDto(account.getId(), account.getUsername(), account.getEmail());
+		return new AuthUserResponseDto(account.getId(), account.getUsername(), account.getEmail(), account.getRole());
 	}
 
 	private String generateRawToken() {

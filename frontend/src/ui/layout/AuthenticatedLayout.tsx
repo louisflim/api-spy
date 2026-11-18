@@ -35,6 +35,7 @@ export function AuthenticatedLayout({
           uplink={uplink}
           onNavigate={onNavigate}
           onLogout={onLogout}
+          showResearch={Boolean(profile?.isAdministrator)}
         />
         <div className="auth-shell__body">{children}</div>
       </div>

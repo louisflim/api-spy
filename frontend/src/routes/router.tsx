@@ -7,6 +7,7 @@ import {
   DashboardPage,
   ForgotPasswordPage,
   LoadoutPage,
+  ResearchPage,
   LoginPage,
   MissionBriefingPage,
   MissionFieldPage,
@@ -71,6 +72,7 @@ export const router = createBrowserRouter([
               { path: 'training-academy', element: <TrainingAcademyPage /> },
               { path: 'profile', element: <ProfilePage /> },
               { path: 'loadout', element: <LoadoutPage /> },
+              { path: 'research', element: <ResearchPage /> },
               { path: 'settings', element: <SettingsPage /> },
               {
                 path: 'missions/:missionId',

@@ -3,6 +3,8 @@ interface MissionCompleteOverlayProps {
   title?: string
   /** True when finishing an authorized replay run (career clear already saved). */
   replayClear?: boolean
+  /** Coins granted by this clear (first clears only); null while loading or unknown. */
+  coinsAwarded?: number | null
   onContinue: () => void
   /** When set, offers a next playable operation on the same track. */
   nextMissionTitle?: string | null
@@ -13,6 +15,7 @@ export function MissionCompleteOverlay({
   missionId,
   title,
   replayClear = false,
+  coinsAwarded = null,
   onContinue,
   nextMissionTitle = null,
   onContinueNext,
@@ -30,8 +33,8 @@ export function MissionCompleteOverlay({
               first-attempt research records, and Terminal Verification Progress are unchanged.
             </p>
             <p className="hint">
-              No duplicate first-clear rewards were granted. Return to the Operations Board anytime to
-              replay again.
+              Replays never grant first-clear coins again. Enemies you defeat still give EXP until this
+              mission's EXP limit is reached. Return to the Operations Board anytime to replay again.
             </p>
           </>
         ) : (
@@ -40,9 +43,14 @@ export function MissionCompleteOverlay({
               You reached the exit and cleared <strong>{title ?? missionId}</strong>. Progress is saved
               to your authenticated agent record.
             </p>
+            {coinsAwarded && coinsAwarded > 0 ? (
+              <p className="mission-complete__reward">
+                <span aria-hidden="true">◈</span> +{coinsAwarded} coins (first-clear Intel Credit)
+              </p>
+            ) : null}
             <p className="hint">
-              No stars, XP, or coins are awarded. You can replay this operation later without losing
-              permanent progress.
+              Spend coins on new guns and EXP on gun upgrades in your Loadout. Rewards only change combat —
+              never your API record. You can replay this operation later without losing permanent progress.
             </p>
           </>
         )}

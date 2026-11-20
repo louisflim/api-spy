@@ -8,6 +8,8 @@ interface AgentProfilePanelProps {
   missionsInProgress: number | null
   missionsAvailable: number | null
   missionsLocked: number | null
+  /** Gameplay balances and equipped gun (null until loaded). Never academic scores. */
+  rewards?: { exp: number; coins: number; weaponName: string } | null
   delayMs?: number
 }
 
@@ -18,6 +20,7 @@ export function AgentProfilePanel({
   missionsInProgress,
   missionsAvailable,
   missionsLocked,
+  rewards = null,
   delayMs = 80,
 }: AgentProfilePanelProps) {
   return (
@@ -53,7 +56,25 @@ export function AgentProfilePanel({
 
       <div className="dash-placeholder-block">
         <h3>Experience &amp; coins</h3>
-        <p>Not tracked yet. Values will appear here only when real account data exists.</p>
+        {rewards ? (
+          <ul className="dash-stat-list" aria-label="Gameplay rewards">
+            <li>
+              <span>EXP</span>
+              <strong>{rewards.exp}</strong>
+            </li>
+            <li>
+              <span>Coins</span>
+              <strong>{rewards.coins}</strong>
+            </li>
+            <li>
+              <span>Gun</span>
+              <strong>{rewards.weaponName}</strong>
+            </li>
+          </ul>
+        ) : (
+          <p>Loading your rewards…</p>
+        )}
+        <p>Spend them in the Loadout armory. Gameplay rewards only, never academic scores.</p>
       </div>
 
       <div className="dash-placeholder-block">

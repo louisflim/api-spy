@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
-import { fetchAllMissionProgress, fetchCatalog } from '../api/client'
+import { fetchAllMissionProgress, fetchCatalog, fetchRewards } from '../api/client'
+import { WEAPON_REGISTRY } from '../phaser/combat/weapons'
+import type { RewardsState } from '../types/rewards'
 import { useAuth } from '../auth/AuthContext'
 import { normalizeRank, RANK_LABELS, type RankKey } from '../content/moduleMeta'
 import {
@@ -28,6 +30,16 @@ export function MainMenu({ onNavigate }: MainMenuProps) {
   const [progressTick, setProgressTick] = useState(0)
   const [difficultyTrack, setDifficultyTrack] = useState<RankKey>('RECRUIT')
   const [serverProgress, setServerProgress] = useState<MissionProgressState[]>([])
+  const [rewards, setRewards] = useState<RewardsState | null>(null)
+  useEffect(() => {
+    let live = true
+    fetchRewards()
+      .then((next) => live && setRewards(next))
+      .catch(() => undefined)
+    return () => {
+      live = false
+    }
+  }, [])
 
   const playerId = profile?.userId
   const agentName = profile?.username ?? 'Recruit'
@@ -145,6 +157,15 @@ export function MainMenu({ onNavigate }: MainMenuProps) {
           missionsInProgress={missionStats.inProgress}
           missionsAvailable={missionStats.available}
           missionsLocked={missionStats.locked}
+          rewards={
+            rewards
+              ? {
+                  exp: rewards.exp,
+                  coins: rewards.coins,
+                  weaponName: WEAPON_REGISTRY[rewards.equippedWeapon]?.displayName ?? 'Field Sidearm',
+                }
+              : null
+          }
           delayMs={90}
         />
 

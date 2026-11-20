@@ -6,6 +6,7 @@ import { ROOM_LAYOUT } from '../phaser/roomLayout'
 import type { RoomLayoutPlan } from '../phaser/room/types'
 import type { MandatoryDeviceState } from '../types/api'
 import type { BossSnapshot } from '../phaser/combat'
+import type { WeaponDefinition } from '../phaser/combat/types'
 
 export type PlayerFacing = 'down' | 'left' | 'right' | 'up'
 export type PlayerPosition = { x: number; y: number; facing?: PlayerFacing }
@@ -47,6 +48,12 @@ interface GameCanvasProps {
   onBossDefeated?: () => void
   /** Equipped outfit spritesheet (cosmetic only). */
   playerSheet?: { key: string; path: string } | null
+  /** Equipped gun with EXP upgrades applied (combat only). */
+  weapon?: WeaponDefinition | null
+  /** A regular enemy fell (reported to the server for capped EXP). */
+  onEnemyDefeated?: (enemyType: string) => void
+  /** Held-gun texture (equipped gun + gun skin). Cosmetic only. */
+  gunSprite?: { key: string; path: string; gripX: number; gripY: number } | null
 }
 
 export function GameCanvas({
@@ -70,6 +77,9 @@ export function GameCanvas({
   onBossState,
   onBossDefeated,
   playerSheet = null,
+  weapon = null,
+  onEnemyDefeated,
+  gunSprite = null,
 }: GameCanvasProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const gameRef = useRef<Phaser.Game | null>(null)
@@ -81,6 +91,9 @@ export function GameCanvas({
   const onCombatDeathRef = useRef(onCombatDeath)
   const onBossStateRef = useRef(onBossState)
   const onBossDefeatedRef = useRef(onBossDefeated)
+  const onEnemyDefeatedRef = useRef(onEnemyDefeated)
+  const gunKey = gunSprite?.key ?? ''
+  const weaponKey = weapon ? `${weapon.id}:${weapon.damage}:${weapon.cooldownMs}:${weapon.projectileSpeed}` : ''
   const bossShieldDownRef = useRef(Boolean(boss?.shieldDown))
   const bossDefeatedRef = useRef(Boolean(boss?.defeated))
   const bossRoomActive = Boolean(boss)
@@ -113,6 +126,9 @@ export function GameCanvas({
   useEffect(() => {
     onBossDefeatedRef.current = onBossDefeated
   }, [onBossDefeated])
+  useEffect(() => {
+    onEnemyDefeatedRef.current = onEnemyDefeated
+  }, [onEnemyDefeated])
 
   useEffect(() => {
     const parent = containerRef.current
@@ -149,6 +165,9 @@ export function GameCanvas({
     const bossDefeatedHandler = () => {
       onBossDefeatedRef.current?.()
     }
+    const enemyDefeatedHandler = (payload: { enemyType: string }) => {
+      onEnemyDefeatedRef.current?.(payload.enemyType)
+    }
     game.events.on(GAME_EVENTS.OPEN_TERMINAL, openHandler)
     game.events.on(GAME_EVENTS.EXIT_REACHED, exitHandler)
     game.events.on(GAME_EVENTS.PLAYER_MOVED, movedHandler)
@@ -157,6 +176,7 @@ export function GameCanvas({
     game.events.on(GAME_EVENTS.COMBAT_DEATH, deathHandler)
     game.events.on(GAME_EVENTS.BOSS_STATE, bossStateHandler)
     game.events.on(GAME_EVENTS.BOSS_DEFEATED, bossDefeatedHandler)
+    game.events.on(GAME_EVENTS.ENEMY_DEFEATED, enemyDefeatedHandler)
 
     const timer = window.setTimeout(() => {
       if (cancelled) return
@@ -176,6 +196,8 @@ export function GameCanvas({
           ? { shieldDown: bossShieldDownRef.current, defeated: bossDefeatedRef.current }
           : null,
         playerSheet,
+        weapon,
+        gunSprite,
       })
     }, 0)
 
@@ -190,6 +212,7 @@ export function GameCanvas({
       game.events.off(GAME_EVENTS.COMBAT_DEATH, deathHandler)
       game.events.off(GAME_EVENTS.BOSS_STATE, bossStateHandler)
       game.events.off(GAME_EVENTS.BOSS_DEFEATED, bossDefeatedHandler)
+      game.events.off(GAME_EVENTS.ENEMY_DEFEATED, enemyDefeatedHandler)
       game.destroy(true)
       if (gameRef.current === game) gameRef.current = null
     }
@@ -205,6 +228,8 @@ export function GameCanvas({
     combatEnabled,
     bossRoomActive,
     playerSheetKey,
+    weaponKey,
+    gunKey,
     // Bindings identity for this room generation (device/challenge pairing).
     terminalBindings.map((b) => `${b.deviceId}:${b.challengeId}`).join('|'),
   ])

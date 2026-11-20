@@ -120,6 +120,11 @@ export class PatrolGuard {
     return this.defeated
   }
 
+  /** Enemy type id (EXP value is decided by the server). */
+  get typeId(): string {
+    return this.config.typeId
+  }
+
   hurtbox(out?: Phaser.Geom.Rectangle): Phaser.Geom.Rectangle {
     return spriteHurtbox(this.sprite, GUARD_HURTBOX, out)
   }

@@ -4,6 +4,8 @@ import edu.citu.apispy.domain.mission.RoomResetReason;
 import edu.citu.apispy.dto.AcknowledgeLessonReviewDto;
 import edu.citu.apispy.dto.BossDefeatRequestDto;
 import edu.citu.apispy.dto.CombatDeathRequestDto;
+import edu.citu.apispy.dto.EnemyDefeatRequestDto;
+import edu.citu.apispy.service.rewards.RewardService;
 import edu.citu.apispy.dto.ResearchSignalDto;
 import edu.citu.apispy.dto.MissionCompleteRequestDto;
 import edu.citu.apispy.dto.MissionProgressDto;
@@ -34,12 +36,15 @@ public class MissionProgressController {
 
 	private final MissionProgressService missionProgressService;
 	private final RequestSimulationService requestSimulationService;
+	private final RewardService rewardService;
 
 	public MissionProgressController(
 			MissionProgressService missionProgressService,
-			RequestSimulationService requestSimulationService) {
+			RequestSimulationService requestSimulationService,
+			RewardService rewardService) {
 		this.missionProgressService = missionProgressService;
 		this.requestSimulationService = requestSimulationService;
+		this.rewardService = rewardService;
 	}
 
 	@GetMapping("/progress")
@@ -142,6 +147,17 @@ public class MissionProgressController {
 		missionProgressService.recordTerminalOpened(
 				AuthenticatedPlayer.requireUserIdString(), missionId, request.roomGeneration(), request.deviceId());
 		return ResponseEntity.noContent().build();
+	}
+
+	/** Gameplay reward: a regular enemy fell in the active room (EXP; never affects API state). */
+	@PostMapping("/{missionId}/enemy-defeated")
+	public EnemyDefeatRequestDto.Result enemyDefeated(
+			@PathVariable @Size(max = InputLimits.ID) String missionId,
+			@Valid @RequestBody EnemyDefeatRequestDto request) {
+		String player = AuthenticatedPlayer.requireUserIdString();
+		int granted = missionProgressService.recordEnemyDefeated(
+				player, missionId, request.roomGeneration(), request.enemyType());
+		return new EnemyDefeatRequestDto.Result(granted, rewardService.get(player).exp());
 	}
 
 	@PostMapping("/{missionId}/complete")

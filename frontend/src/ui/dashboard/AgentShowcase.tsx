@@ -18,8 +18,8 @@ export function AgentShowcase({ delayMs = 140 }: AgentShowcaseProps) {
         <RookieIdlePortrait size="large" />
       </div>
       <p className="dash-note">
-        Rookie Detective is the only playable field sprite. Cosmetics and alternate loadouts are not
-        available yet.
+        Change your agent, guns and gun skins in Agent Loadout. Agents and skins are cosmetic; guns only
+        change combat.
       </p>
     </SpyPanel>
   )

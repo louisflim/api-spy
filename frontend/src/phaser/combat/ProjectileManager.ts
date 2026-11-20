@@ -23,7 +23,7 @@ export class ProjectileManager {
     this.scene = scene
     this.group = scene.physics.add.group({
       classType: Phaser.Physics.Arcade.Image,
-      maxSize: 24,
+      maxSize: 40,
       runChildUpdate: false,
     })
   }
@@ -72,6 +72,8 @@ export class ProjectileManager {
     sprite.setActive(true)
     sprite.setVisible(true)
     sprite.setScale(req.weapon.projectileScale)
+    if (req.weapon.projectileTint !== undefined) sprite.setTint(req.weapon.projectileTint)
+    else sprite.clearTint()
     sprite.setDepth(30)
     sprite.setData('damage', req.weapon.damage)
     sprite.setData('weaponId', req.weapon.id)

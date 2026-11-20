@@ -1,6 +1,7 @@
 import Phaser from 'phaser'
 import { CombatSystem } from './combat'
 import { bossConfigFor } from './combat/bossConfig'
+import type { WeaponDefinition } from './combat/types'
 import { ENEMY_SHEETS } from './combat/enemyTypes'
 import { generateRoomLayout, ROOM_COLS, ROOM_ROWS, ROOM_TILE_SIZE } from './room/generateRoomLayout'
 import { ensureRoomTextures, FLOOR_TEXTURE_KEYS, PROP_TEXTURE_KEYS } from './room/pixelArt'
@@ -24,6 +25,8 @@ export const GAME_EVENTS = {
   BOSS_STATE: 'boss-state',
   /** Level 7: scene → React, boss defeated (React reports it to the server). */
   BOSS_DEFEATED: 'boss-defeated',
+  /** scene → React, a regular enemy fell (React reports it for server-capped EXP). */
+  ENEMY_DEFEATED: 'enemy-defeated',
 } as const
 
 /** Default agent sheet; outfits share its 4x4 layout (see content/outfits.ts). */
@@ -78,6 +81,8 @@ export class MissionScene extends Phaser.Scene {
   private bossRoom: { shieldDown: boolean; defeated: boolean } | null = null
   /** Equipped outfit spritesheet (cosmetic only). */
   private playerSheet = DEFAULT_PLAYER
+  private weapon: WeaponDefinition | null = null
+  private gunSprite: { key: string; path: string; gripX: number; gripY: number } | null = null
 
   constructor() {
     super('MissionScene')
@@ -108,6 +113,10 @@ export class MissionScene extends Phaser.Scene {
     boss?: { shieldDown: boolean; defeated?: boolean } | null
     /** Equipped outfit: texture key + sheet path (same 4x4 layout as the Rookie Detective). */
     playerSheet?: { key: string; path: string } | null
+    /** Equipped gun with EXP upgrades applied (combat only). */
+    weapon?: WeaponDefinition | null
+    /** Held-gun texture (equipped gun + gun skin) and its grip point. Cosmetic only. */
+    gunSprite?: { key: string; path: string; gripX: number; gripY: number } | null
   }): void {
     this.exitReady = Boolean(data?.exitReady)
     this.missionId = data?.missionId ?? this.missionId
@@ -123,6 +132,8 @@ export class MissionScene extends Phaser.Scene {
     )
     this.combatEnabled = Boolean(data?.combatEnabled)
     this.playerSheet = data?.playerSheet?.key && data.playerSheet.path ? data.playerSheet : DEFAULT_PLAYER
+    this.weapon = data?.weapon ?? null
+    this.gunSprite = data?.gunSprite?.key && data.gunSprite.path ? data.gunSprite : null
     this.bossRoom = data?.boss
       ? { shieldDown: Boolean(data.boss.shieldDown), defeated: Boolean(data.boss.defeated) }
       : null
@@ -134,6 +145,9 @@ export class MissionScene extends Phaser.Scene {
         frameWidth: FRAME_SIZE,
         frameHeight: FRAME_SIZE,
       })
+    }
+    if (this.combatEnabled && this.gunSprite && !this.textures.exists(this.gunSprite.key)) {
+      this.load.image(this.gunSprite.key, this.gunSprite.path)
     }
     if (this.combatEnabled) {
       const sheets = ENEMY_SHEETS.map((cfg) => ({ key: cfg.spritesheetKey, path: cfg.sheetPath }))
@@ -202,6 +216,13 @@ export class MissionScene extends Phaser.Scene {
         },
         onCombatDeath: () => {
           this.game.events.emit(GAME_EVENTS.COMBAT_DEATH, { missionId: this.missionId })
+        },
+        weapon: this.weapon ?? undefined,
+        heldGun: this.gunSprite
+          ? { textureKey: this.gunSprite.key, gripX: this.gunSprite.gripX, gripY: this.gunSprite.gripY }
+          : undefined,
+        onEnemyDefeated: (enemyType) => {
+          this.game.events.emit(GAME_EVENTS.ENEMY_DEFEATED, { enemyType })
         },
         boss: this.bossRoom
           ? {
@@ -286,14 +307,17 @@ export class MissionScene extends Phaser.Scene {
     if (this.cursors.down?.isDown || this.wasd.S.isDown) vy += 1
 
     const length = Math.hypot(vx, vy)
+    // While shooting, the agent faces the aim (so the gun and body line up); otherwise movement.
+    const aimFacing = this.combat?.aimFacing(time) ?? null
     if (length > 0) {
       vx = (vx / length) * this.speed
       vy = (vy / length) * this.speed
-      this.facing = this.resolveFacing(vx, vy)
+      this.facing = aimFacing ?? this.resolveFacing(vx, vy)
       this.playWalk(this.facing)
       body.setVelocity(vx, vy)
     } else {
       body.setVelocity(0, 0)
+      if (aimFacing) this.facing = aimFacing
       this.playIdle(this.facing)
     }
 

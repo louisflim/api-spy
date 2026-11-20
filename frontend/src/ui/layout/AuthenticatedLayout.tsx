@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { useAuth } from '../../auth/AuthContext'
 import type { MenuDestination } from '../../screens/menuTypes'
 import { SpyStage } from '../spy/SpyStage'
+import { StarterAgentPicker } from '../loadout/StarterAgentPicker'
 import { AuthenticatedNavbar, type AppNavId } from './AuthenticatedNavbar'
 
 interface AuthenticatedLayoutProps {
@@ -39,6 +40,7 @@ export function AuthenticatedLayout({
         />
         <div className="auth-shell__body">{children}</div>
       </div>
+      <StarterAgentPicker />
     </SpyStage>
   )
 }

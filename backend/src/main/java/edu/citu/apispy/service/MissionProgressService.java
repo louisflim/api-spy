@@ -28,6 +28,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import edu.citu.apispy.service.rewards.RewardHooks;
 
 /**
  * Server-authoritative escape-room mission progress with career clear + temporary replay runs.
@@ -72,6 +73,14 @@ public class MissionProgressService {
 	@Autowired(required = false)
 	public void setResearchEventLog(ResearchEventLog researchEvents) {
 		this.researchEvents = researchEvents == null ? ResearchEventLog.NOOP : researchEvents;
+	}
+
+	/** Gameplay rewards (EXP / coins). No-op until wired, so focused tests are unaffected. */
+	private RewardHooks rewards = RewardHooks.NOOP;
+
+	@Autowired(required = false)
+	public void setRewardHooks(RewardHooks rewards) {
+		this.rewards = rewards == null ? RewardHooks.NOOP : rewards;
 	}
 
 	@Autowired
@@ -518,8 +527,28 @@ public class MissionProgressService {
 			entity.setUpdatedAt(Instant.now());
 			save(entity);
 			logEvent(entity, ResearchEvent.BOSS_DEFEATED, null, null);
+			rewards.bossDefeated(participantCode, entity.getMissionId(), entity.getRankCode(), entity.getRoomGeneration());
 		}
 		return toDto(entity);
+	}
+
+	/**
+	 * A regular enemy was defeated in the active room run: grants EXP (capped per room run and per
+	 * mission) and logs a descriptive research event. Stale generations, inactive runs and boss
+	 * rooms (no regular enemies) grant nothing. Combat rewards never affect API state.
+	 */
+	@Transactional
+	public int recordEnemyDefeated(String participantCode, String missionId, String roomGeneration, String enemyType) {
+		UUID expected = parseRoomGeneration(roomGeneration, "record an enemy defeat");
+		Optional<MissionProgressEntity> found = findEntity(participantCode, missionId);
+		if (found.isEmpty()) return 0;
+		MissionProgressEntity entity = found.get();
+		if (!entity.hasActiveRoomRun() || !expected.equals(entity.getRoomGeneration())) return 0;
+		if (isBossMission(entity.getMissionId())) return 0;
+		int granted = rewards.enemyDefeated(
+				participantCode, entity.getMissionId(), entity.getRankCode(), entity.getRoomGeneration(), enemyType);
+		logEvent(entity, ResearchEvent.ENEMY_DEFEATED, null, null);
+		return granted;
 	}
 
 	/**
@@ -663,6 +692,7 @@ public class MissionProgressService {
 		entity.setRequiredReviewLessonId(null);
 		entity.setUpdatedAt(now);
 		save(entity);
+		rewards.firstClear(participantCode, entity.getMissionId(), entity.getRankCode());
 		return toDto(entity);
 	}
 

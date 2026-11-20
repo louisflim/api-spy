@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   completeMissionAtExit,
   fetchAllMissionProgress,
@@ -7,10 +7,12 @@ import {
   fetchMissionDetail,
   fetchMissionProgress,
   fetchMyConcepts,
+  fetchRewards,
   reportBossDefeated,
   reportRoomEntered,
   reportTerminalOpened,
   reportCombatDeath,
+  reportEnemyDefeated,
   resetMissionRoom,
   startMissionReplay,
   type ConceptProgressRow,
@@ -18,9 +20,12 @@ import {
 import { useAuth } from '../auth/AuthContext'
 import { publicErrorMessage } from '../security/publicErrors'
 import { clearedMissionIds, effectiveOutfit, OUTFITS, type Outfit } from '../content/outfits'
+import { effectiveGunSkin, GUN_SKINS, gunSprite, type GunSkin } from '../content/gunSkins'
 import { lessonTitle, missingRequiredLessons } from '../learning/prerequisites'
 import { bossConfigFor, type BossSnapshot } from '../phaser/combat'
 import type { RoomLayoutPlan } from '../phaser/room/types'
+import { buildLoadoutWeapon } from '../phaser/combat/weapons'
+import type { RewardsState } from '../types/rewards'
 import { ROOM_LAYOUT } from '../phaser/roomLayout'
 import { loadMissionProgress, saveMissionProgress } from '../storage/attemptStorage'
 import type {
@@ -91,21 +96,50 @@ export function GameWorkspace({
   const [hearts, setHearts] = useState(3)
   const [combatDeathPending, setCombatDeathPending] = useState(false)
   const [resetLevelBusy, setResetLevelBusy] = useState(false)
-  /** Equipped outfit (cosmetic): validated against the agent's cleared missions. */
+  /**
+   * Equipped outfit and gun skin (cosmetic), validated against owned characters and cleared
+   * missions. The canvas waits for them so the room is not restarted when they arrive.
+   */
   const [outfit, setOutfit] = useState<Outfit>(OUTFITS[0]!)
-  /** Canvas waits for the outfit so the room is not restarted when it arrives. */
+  const [gunSkin, setGunSkin] = useState<GunSkin>(GUN_SKINS[0]!)
   const [outfitReady, setOutfitReady] = useState(false)
+  /** Gameplay rewards (EXP, coins, equipped gun). */
+  const [rewards, setRewards] = useState<RewardsState | null>(null)
+  const [rewardsReady, setRewardsReady] = useState(false)
+  /** Last EXP grant, shown briefly in the HUD (id re-triggers the animation). */
+  const [expGain, setExpGain] = useState<{ amount: number; id: number } | null>(null)
+  /** Coins granted by the last clear (first clears only), for the completion overlay. */
+  const [coinsAwarded, setCoinsAwarded] = useState<number | null>(null)
   useEffect(() => {
     if (!playerId) return
     let live = true
-    fetchAllMissionProgress()
-      .then((rows) => live && setOutfit(effectiveOutfit(playerId, clearedMissionIds(rows))))
-      .catch(() => undefined)
-      .finally(() => live && setOutfitReady(true))
+    Promise.allSettled([fetchAllMissionProgress(), fetchRewards()]).then(([rows, wallet]) => {
+      if (!live) return
+      const cleared = rows.status === 'fulfilled' ? clearedMissionIds(rows.value) : new Set<string>()
+      const loaded = wallet.status === 'fulfilled' ? wallet.value : null
+      const owned = loaded ? new Set(loaded.characters.filter((c) => c.owned).map((c) => c.id)) : null
+      setRewards(loaded)
+      setOutfit(effectiveOutfit(playerId, cleared, owned))
+      setGunSkin(effectiveGunSkin(playerId, cleared))
+      setOutfitReady(true)
+      setRewardsReady(true)
+    })
     return () => {
       live = false
     }
   }, [playerId])
+  const heldGun = useMemo(() => gunSprite(rewards?.equippedWeapon, gunSkin.id), [rewards?.equippedWeapon, gunSkin.id])
+  /** Equipped gun with its own upgrade levels (each gun is upgraded separately). */
+  const equippedOffer = rewards?.weapons.find((w) => w.id === rewards.equippedWeapon)
+  const loadoutKey = equippedOffer
+    ? `${equippedOffer.id}:${equippedOffer.upgrades.DAMAGE}:${equippedOffer.upgrades.FIRE_RATE}:${equippedOffer.upgrades.VELOCITY}`
+    : ''
+  const weapon = useMemo(
+    () => buildLoadoutWeapon(equippedOffer?.id, equippedOffer?.upgrades),
+    // Rebuild only when the loadout itself changes, not when EXP / coins move.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [loadoutKey],
+  )
   /** Level 7 boss HUD snapshot from Phaser (display only; the server owns the defeat). */
   const [bossState, setBossState] = useState<BossSnapshot | null>(null)
 
@@ -407,11 +441,35 @@ export function GameWorkspace({
       .then((server) => {
         setRoomProgress(server)
         setExitReady(Boolean(server.exitReady))
+        // Boss EXP is granted once per mission on the server; refresh the HUD balance.
+        const before = rewards?.exp ?? null
+        fetchRewards()
+          .then((next) => {
+            setRewards(next)
+            if (before !== null && next.exp > before) setExpGain({ amount: next.exp - before, id: Date.now() })
+          })
+          .catch(() => undefined)
       })
       .catch((err) => {
         setGateMessage(publicErrorMessage(err, 'Boss defeat could not be confirmed'))
       })
-  }, [missionDetail?.mission.missionId, roomProgress?.roomGeneration])
+  }, [missionDetail?.mission.missionId, roomProgress?.roomGeneration, rewards?.exp])
+
+  /** Regular enemy down: the server grants EXP (capped per room run and per mission). */
+  const handleEnemyDefeated = useCallback(
+    (enemyType: string) => {
+      const missionId = missionDetail?.mission.missionId
+      const generation = roomProgress?.roomGeneration
+      if (!missionId || !generation) return
+      void reportEnemyDefeated(missionId, generation, enemyType)
+        .then((result) => {
+          setRewards((prev) => (prev ? { ...prev, exp: result.exp } : prev))
+          if (result.expAwarded > 0) setExpGain({ amount: result.expAwarded, id: Date.now() })
+        })
+        .catch(() => undefined)
+    },
+    [missionDetail?.mission.missionId, roomProgress?.roomGeneration],
+  )
 
   return (
     <div className="field-room">
@@ -423,6 +481,9 @@ export function GameWorkspace({
             level={missionDetail.mission.level}
             rank={missionDetail.mission.rank}
             hearts={hearts}
+            exp={rewards?.exp ?? null}
+            coins={rewards?.coins ?? null}
+            expGain={expGain}
             boss={bossRoom ? bossState : null}
             pauseOpen={pauseOpen}
             onTogglePause={() => setPauseOpen((open) => !open)}
@@ -459,7 +520,7 @@ export function GameWorkspace({
                 <h2 className="field-room__stage-title">Security room · top-down view</h2>
               </div>
               <div className="field-room__canvas-frame">
-                {roomProgress && outfitReady ? (
+                {roomProgress && outfitReady && rewardsReady ? (
                   <GameErrorBoundary>
                     <GameCanvas
                       key={roomProgress.roomGeneration}
@@ -489,6 +550,9 @@ export function GameWorkspace({
                       playerSheet={{ key: `agent-${outfit.id}`, path: outfit.sheet }}
                       onBossState={setBossState}
                       onBossDefeated={handleBossDefeated}
+                      weapon={weapon}
+                      gunSprite={heldGun}
+                      onEnemyDefeated={handleEnemyDefeated}
                       onPlayerMoved={setPlayerPos}
                       onRoomLayoutReady={(plan) => {
                         // Research log: this room generation was actually entered (SCR denominator).
@@ -528,6 +592,7 @@ export function GameWorkspace({
                           return
                         }
                         const finishingReplay = Boolean(roomProgress?.replayActive)
+                        const coinsBefore = rewards?.coins ?? null
                         void completeMissionAtExit(missionDetail.mission.missionId, generation)
                           .then((server) => {
                             setRoomProgress(server)
@@ -542,6 +607,13 @@ export function GameWorkspace({
                               updatedAt: new Date().toISOString(),
                             })
                             setMissionCompleteOpen(true)
+                            setCoinsAwarded(null)
+                            fetchRewards()
+                              .then((next) => {
+                                setRewards(next)
+                                if (coinsBefore !== null) setCoinsAwarded(Math.max(0, next.coins - coinsBefore))
+                              })
+                              .catch(() => undefined)
                             refreshSavedAttempt(playerId, missionDetail.mission.missionId)
                           })
                           .catch((err) => {
@@ -647,6 +719,7 @@ export function GameWorkspace({
           missionId={missionDetail.mission.missionId}
           title={missionDetail.mission.title}
           replayClear={replayClear}
+          coinsAwarded={coinsAwarded}
           nextMissionTitle={!replayClear && nextMission ? nextMission.title : null}
           onContinueNext={
             !replayClear && nextMission && onContinueNextMission

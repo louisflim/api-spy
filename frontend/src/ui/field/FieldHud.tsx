@@ -8,6 +8,11 @@ interface FieldHudProps {
   rank: string
   hearts?: number
   maxHearts?: number
+  /** Gameplay balances (null until loaded). Never academic scores. */
+  exp?: number | null
+  coins?: number | null
+  /** Last EXP grant; a new id replays the pop animation. */
+  expGain?: { amount: number; id: number } | null
   /** Level 7 boss health / shield (null outside boss rooms). */
   boss?: BossSnapshot | null
   pauseOpen: boolean
@@ -22,6 +27,9 @@ export function FieldHud({
   rank,
   hearts = 3,
   maxHearts = 3,
+  exp = null,
+  coins = null,
+  expGain = null,
   boss = null,
   pauseOpen,
   onTogglePause,
@@ -70,6 +78,22 @@ export function FieldHud({
           </span>
         ))}
       </div>
+
+      {exp !== null || coins !== null ? (
+        <div className="field-hud__wallet" aria-label="Agent rewards">
+          <span className="field-hud__exp" title="EXP — upgrade your gun in the Loadout">
+            EXP <strong>{exp ?? '—'}</strong>
+            {expGain ? (
+              <span key={expGain.id} className="field-hud__gain" aria-live="polite">
+                +{expGain.amount}
+              </span>
+            ) : null}
+          </span>
+          <span className="field-hud__coins" title="Coins — buy guns in the Loadout">
+            <span aria-hidden="true">◈</span> <strong>{coins ?? '—'}</strong>
+          </span>
+        </div>
+      ) : null}
 
       {boss ? (
         <div

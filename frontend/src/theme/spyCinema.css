@@ -3106,6 +3106,18 @@ div.ops-node__hit {
   max-width: 100%;
 }
 
+/* The field-room game box is height: 100% of its parent; inside the training room that made it
+   taller than the game and spill over the buttons below. Size it to the game instead. */
+.m0-training-room .field-room__game-shell.game-shell {
+  height: auto;
+  min-height: 0;
+}
+
+.m0-training-room .field-room__game-shell canvas {
+  display: block;
+  margin: 0 auto;
+}
+
 .m0-lesson .control-guide {
   margin: 0.15rem 0 0.35rem;
   padding: 0.85rem 0.95rem;

@@ -14,6 +14,18 @@ export interface WeaponDefinition {
   projectileLifespanMs: number
   /** Visual scale of the projectile sprite. */
   projectileScale: number
+  /** Optional tint so each gun's rounds are recognisable. */
+  projectileTint?: number
+  /** semi: one shot per click / Space press. auto: keeps firing while held. Default auto. */
+  fireMode?: 'semi' | 'auto'
+  /** Rounds per shot (shotgun spray). Default 1. */
+  pellets?: number
+  /** Total spread of the pellets in degrees. */
+  spreadDeg?: number
+  /** Automatic guns: rounds in one continuous burst before the gun overheats. */
+  heatShots?: number
+  /** How long an overheated gun cannot fire. */
+  overheatMs?: number
 }
 
 export interface GridCell {

@@ -9,6 +9,7 @@ import type {
   SimulateResponse,
   TerminalVerification,
 } from '../types/api'
+import type { GunStat, RewardsState } from '../types/rewards'
 
 export interface AuthUser {
   userId: string
@@ -308,6 +309,48 @@ export function reportTerminalOpened(missionId: string, roomGeneration: string, 
     method: 'POST',
     body: JSON.stringify({ roomGeneration, deviceId }),
   }).catch(() => undefined)
+}
+
+/** The agent's EXP, coins, gun upgrades and gun catalog (gameplay only). */
+export async function fetchRewards(): Promise<RewardsState> {
+  const response = await apiFetch('/api/rewards')
+  if (!response.ok) {
+    throw new Error(await readError(response, 'Rewards could not be loaded'))
+  }
+  return (await response.json()) as RewardsState
+}
+
+async function rewardAction(path: string, body: object, fallback: string): Promise<RewardsState> {
+  const response = await apiFetch(`/api/rewards/${path}`, { method: 'POST', body: JSON.stringify(body) })
+  if (!response.ok) {
+    throw new Error(await readError(response, fallback))
+  }
+  return (await response.json()) as RewardsState
+}
+
+export const upgradeGun = (weaponId: string, stat: GunStat) =>
+  rewardAction('upgrade', { weaponId, stat }, 'Upgrade failed')
+export const purchaseWeapon = (weaponId: string) => rewardAction('purchase', { weaponId }, 'Purchase failed')
+export const equipWeapon = (weaponId: string) => rewardAction('equip', { weaponId }, 'Could not equip weapon')
+export const chooseStarterCharacter = (characterId: string) =>
+  rewardAction('characters/starter', { characterId }, 'Could not choose this agent')
+export const purchaseCharacter = (characterId: string) =>
+  rewardAction('characters/purchase', { characterId }, 'Could not buy this agent')
+
+/** A regular enemy fell in the active room; the server grants capped EXP. */
+export async function reportEnemyDefeated(
+  missionId: string,
+  roomGeneration: string,
+  enemyType: string,
+): Promise<{ expAwarded: number; exp: number }> {
+  const response = await apiFetch(`/api/missions/${encodeURIComponent(missionId)}/enemy-defeated`, {
+    method: 'POST',
+    body: JSON.stringify({ roomGeneration, enemyType }),
+  })
+  if (!response.ok) {
+    throw new Error(await readError(response, 'Enemy defeat could not be recorded'))
+  }
+  return (await response.json()) as { expAwarded: number; exp: number }
 }
 
 /** Research console (Administrator role). Throws with the HTTP status on 401/403. */

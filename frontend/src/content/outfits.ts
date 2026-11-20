@@ -6,9 +6,11 @@ import type { MissionProgressState } from '../types/api'
  * (4x4 frames of 272px: rows down/left/right/up; columns idle + 3 walk frames) and are
  * derived from the Rookie art by scripts/derive-sprites.py.
  *
- * Unlocks follow the approved proposal: completing all 21 missions of a rank awards that
- * rank's skin; completing all 63 missions awards the legendary skin. Skins are cosmetic only:
- * they never change combat, API validation or research records.
+ * Starter characters (Rookie Detective, Agent Leo, Agent Mira): a new agent picks one for free;
+ * the other two are bought with in-game coins (ownership lives on the server, /api/rewards).
+ * Rank and legendary skins follow the approved proposal: completing all 21 missions of a rank
+ * awards that rank's skin; completing all 63 missions awards the legendary skin. Outfits are
+ * cosmetic only: they never change combat, API validation or research records.
  */
 export type OutfitId =
   | 'rookie'
@@ -21,7 +23,8 @@ export type OutfitId =
 
 export type OutfitTier = 'starter' | 'rank' | 'legendary'
 
-export type OutfitUnlock = { kind: 'free' } | { kind: 'rank'; rank: RankKey } | { kind: 'all' }
+/** character = starter agent owned via the free pick or bought with coins. */
+export type OutfitUnlock = { kind: 'character' } | { kind: 'rank'; rank: RankKey } | { kind: 'all' }
 
 export interface Outfit {
   id: OutfitId
@@ -41,8 +44,8 @@ export const OUTFITS: Outfit[] = [
     name: 'Rookie Detective',
     tier: 'starter',
     sheet: '/assets/characters/rookie-detective.png',
-    description: 'The classic trench coat. Every agent starts here.',
-    unlock: { kind: 'free' },
+    description: 'The classic trench coat and fedora.',
+    unlock: { kind: 'character' },
   },
   {
     id: 'agent-boy',
@@ -50,7 +53,7 @@ export const OUTFITS: Outfit[] = [
     tier: 'starter',
     sheet: '/assets/characters/agent-boy.png',
     description: 'Navy fedora, harbour-blue coat and a gold tie.',
-    unlock: { kind: 'free' },
+    unlock: { kind: 'character' },
   },
   {
     id: 'agent-girl',
@@ -58,7 +61,7 @@ export const OUTFITS: Outfit[] = [
     tier: 'starter',
     sheet: '/assets/characters/agent-girl.png',
     description: 'Burgundy coat, long auburn hair and a ribboned hat.',
-    unlock: { kind: 'free' },
+    unlock: { kind: 'character' },
   },
   {
     id: 'skin-recruit',
@@ -112,18 +115,38 @@ export function clearedMissionIds(rows: MissionProgressState[]): Set<string> {
   return new Set(rows.filter(isCleared).map((row) => row.missionId))
 }
 
-export function outfitStatus(outfit: Outfit, cleared: Set<string>): OutfitStatus {
-  if (outfit.unlock.kind === 'free') {
-    return { unlocked: true, completed: 0, required: 0, requirement: 'Available from the start' }
+/** Starter characters this agent owns (free pick + purchases), from /api/rewards. */
+export type OwnedCharacters = ReadonlySet<string>
+
+/**
+ * Unlock state for an outfit. Starter characters need ownership (null = ownership unknown yet,
+ * treated as locked); rank / legendary skins need cleared missions.
+ */
+export function outfitStatus(
+  outfit: Outfit,
+  cleared: Set<string>,
+  ownedCharacters: OwnedCharacters | null = null,
+): OutfitStatus {
+  if (outfit.unlock.kind === 'character') {
+    const owned = Boolean(ownedCharacters?.has(outfit.id))
+    return { unlocked: owned, completed: owned ? 1 : 0, required: 1, requirement: 'Buy with coins' }
   }
-  if (outfit.unlock.kind === 'rank') {
-    const slug = RANK_SLUG[outfit.unlock.rank]
+  return rankUnlockStatus(outfit.unlock, cleared)
+}
+
+/** Shared rank / all-missions unlock rule (outfits and gun skins). */
+export function rankUnlockStatus(
+  unlock: { kind: 'rank'; rank: RankKey } | { kind: 'all' },
+  cleared: Set<string>,
+): OutfitStatus {
+  if (unlock.kind === 'rank') {
+    const slug = RANK_SLUG[unlock.rank]
     const completed = [...cleared].filter((id) => new RegExp(`^m[1-3]-${slug}-l[1-7]$`).test(id)).length
     return {
       unlocked: completed >= MISSIONS_PER_RANK,
       completed,
       required: MISSIONS_PER_RANK,
-      requirement: `Complete all ${MISSIONS_PER_RANK} ${RANK_LABELS[outfit.unlock.rank]} missions`,
+      requirement: `Complete all ${MISSIONS_PER_RANK} ${RANK_LABELS[unlock.rank]} missions`,
     }
   }
   const completed = [...cleared].filter((id) => /^m[1-3]-(recruit|field|special)-l[1-7]$/.test(id)).length
@@ -159,8 +182,17 @@ export function saveSelectedOutfitId(userId: string, id: OutfitId): void {
   }
 }
 
-/** Selected outfit if still unlocked for this agent, otherwise the Rookie Detective. */
-export function effectiveOutfit(userId: string, cleared: Set<string>): Outfit {
+/**
+ * Selected outfit if this agent still has it; otherwise their first owned starter character,
+ * otherwise the Rookie Detective (e.g. before the free pick or if rewards could not load).
+ */
+export function effectiveOutfit(
+  userId: string,
+  cleared: Set<string>,
+  ownedCharacters: OwnedCharacters | null = null,
+): Outfit {
   const selected = findOutfit(loadSelectedOutfitId(userId))
-  return outfitStatus(selected, cleared).unlocked ? selected : OUTFITS[0]!
+  if (outfitStatus(selected, cleared, ownedCharacters).unlocked) return selected
+  const firstOwned = OUTFITS.find((o) => o.unlock.kind === 'character' && ownedCharacters?.has(o.id))
+  return firstOwned ?? OUTFITS[0]!
 }

@@ -296,6 +296,9 @@ export function Module0Academy({ onFinished, moduleSelect, onReturnToBriefing }:
 
                 {!showTrainingRoom ? (
                   <TopicInteraction
+                    // Fresh exercise state per topic: otherwise the previous topic's "done" state
+                    // carries over and locks the next exercise (e.g. topic 2's Send button).
+                    key={topic.id}
                     topic={topic}
                     alreadyComplete={interactionDone}
                     onInteractionComplete={() => void handleInteractionComplete()}
@@ -319,7 +322,13 @@ export function Module0Academy({ onFinished, moduleSelect, onReturnToBriefing }:
                         onOpenTerminal={() => {
                           setEditorOpen(true)
                         }}
-                        onExitReached={() => undefined}
+                        onExitReached={() => {
+                          // The room tells the agent to leave through the green door to finish:
+                          // that completes Terminal Field Training (only after the terminal is solved).
+                          if (!terminalDone) return
+                          setShowTrainingRoom(false)
+                          void handleInteractionComplete()
+                        }}
                       />
                     </GameErrorBoundary>
                     <div className="m0-nav-row">

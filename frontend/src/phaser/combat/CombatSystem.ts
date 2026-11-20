@@ -20,7 +20,9 @@ import { PlayerHealth } from './PlayerHealth'
 import { planPatrolGuardSpawns } from './spawnPlan'
 import { ProjectileManager } from './ProjectileManager'
 import { WeaponController } from './WeaponController'
+import { HeldGun } from './HeldGun'
 import { STARTER_SIDEARM } from './weapons'
+import type { WeaponDefinition } from './types'
 
 type Facing = 'down' | 'left' | 'right' | 'up'
 
@@ -37,6 +39,12 @@ export interface CombatSystemOptions {
   getFacing: () => Facing
   onHeartsChanged: HeartsListener
   onCombatDeath: CombatDeathListener
+  /** Equipped gun with EXP upgrades applied (defaults to the starter sidearm). */
+  weapon?: WeaponDefinition
+  /** Texture of the equipped gun (with its skin) drawn in the agent's hand. */
+  heldGun?: { textureKey: string; gripX: number; gripY: number }
+  /** A regular enemy fell (EXP is granted and capped by the server). */
+  onEnemyDefeated?: (enemyType: string) => void
   /**
    * Level 7 boss-only room: no ordinary guards spawn; one boss whose shield follows the
    * server's mandatory-device state (`shieldDown`).
@@ -78,6 +86,9 @@ export class CombatSystem {
   private readonly bossColliders: Phaser.Physics.Arcade.Collider[] = []
   private readonly enemyShotCollider: Phaser.Physics.Arcade.Collider
   private readonly agentBox = new Phaser.Geom.Rectangle()
+  /** Guards whose defeat has already been reported (one EXP signal per enemy). */
+  private readonly reportedDefeats = new Set<PatrolGuard>()
+  private heldGun: HeldGun | null = null
 
   constructor(options: CombatSystemOptions) {
     this.options = options
@@ -96,6 +107,7 @@ export class CombatSystem {
 
     this.projectiles = new ProjectileManager(scene)
     this.weapon = new WeaponController(scene, this.projectiles, STARTER_SIDEARM.id)
+    if (options.weapon) this.weapon.equipDefinition(options.weapon)
     this.weapon.bindInput()
     this.collisions = new CombatCollisionManager(scene, this.projectiles)
     this.collisions.bindWalls(solids)
@@ -107,6 +119,12 @@ export class CombatSystem {
     })
 
     this.health.setListeners(onHeartsChanged, () => this.handleDeath())
+
+    if (options.heldGun && scene.textures.exists(options.heldGun.textureKey)) {
+      const g = options.heldGun
+      this.heldGun = new HeldGun(scene, g.textureKey, g.gripX, g.gripY)
+      this.heldGun.update(player, getFacing(), null)
+    }
 
     if (options.boss) {
       // Level 7 is boss-only: never spawn ordinary guards, even once the boss is down.
@@ -146,6 +164,18 @@ export class CombatSystem {
       scene.physics.add.collider(this.boss.sprite, solids),
       scene.physics.add.collider(this.player, this.boss.sprite),
     )
+  }
+
+  /**
+   * Direction the agent is shooting (for ~0.6 s after a shot), so the body turns to face the aim
+   * and the held gun lines up with it. Null when not shooting.
+   */
+  aimFacing(time: number): Facing | null {
+    if (this.paused || this.health.isDead()) return null
+    const aim = this.weapon.recentAim(this.combatNow(time), 600)
+    if (!aim) return null
+    if (Math.abs(aim.x) >= Math.abs(aim.y)) return aim.x < 0 ? 'left' : 'right'
+    return aim.y < 0 ? 'up' : 'down'
   }
 
   /** Server-driven: true once every mandatory API device in the room is activated. */
@@ -210,6 +240,8 @@ export class CombatSystem {
 
   update(time: number): void {
     if (this.health.isDead()) return
+    const now0 = this.combatNow(time)
+    this.heldGun?.update(this.player, this.getFacing(), this.weapon.recentAim(now0, 600), this.weapon.isOverheated(now0))
     // Projectiles use wall-clock scene time (lifespan frozen explicitly on pause).
     // AI / weapon / invuln use combatNow so terminal time does not advance combat.
     const now = this.combatNow(time)
@@ -227,7 +259,13 @@ export class CombatSystem {
       }
 
       for (const guard of this.guards) {
-        if (guard.isDefeated()) continue
+        if (guard.isDefeated()) {
+          if (!this.reportedDefeats.has(guard)) {
+            this.reportedDefeats.add(guard)
+            this.options.onEnemyDefeated?.(guard.typeId)
+          }
+          continue
+        }
         guard.update(this.player.x, this.player.y, now)
         const strike = guard.tryAttack(this.player.x, this.player.y, now)
         if (strike) this.resolveStrike(strike, now)
@@ -312,6 +350,7 @@ export class CombatSystem {
     this.deathEmitted = true
     this.setPaused(true)
     this.weapon.setEnabled(false)
+    this.heldGun?.setVisible(false)
     this.player.setTint(0x660000)
     const body = this.player.body as Phaser.Physics.Arcade.Body
     body.setVelocity(0, 0)
@@ -325,6 +364,8 @@ export class CombatSystem {
 
   destroy(): void {
     this.weapon.unbindInput()
+    this.heldGun?.destroy()
+    this.heldGun = null
     this.collisions.destroy()
     this.projectiles.destroy()
     this.enemyCollider?.destroy()

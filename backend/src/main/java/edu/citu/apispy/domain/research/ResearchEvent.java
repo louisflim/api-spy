@@ -33,4 +33,6 @@ public record ResearchEvent(
 	public static final String ROOM_COMPLETE = "ROOM_COMPLETE";
 	public static final String BOSS_DEFEATED = "BOSS_DEFEATED";
 	public static final String TERMINAL_OPENED = "TERMINAL_OPENED";
+	/** Descriptive gameplay variable (proposal): never part of SCR, RCA or HLCR. */
+	public static final String ENEMY_DEFEATED = "ENEMY_DEFEATED";
 }
